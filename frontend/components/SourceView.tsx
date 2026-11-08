@@ -29,23 +29,25 @@ function registerCobol(monaco: Monaco) {
       ],
     },
   });
+  // GitHub light syntax colors.
   monaco.editor.defineTheme("ledger-paper", {
     base: "vs",
     inherit: true,
     rules: [
-      { token: "comment", foreground: "7a8a80", fontStyle: "italic" },
-      { token: "keyword", foreground: "1f4f7a" },
-      { token: "string", foreground: "8a4b12" },
-      { token: "number", foreground: "6b3fa0" },
-      { token: "identifier", foreground: "1b2420" },
+      { token: "comment", foreground: "6e7781", fontStyle: "italic" },
+      { token: "keyword", foreground: "cf222e" },
+      { token: "string", foreground: "0a3069" },
+      { token: "number", foreground: "0550ae" },
+      { token: "identifier", foreground: "1f2328" },
     ],
     colors: {
-      "editor.background": "#fbfcfa",
-      "editorLineNumber.foreground": "#8d9a92",
-      "editorLineNumber.activeForeground": "#1b2420",
+      "editor.background": "#ffffff",
+      "editorLineNumber.foreground": "#8c959f",
+      "editorLineNumber.activeForeground": "#1f2328",
       "editor.lineHighlightBackground": "#00000000",
       "editor.lineHighlightBorder": "#00000000",
-      "editorGutter.background": "#f4f6f2",
+      "editorGutter.background": "#ffffff",
+      "editorRuler.foreground": "#eeece8",
     },
   });
 }
@@ -82,11 +84,6 @@ export default function SourceView({
     if (!model) return;
     const n = model.getLineCount();
     const decos: Parameters<MonacoEditor["deltaDecorations"]>[1] = [];
-    if (language === "cobol") {
-      for (let i = 1; i <= n; i++) {
-        if (Math.floor((i - 1) / 3) % 2 === 1) decos.push({ range: new monaco.Range(i, 1, i, 1), options: { isWholeLine: true, className: "ledger-bar" } });
-      }
-    }
     for (const s of spans.filter((s) => s.file === file && s.lines.length === 2)) {
       decos.push({ range: new monaco.Range(s.lines[0], 1, s.lines[1], 1), options: { isWholeLine: true, className: "ledger-cited", linesDecorationsClassName: "ledger-cited-gutter" } });
     }
@@ -105,7 +102,7 @@ export default function SourceView({
 
   useEffect(decorate, [spans, active, executed, src, file]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (src === null) return <div className="p-6 text-ink-soft text-[14px]">Loading {file}</div>;
+  if (src === null) return <div className="p-6 text-ink-soft text-[14px]">Loading {file}…</div>;
   return (
     <Editor
       height={height}

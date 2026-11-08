@@ -1,33 +1,51 @@
 import { STATUS_HELP, STATUS_LABEL } from "@/lib/labels";
+import { CheckCircle, DotCircle, EmptyCircle, NotEqual, Shield, XCircle } from "./Icons";
 
-const COLORS: Record<string, string> = {
-  verified: "text-verified border-verified",
-  traced: "text-traced border-traced",
-  flagged: "text-flagged border-flagged",
-  rejected: "text-rejected border-rejected",
-  approved: "text-approved border-approved",
-  diverged: "text-diverged border-diverged",
-  stale: "text-stale border-stale",
-  extracted: "text-extracted border-extracted",
+// GitHub-style state label: a pill with an icon, colored by meaning.
+// Pill glyphs are plain strokes so they read in white on the colored pill.
+const GLYPH: Record<string, string> = {
+  check: "M3.5 8.5 6.5 11.5 12.5 4.5",
+  dot: "M8 8m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0",
+  x: "M4.5 4.5l7 7m0-7-7 7",
+  neq: "M3.5 6.5h9M3.5 9.5h9M10 3.5 6 12.5",
+  ring: "M8 8m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0",
 };
-const MARK: Record<string, string> = {
-  verified: "✓✓", traced: "✓", flagged: "!", rejected: "✕", approved: "✓✓", diverged: "≠", stale: "~", extracted: "·",
+const STYLE: Record<string, { pill: string; glyph: string }> = {
+  verified: { pill: "bg-verified text-white", glyph: "check" },
+  traced: { pill: "bg-accent text-white", glyph: "check" },
+  flagged: { pill: "bg-flagged text-white", glyph: "dot" },
+  rejected: { pill: "bg-rejected text-white", glyph: "x" },
+  approved: { pill: "bg-approved text-white", glyph: "check" },
+  diverged: { pill: "bg-diverged text-white", glyph: "neq" },
+  stale: { pill: "bg-stale text-white", glyph: "ring" },
+  extracted: { pill: "bg-stale text-white", glyph: "ring" },
 };
 
 export function StatusMark({ status, large = false }: { status: string; large?: boolean }) {
+  const s = STYLE[status] ?? STYLE.extracted;
   return (
-    <span title={STATUS_HELP[status]} className={`inline-flex items-center gap-1.5 border rounded-sm whitespace-nowrap ${COLORS[status] ?? "text-ink-soft border-rule"} ${large ? "px-2.5 py-1 text-[14px]" : "px-1.5 py-[1px] text-[12.5px]"}`}>
-      <span aria-hidden className="font-semibold">{MARK[status] ?? "?"}</span>
-      <span>{STATUS_LABEL[status] ?? status}</span>
+    <span title={STATUS_HELP[status]}
+      className={`inline-flex items-center gap-1.5 rounded-full whitespace-nowrap font-medium ${s.pill} ${large ? "h-8 px-3 text-[14px]" : "h-[22px] px-2 text-[12px]"}`}>
+      <svg viewBox="0 0 16 16" width={large ? 16 : 13} height={large ? 16 : 13} aria-hidden fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+        <path d={GLYPH[s.glyph]} />
+      </svg>
+      {STATUS_LABEL[status] ?? status}
     </span>
   );
 }
 
+// Inline icon for a single check or row state.
+export function StateIcon({ state, title }: { state: "pass" | "fail" | "pending" | "changed" | "approved"; title?: string }) {
+  if (state === "pass") return <CheckCircle className="text-verified" title={title ?? "Passed"} />;
+  if (state === "fail") return <XCircle className="text-rejected" title={title ?? "Failed"} />;
+  if (state === "changed") return <NotEqual className="text-diverged" title={title ?? "Changed on purpose"} />;
+  if (state === "approved") return <Shield className="text-approved" title={title ?? "Signed off"} />;
+  return <DotCircle className="text-flagged" title={title ?? "Waiting"} />;
+}
+
 export function Tick({ ok, title }: { ok: boolean | null; title?: string }) {
-  if (ok === null) return <span className="text-ink-soft" title={title}>·</span>;
-  return ok
-    ? <span className="text-verified font-semibold" title={title} aria-label="verified">✓</span>
-    : <span className="text-rejected font-semibold" title={title} aria-label="failed">✕</span>;
+  if (ok === null) return <EmptyCircle className="text-stale" title={title ?? "Not checked"} />;
+  return <StateIcon state={ok ? "pass" : "fail"} title={title} />;
 }
 
 export const statusOrder = ["verified", "traced", "flagged", "approved", "rejected", "diverged", "stale", "extracted"];

@@ -2,10 +2,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { get, LogEvent } from "@/lib/api";
 
+// Styled like a CI run log: dark, monospace, one line per agent step.
 const AGENT_COLOR: Record<string, string> = {
-  parser: "text-ink-soft", extractor: "text-traced", verifier: "text-verified", modernizer: "text-diverged",
-  testgen: "text-stale", harness: "text-ink", coverage: "text-ink-soft", impact: "text-flagged", pipeline: "text-ink",
+  parser: "text-night-soft", extractor: "text-[#82bbf5]", verifier: "text-[#6fdd8b]", modernizer: "text-[#d2a8ff]",
+  testgen: "text-[#e3b341]", harness: "text-night-ink", coverage: "text-night-soft", impact: "text-[#ffa198]", pipeline: "text-night-ink",
 };
+const ISSUE = ["reject", "retry", "mismatch", "sample-mismatch", "gap", "drop", "invalid", "guard"];
 
 export default function LogPanel({ onClose }: { onClose: () => void }) {
   const [events, setEvents] = useState<LogEvent[]>([]);
@@ -15,38 +17,37 @@ export default function LogPanel({ onClose }: { onClose: () => void }) {
   const shown = useMemo(() => events.filter((e) =>
     e.step !== "tool" &&
     (program === "all" || e.program === program || e.program === null) &&
-    (!onlyIssues || ["reject", "retry", "mismatch", "sample-mismatch", "gap", "drop", "invalid", "guard"].includes(e.step))
+    (!onlyIssues || ISSUE.includes(e.step))
   ), [events, program, onlyIssues]);
   return (
-    <aside className="w-[420px] shrink-0 border-l border-rule bg-sheet h-[calc(100vh-3rem)] sticky top-0 flex flex-col">
-      <div className="px-4 py-3 border-b border-rule flex items-center gap-3">
-        <h2 className="font-serif text-[16px] font-semibold">Pipeline log</h2>
-        <span className="text-[12.5px] text-ink-soft">supervision only</span>
-        <button onClick={onClose} className="ml-auto text-[13px] text-ink-soft hover:text-ink">Close</button>
+    <aside className="w-[440px] shrink-0 bg-night text-night-ink h-[calc(100vh-6.5rem)] sticky top-0 flex flex-col border-l border-night-line">
+      <div className="px-4 h-12 border-b border-night-line flex items-center gap-3">
+        <h2 className="text-[14px] font-semibold">Pipeline log</h2>
+        <span className="text-[12px] text-night-soft">what each agent did, in order</span>
+        <button onClick={onClose} className="ml-auto text-[13px] text-night-soft hover:text-night-ink">Close</button>
       </div>
-      <div className="px-4 py-2 flex gap-2 text-[12.5px] border-b border-rule items-center">
+      <div className="px-4 py-2 flex gap-1.5 text-[12.5px] border-b border-night-line items-center">
         {["all", "CBTRN02C", "CBACT04C"].map((p) => (
           <button key={p} onClick={() => setProgram(p)}
-            className={`px-2 py-0.5 rounded-sm border ${program === p ? "border-ink" : "border-rule text-ink-soft"}`}>{p === "all" ? "Both" : p}</button>
+            className={`px-2 h-6 rounded-md ${program === p ? "bg-night-line text-night-ink" : "text-night-soft hover:text-night-ink"}`}>{p === "all" ? "Both programs" : p}</button>
         ))}
-        <label className="ml-auto flex items-center gap-1.5 text-ink-soft">
+        <label className="ml-auto flex items-center gap-1.5 text-night-soft">
           <input type="checkbox" checked={onlyIssues} onChange={(e) => setOnlyIssues(e.target.checked)} />
-          Rejections and gaps
+          Only rejections and gaps
         </label>
       </div>
-      <ol className="overflow-y-auto flex-1 text-[12.5px] leading-snug">
+      <ol className="overflow-y-auto flex-1 font-mono text-[12px] leading-[1.55] py-1">
         {shown.map((e, i) => (
-          <li key={i} className={`px-4 py-1.5 border-b border-rule/60 ${["reject", "mismatch", "sample-mismatch"].includes(e.step) ? "bg-[#fbf1ec]" : e.step === "retry" ? "bg-[#fbf6e6]" : ""}`}>
-            <div className="flex gap-2 text-[11.5px] text-ink-soft">
+          <li key={i} className={`px-4 py-1 grid grid-cols-[64px_1fr] gap-x-3 ${ISSUE.includes(e.step) ? "bg-[#3a1d1a]/60" : "hover:bg-night-2"}`}>
+            <span className="text-night-soft">{e.ts.slice(11, 19)}</span>
+            <span>
               <span className={AGENT_COLOR[e.agent] ?? ""}>{e.agent}</span>
-              <span>{e.step}</span>
-              {e.program && <span>{e.program}</span>}
-              <span className="ml-auto">{e.ts.slice(11)}</span>
-            </div>
-            <div className="text-ink">{e.message}</div>
+              <span className="text-night-soft"> {e.step}{e.program ? ` ${e.program}` : ""}</span>
+              <span className="block text-night-ink/90 font-sans text-[12.5px]">{e.message}</span>
+            </span>
           </li>
         ))}
-        {shown.length === 0 && <li className="px-4 py-6 text-ink-soft">No pipeline events yet. Run the pipeline to populate the log.</li>}
+        {shown.length === 0 && <li className="px-4 py-6 text-night-soft">No pipeline events yet. Run the pipeline to populate the log.</li>}
       </ol>
     </aside>
   );

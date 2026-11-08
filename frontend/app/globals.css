@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
-/* Ledger tokens: auditor's working papers on mainframe green-bar stock. */
+/* Ledger tokens. Structure borrows GitHub's (boxes, header bars, tabs, checks);
+   palette and type borrow 8090's (warm "linen" neutrals, azure accent, grotesk). */
 @theme {
-  --color-paper: #f4f6f2;
-  --color-sheet: #fbfcfa;
-  --color-ink: #1b2420;
-  --color-ink-soft: #4c5a53;
-  --color-rule: #c9d3cc;
-  --color-bar: #e3eee4;
-  --color-marker: #ffefa0;
-  --color-marker-strong: #ffd84d;
-  --color-verified: #1f6b4a;
-  --color-traced: #3c5a85;
-  --color-flagged: #a35c00;
-  --color-rejected: #a8322d;
-  --color-approved: #2d5f3a;
-  --color-diverged: #1f5f8b;
-  --color-stale: #6e5a94;
-  --color-extracted: #6b746f;
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-plex-serif), ui-serif, Georgia, serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  /* surfaces */
+  --color-paper: #f9f8f5;        /* page */
+  --color-canvas: #ffffff;       /* boxes */
+  --color-sheet: #f4f2ee;        /* box headers, hover rows */
+  --color-night: #151211;        /* top bar, log */
+  --color-night-2: #1d1918;
+  --color-night-line: #2f2b29;
+  --color-night-ink: #f5f4f4;
+  --color-night-soft: #b4afad;
+
+  /* text and lines */
+  --color-ink: #1d1918;
+  --color-ink-soft: #6b6562;
+  --color-rule: #e0ddd8;
+  --color-rule-strong: #c9c5bf;
+
+  /* accent (8090 azure) */
+  --color-accent: #275e94;
+  --color-accent-strong: #17324f;
+  --color-accent-bright: #4b88c9;
+  --color-accent-wash: #e8f2fd;
+
+  /* states (GitHub Primer light) */
+  --color-verified: #1a7f37;
+  --color-verified-wash: #dafbe1;
+  --color-traced: #275e94;
+  --color-flagged: #9a6700;
+  --color-flagged-wash: #fff8c5;
+  --color-rejected: #d1242f;
+  --color-rejected-wash: #ffebe9;
+  --color-approved: #8250df;
+  --color-approved-wash: #fbefff;
+  --color-diverged: #275e94;
+  --color-stale: #6e7781;
+  --color-extracted: #6e7781;
+
+  /* code highlights (GitHub line highlight) */
+  --color-marker: #fff8c5;
+  --color-marker-strong: #d4a72c;
+
+  --font-sans: var(--font-instrument), -apple-system, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
 }
 
 html, body {
@@ -29,23 +53,51 @@ html, body {
 }
 body {
   font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
   font-feature-settings: "tnum" 1;
 }
 :focus-visible {
-  outline: 2px solid var(--color-traced);
+  outline: 2px solid var(--color-accent-bright);
   outline-offset: 2px;
+  border-radius: 4px;
 }
-/* Accounting double rule under totals */
-.double-rule {
-  border-bottom: 3px double var(--color-ink);
-}
+a { color: inherit; }
+
+/* Box: GitHub's bordered container with an optional header bar. */
+.box { background: var(--color-canvas); border: 1px solid var(--color-rule); border-radius: 8px; }
+.box-header { background: var(--color-sheet); border-bottom: 1px solid var(--color-rule); border-radius: 8px 8px 0 0; padding: 10px 16px; }
+.box-row + .box-row { border-top: 1px solid var(--color-rule); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 6px; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--color-rule-strong); background: var(--color-canvas); color: var(--color-ink); }
+.btn:hover { background: var(--color-sheet); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-primary { background: var(--color-verified); border-color: rgba(31, 35, 40, .15); color: #fff; }
+.btn-primary:hover { background: #1a6e31; }
+.btn-accent { background: var(--color-accent); border-color: var(--color-accent-strong); color: #fff; }
+.btn-accent:hover { background: var(--color-accent-strong); }
+.btn-danger { color: var(--color-rejected); }
+.btn-danger:hover { background: var(--color-rejected); color: #fff; border-color: var(--color-rejected); }
+
+/* Form fields */
+.field { width: 100%; border: 1px solid var(--color-rule-strong); border-radius: 6px; background: var(--color-canvas); padding: 5px 10px; font-size: 14px; color: var(--color-ink); }
+.field:focus { outline: none; border-color: var(--color-accent-bright); box-shadow: 0 0 0 3px var(--color-accent-wash); }
+
+/* Counter pill next to tab labels */
+.counter { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 999px; background: #ebe8e3; font-size: 12px; font-weight: 500; line-height: 18px; text-align: center; color: var(--color-ink); }
+
+.link { color: var(--color-accent); }
+.link:hover { text-decoration: underline; text-underline-offset: 2px; }
+
 /* Monaco decorations */
-.ledger-bar { background: var(--color-bar); }
-.ledger-cited { background: rgba(255, 239, 160, 0.85); }
-.ledger-active { background: var(--color-marker-strong); }
-.ledger-active-gutter { background: var(--color-ink); width: 4px !important; margin-left: 3px; }
-.ledger-cited-gutter { background: #c9a227; width: 3px !important; margin-left: 4px; }
-.ledger-exec-gutter { background: var(--color-verified); width: 2px !important; margin-left: 12px; opacity: .55; }
+.ledger-cited { background: rgba(255, 248, 197, .9); }
+.ledger-active { background: #fff1a8; }
+.ledger-active-gutter { background: var(--color-marker-strong); width: 3px !important; margin-left: 4px; }
+.ledger-cited-gutter { background: var(--color-marker-strong); width: 3px !important; margin-left: 4px; opacity: .55; }
+.ledger-exec-gutter { background: var(--color-verified); width: 3px !important; margin-left: 10px; opacity: .6; }
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
