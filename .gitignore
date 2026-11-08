@@ -1,0 +1,29 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# local environments / deps
+.venv/
+node_modules/
+frontend/node_modules/
+frontend/.next/
+__pycache__/
+*.pyc
+
+# vendored clone (re-clone per README) and build artefacts
+vendor/carddemo/
+harness/build/
+harness/docker/build.log
+
+# bulky per-case harness scratch (results are summarised into data/*.json)
+data/runs/
+
+# OS / editor / tooling noise
+.DS_Store
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.idea/
+.vscode/

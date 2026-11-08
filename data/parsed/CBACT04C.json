@@ -1,0 +1,4609 @@
+{
+ "program": "CBACT04C",
+ "file": "CBACT04C.cbl",
+ "line_count": 653,
+ "divisions": [
+  {
+   "name": "IDENTIFICATION",
+   "start": 22,
+   "end": 24
+  },
+  {
+   "name": "ENVIRONMENT",
+   "start": 25,
+   "end": 58
+  },
+  {
+   "name": "DATA",
+   "start": 59,
+   "end": 179
+  },
+  {
+   "name": "PROCEDURE",
+   "start": 180,
+   "end": 653
+  }
+ ],
+ "sections": [
+  {
+   "name": "INPUT-OUTPUT",
+   "start": 26,
+   "end": 59
+  },
+  {
+   "name": "FILE",
+   "start": 60,
+   "end": 93
+  },
+  {
+   "name": "WORKING-STORAGE",
+   "start": 94,
+   "end": 174
+  },
+  {
+   "name": "LINKAGE",
+   "start": 175,
+   "end": 179
+  }
+ ],
+ "paragraphs": [
+  {
+   "name": "(main)",
+   "start": 181,
+   "end": 232,
+   "performs": [
+    {
+     "target": "0000-TCATBALF-OPEN",
+     "thru": null,
+     "line": 182
+    },
+    {
+     "target": "0100-XREFFILE-OPEN",
+     "thru": null,
+     "line": 183
+    },
+    {
+     "target": "0200-DISCGRP-OPEN",
+     "thru": null,
+     "line": 184
+    },
+    {
+     "target": "0300-ACCTFILE-OPEN",
+     "thru": null,
+     "line": 185
+    },
+    {
+     "target": "0400-TRANFILE-OPEN",
+     "thru": null,
+     "line": 186
+    },
+    {
+     "target": "1000-TCATBALF-GET-NEXT",
+     "thru": null,
+     "line": 190
+    },
+    {
+     "target": "1050-UPDATE-ACCOUNT",
+     "thru": null,
+     "line": 196
+    },
+    {
+     "target": "1100-GET-ACCT-DATA",
+     "thru": null,
+     "line": 203
+    },
+    {
+     "target": "1110-GET-XREF-DATA",
+     "thru": null,
+     "line": 205
+    },
+    {
+     "target": "1200-GET-INTEREST-RATE",
+     "thru": null,
+     "line": 213
+    },
+    {
+     "target": "1300-COMPUTE-INTEREST",
+     "thru": null,
+     "line": 215
+    },
+    {
+     "target": "1400-COMPUTE-FEES",
+     "thru": null,
+     "line": 216
+    },
+    {
+     "target": "1050-UPDATE-ACCOUNT",
+     "thru": null,
+     "line": 220
+    },
+    {
+     "target": "9000-TCATBALF-CLOSE",
+     "thru": null,
+     "line": 224
+    },
+    {
+     "target": "9100-XREFFILE-CLOSE",
+     "thru": null,
+     "line": 225
+    },
+    {
+     "target": "9200-DISCGRP-CLOSE",
+     "thru": null,
+     "line": 226
+    },
+    {
+     "target": "9300-ACCTFILE-CLOSE",
+     "thru": null,
+     "line": 227
+    },
+    {
+     "target": "9400-TRANFILE-CLOSE",
+     "thru": null,
+     "line": 228
+    }
+   ],
+   "calls_external": [],
+   "performed_by": []
+  },
+  {
+   "name": "0000-TCATBALF-OPEN",
+   "start": 234,
+   "end": 250,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 247
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 248
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 182
+    }
+   ]
+  },
+  {
+   "name": "0100-XREFFILE-OPEN",
+   "start": 252,
+   "end": 268,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 265
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 266
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 183
+    }
+   ]
+  },
+  {
+   "name": "0200-DISCGRP-OPEN",
+   "start": 270,
+   "end": 286,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 283
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 284
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 184
+    }
+   ]
+  },
+  {
+   "name": "0300-ACCTFILE-OPEN",
+   "start": 289,
+   "end": 305,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 302
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 303
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 185
+    }
+   ]
+  },
+  {
+   "name": "0400-TRANFILE-OPEN",
+   "start": 307,
+   "end": 323,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 320
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 321
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 186
+    }
+   ]
+  },
+  {
+   "name": "1000-TCATBALF-GET-NEXT",
+   "start": 325,
+   "end": 348,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 344
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 345
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 190
+    }
+   ]
+  },
+  {
+   "name": "1050-UPDATE-ACCOUNT",
+   "start": 350,
+   "end": 370,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 367
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 368
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 196
+    },
+    {
+     "source": "(main)",
+     "line": 220
+    }
+   ]
+  },
+  {
+   "name": "1100-GET-ACCT-DATA",
+   "start": 372,
+   "end": 391,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 388
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 389
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 203
+    }
+   ]
+  },
+  {
+   "name": "1110-GET-XREF-DATA",
+   "start": 393,
+   "end": 413,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 410
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 411
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 205
+    }
+   ]
+  },
+  {
+   "name": "1200-GET-INTEREST-RATE",
+   "start": 415,
+   "end": 440,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 433
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 434
+    },
+    {
+     "target": "1200-A-GET-DEFAULT-INT-RATE",
+     "thru": null,
+     "line": 438
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 213
+    }
+   ]
+  },
+  {
+   "name": "1200-A-GET-DEFAULT-INT-RATE",
+   "start": 443,
+   "end": 460,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 457
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 458
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "1200-GET-INTEREST-RATE",
+     "line": 438
+    }
+   ]
+  },
+  {
+   "name": "1300-COMPUTE-INTEREST",
+   "start": 462,
+   "end": 470,
+   "performs": [
+    {
+     "target": "1300-B-WRITE-TX",
+     "thru": null,
+     "line": 468
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 215
+    }
+   ]
+  },
+  {
+   "name": "1300-B-WRITE-TX",
+   "start": 473,
+   "end": 515,
+   "performs": [
+    {
+     "target": "Z-GET-DB2-FORMAT-TIMESTAMP",
+     "thru": null,
+     "line": 496
+    },
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 512
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 513
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "1300-COMPUTE-INTEREST",
+     "line": 468
+    }
+   ]
+  },
+  {
+   "name": "1400-COMPUTE-FEES",
+   "start": 518,
+   "end": 520,
+   "performs": [],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 216
+    }
+   ]
+  },
+  {
+   "name": "9000-TCATBALF-CLOSE",
+   "start": 522,
+   "end": 538,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 535
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 536
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 224
+    }
+   ]
+  },
+  {
+   "name": "9100-XREFFILE-CLOSE",
+   "start": 541,
+   "end": 557,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 554
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 555
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 225
+    }
+   ]
+  },
+  {
+   "name": "9200-DISCGRP-CLOSE",
+   "start": 559,
+   "end": 575,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 572
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 573
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 226
+    }
+   ]
+  },
+  {
+   "name": "9300-ACCTFILE-CLOSE",
+   "start": 577,
+   "end": 593,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 590
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 591
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 227
+    }
+   ]
+  },
+  {
+   "name": "9400-TRANFILE-CLOSE",
+   "start": 595,
+   "end": 611,
+   "performs": [
+    {
+     "target": "9910-DISPLAY-IO-STATUS",
+     "thru": null,
+     "line": 608
+    },
+    {
+     "target": "9999-ABEND-PROGRAM",
+     "thru": null,
+     "line": 609
+    }
+   ],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "(main)",
+     "line": 228
+    }
+   ]
+  },
+  {
+   "name": "Z-GET-DB2-FORMAT-TIMESTAMP",
+   "start": 613,
+   "end": 626,
+   "performs": [],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "1300-B-WRITE-TX",
+     "line": 496
+    }
+   ]
+  },
+  {
+   "name": "9999-ABEND-PROGRAM",
+   "start": 628,
+   "end": 632,
+   "performs": [],
+   "calls_external": [
+    {
+     "target": "CEE3ABD",
+     "line": 632
+    }
+   ],
+   "performed_by": [
+    {
+     "source": "0000-TCATBALF-OPEN",
+     "line": 248
+    },
+    {
+     "source": "0100-XREFFILE-OPEN",
+     "line": 266
+    },
+    {
+     "source": "0200-DISCGRP-OPEN",
+     "line": 284
+    },
+    {
+     "source": "0300-ACCTFILE-OPEN",
+     "line": 303
+    },
+    {
+     "source": "0400-TRANFILE-OPEN",
+     "line": 321
+    },
+    {
+     "source": "1000-TCATBALF-GET-NEXT",
+     "line": 345
+    },
+    {
+     "source": "1050-UPDATE-ACCOUNT",
+     "line": 368
+    },
+    {
+     "source": "1100-GET-ACCT-DATA",
+     "line": 389
+    },
+    {
+     "source": "1110-GET-XREF-DATA",
+     "line": 411
+    },
+    {
+     "source": "1200-GET-INTEREST-RATE",
+     "line": 434
+    },
+    {
+     "source": "1200-A-GET-DEFAULT-INT-RATE",
+     "line": 458
+    },
+    {
+     "source": "1300-B-WRITE-TX",
+     "line": 513
+    },
+    {
+     "source": "9000-TCATBALF-CLOSE",
+     "line": 536
+    },
+    {
+     "source": "9100-XREFFILE-CLOSE",
+     "line": 555
+    },
+    {
+     "source": "9200-DISCGRP-CLOSE",
+     "line": 573
+    },
+    {
+     "source": "9300-ACCTFILE-CLOSE",
+     "line": 591
+    },
+    {
+     "source": "9400-TRANFILE-CLOSE",
+     "line": 609
+    }
+   ]
+  },
+  {
+   "name": "9910-DISPLAY-IO-STATUS",
+   "start": 635,
+   "end": 648,
+   "performs": [],
+   "calls_external": [],
+   "performed_by": [
+    {
+     "source": "0000-TCATBALF-OPEN",
+     "line": 247
+    },
+    {
+     "source": "0100-XREFFILE-OPEN",
+     "line": 265
+    },
+    {
+     "source": "0200-DISCGRP-OPEN",
+     "line": 283
+    },
+    {
+     "source": "0300-ACCTFILE-OPEN",
+     "line": 302
+    },
+    {
+     "source": "0400-TRANFILE-OPEN",
+     "line": 320
+    },
+    {
+     "source": "1000-TCATBALF-GET-NEXT",
+     "line": 344
+    },
+    {
+     "source": "1050-UPDATE-ACCOUNT",
+     "line": 367
+    },
+    {
+     "source": "1100-GET-ACCT-DATA",
+     "line": 388
+    },
+    {
+     "source": "1110-GET-XREF-DATA",
+     "line": 410
+    },
+    {
+     "source": "1200-GET-INTEREST-RATE",
+     "line": 433
+    },
+    {
+     "source": "1200-A-GET-DEFAULT-INT-RATE",
+     "line": 457
+    },
+    {
+     "source": "1300-B-WRITE-TX",
+     "line": 512
+    },
+    {
+     "source": "9000-TCATBALF-CLOSE",
+     "line": 535
+    },
+    {
+     "source": "9100-XREFFILE-CLOSE",
+     "line": 554
+    },
+    {
+     "source": "9200-DISCGRP-CLOSE",
+     "line": 572
+    },
+    {
+     "source": "9300-ACCTFILE-CLOSE",
+     "line": 590
+    },
+    {
+     "source": "9400-TRANFILE-CLOSE",
+     "line": 608
+    }
+   ]
+  }
+ ],
+ "selects": [
+  {
+   "file": "TCATBAL-FILE",
+   "assign": "TCATBALF",
+   "line": 28,
+   "organization": "INDEXED",
+   "access": "SEQUENTIAL",
+   "record_key": "FD-TRAN-CAT-KEY",
+   "alternate_key": null,
+   "status": "TCATBALF-STATUS",
+   "dd_env": "DD_TCATBALF"
+  },
+  {
+   "file": "XREF-FILE",
+   "assign": "XREFFILE",
+   "line": 34,
+   "organization": "INDEXED",
+   "access": "RANDOM",
+   "record_key": "FD-XREF-CARD-NUM",
+   "alternate_key": "FD-XREF-ACCT-ID",
+   "status": "XREFFILE-STATUS",
+   "dd_env": "DD_XREFFILE"
+  },
+  {
+   "file": "ACCOUNT-FILE",
+   "assign": "ACCTFILE",
+   "line": 41,
+   "organization": "INDEXED",
+   "access": "RANDOM",
+   "record_key": "FD-ACCT-ID",
+   "alternate_key": null,
+   "status": "ACCTFILE-STATUS",
+   "dd_env": "DD_ACCTFILE"
+  },
+  {
+   "file": "DISCGRP-FILE",
+   "assign": "DISCGRP",
+   "line": 47,
+   "organization": "INDEXED",
+   "access": "RANDOM",
+   "record_key": "FD-DISCGRP-KEY",
+   "alternate_key": null,
+   "status": "DISCGRP-STATUS",
+   "dd_env": "DD_DISCGRP"
+  },
+  {
+   "file": "TRANSACT-FILE",
+   "assign": "TRANSACT",
+   "line": 53,
+   "organization": "SEQUENTIAL",
+   "access": "SEQUENTIAL",
+   "record_key": null,
+   "alternate_key": null,
+   "status": "TRANFILE-STATUS",
+   "dd_env": "DD_TRANSACT"
+  }
+ ],
+ "copybooks": [
+  {
+   "name": "CVTRA01Y",
+   "line": 97,
+   "section": "WORKING-STORAGE"
+  },
+  {
+   "name": "CVACT03Y",
+   "line": 102,
+   "section": "WORKING-STORAGE"
+  },
+  {
+   "name": "CVTRA02Y",
+   "line": 107,
+   "section": "WORKING-STORAGE"
+  },
+  {
+   "name": "CVACT01Y",
+   "line": 112,
+   "section": "WORKING-STORAGE"
+  },
+  {
+   "name": "CVTRA05Y",
+   "line": 117,
+   "section": "WORKING-STORAGE"
+  }
+ ],
+ "records": [
+  {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-TRAN-CAT-BAL-RECORD",
+   "offset": 0,
+   "size": 50,
+   "line": 62,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "FD-TRAN-CAT-KEY",
+     "offset": 0,
+     "size": 17,
+     "line": 63,
+     "file": "CBACT04C.cbl"
+    },
+    {
+     "level": 10,
+     "name": "FD-TRANCAT-ACCT-ID",
+     "offset": 0,
+     "size": 11,
+     "line": 64,
+     "file": "CBACT04C.cbl",
+     "pic": "9(11)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 10,
+     "name": "FD-TRANCAT-TYPE-CD",
+     "offset": 11,
+     "size": 2,
+     "line": 65,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 10,
+     "name": "FD-TRANCAT-CD",
+     "offset": 13,
+     "size": 4,
+     "line": 66,
+     "file": "CBACT04C.cbl",
+     "pic": "9(4)",
+     "kind": "9",
+     "digits": 4,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FD-FD-TRAN-CAT-DATA",
+     "offset": 17,
+     "size": 33,
+     "line": 67,
+     "file": "CBACT04C.cbl",
+     "pic": "X(33)",
+     "kind": "X",
+     "digits": 33,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-XREFFILE-REC",
+   "offset": 0,
+   "size": 50,
+   "line": 70,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "FD-XREF-CARD-NUM",
+     "offset": 0,
+     "size": 16,
+     "line": 71,
+     "file": "CBACT04C.cbl",
+     "pic": "X(16)",
+     "kind": "X",
+     "digits": 16,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FD-XREF-CUST-NUM",
+     "offset": 16,
+     "size": 9,
+     "line": 72,
+     "file": "CBACT04C.cbl",
+     "pic": "9(9)",
+     "kind": "9",
+     "digits": 9,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FD-XREF-ACCT-ID",
+     "offset": 25,
+     "size": 11,
+     "line": 73,
+     "file": "CBACT04C.cbl",
+     "pic": "9(11)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FD-XREF-FILLER",
+     "offset": 36,
+     "size": 14,
+     "line": 74,
+     "file": "CBACT04C.cbl",
+     "pic": "X(14)",
+     "kind": "X",
+     "digits": 14,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-DISCGRP-REC",
+   "offset": 0,
+   "size": 50,
+   "line": 77,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "FD-DISCGRP-KEY",
+     "offset": 0,
+     "size": 16,
+     "line": 78,
+     "file": "CBACT04C.cbl"
+    },
+    {
+     "level": 10,
+     "name": "FD-DIS-ACCT-GROUP-ID",
+     "offset": 0,
+     "size": 10,
+     "line": 79,
+     "file": "CBACT04C.cbl",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 10,
+     "name": "FD-DIS-TRAN-TYPE-CD",
+     "offset": 10,
+     "size": 2,
+     "line": 80,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 10,
+     "name": "FD-DIS-TRAN-CAT-CD",
+     "offset": 12,
+     "size": 4,
+     "line": 81,
+     "file": "CBACT04C.cbl",
+     "pic": "9(4)",
+     "kind": "9",
+     "digits": 4,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FD-DISCGRP-DATA",
+     "offset": 16,
+     "size": 34,
+     "line": 82,
+     "file": "CBACT04C.cbl",
+     "pic": "X(34)",
+     "kind": "X",
+     "digits": 34,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-ACCTFILE-REC",
+   "offset": 0,
+   "size": 300,
+   "line": 85,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "FD-ACCT-ID",
+     "offset": 0,
+     "size": 11,
+     "line": 86,
+     "file": "CBACT04C.cbl",
+     "pic": "9(11)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FD-ACCT-DATA",
+     "offset": 11,
+     "size": 289,
+     "line": 87,
+     "file": "CBACT04C.cbl",
+     "pic": "X(289)",
+     "kind": "X",
+     "digits": 289,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-TRANFILE-REC",
+   "offset": 0,
+   "size": 350,
+   "line": 90,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "FD-TRANS-ID",
+     "offset": 0,
+     "size": 16,
+     "line": 91,
+     "file": "CBACT04C.cbl",
+     "pic": "X(16)",
+     "kind": "X",
+     "digits": 16,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FD-ACCT-DATA",
+     "offset": 16,
+     "size": 334,
+     "line": 92,
+     "file": "CBACT04C.cbl",
+     "pic": "X(334)",
+     "kind": "X",
+     "digits": 334,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TRAN-CAT-BAL-RECORD",
+   "offset": 0,
+   "size": 50,
+   "line": 4,
+   "file": "CVTRA01Y.cpy",
+   "fields": [
+    {
+     "level": 5,
+     "name": "TRAN-CAT-KEY",
+     "offset": 0,
+     "size": 17,
+     "line": 5,
+     "file": "CVTRA01Y.cpy"
+    },
+    {
+     "level": 10,
+     "name": "TRANCAT-ACCT-ID",
+     "offset": 0,
+     "size": 11,
+     "line": 6,
+     "file": "CVTRA01Y.cpy",
+     "pic": "9(11)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 10,
+     "name": "TRANCAT-TYPE-CD",
+     "offset": 11,
+     "size": 2,
+     "line": 7,
+     "file": "CVTRA01Y.cpy",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 10,
+     "name": "TRANCAT-CD",
+     "offset": 13,
+     "size": 4,
+     "line": 8,
+     "file": "CVTRA01Y.cpy",
+     "pic": "9(4)",
+     "kind": "9",
+     "digits": 4,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-CAT-BAL",
+     "offset": 17,
+     "size": 11,
+     "line": 9,
+     "file": "CVTRA01Y.cpy",
+     "pic": "S9(9)V9(2)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FILLER",
+     "offset": 28,
+     "size": 22,
+     "line": 10,
+     "file": "CVTRA01Y.cpy",
+     "pic": "X(22)",
+     "kind": "X",
+     "digits": 22,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TCATBALF-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 98,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "TCATBALF-STAT1",
+     "offset": 0,
+     "size": 1,
+     "line": 99,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TCATBALF-STAT2",
+     "offset": 1,
+     "size": 1,
+     "line": 100,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "CARD-XREF-RECORD",
+   "offset": 0,
+   "size": 50,
+   "line": 4,
+   "file": "CVACT03Y.cpy",
+   "fields": [
+    {
+     "level": 5,
+     "name": "XREF-CARD-NUM",
+     "offset": 0,
+     "size": 16,
+     "line": 5,
+     "file": "CVACT03Y.cpy",
+     "pic": "X(16)",
+     "kind": "X",
+     "digits": 16,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "XREF-CUST-ID",
+     "offset": 16,
+     "size": 9,
+     "line": 6,
+     "file": "CVACT03Y.cpy",
+     "pic": "9(9)",
+     "kind": "9",
+     "digits": 9,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "XREF-ACCT-ID",
+     "offset": 25,
+     "size": 11,
+     "line": 7,
+     "file": "CVACT03Y.cpy",
+     "pic": "9(11)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FILLER",
+     "offset": 36,
+     "size": 14,
+     "line": 8,
+     "file": "CVACT03Y.cpy",
+     "pic": "X(14)",
+     "kind": "X",
+     "digits": 14,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "XREFFILE-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 103,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "XREFFILE-STAT1",
+     "offset": 0,
+     "size": 1,
+     "line": 104,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "XREFFILE-STAT2",
+     "offset": 1,
+     "size": 1,
+     "line": 105,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "DIS-GROUP-RECORD",
+   "offset": 0,
+   "size": 50,
+   "line": 4,
+   "file": "CVTRA02Y.cpy",
+   "fields": [
+    {
+     "level": 5,
+     "name": "DIS-GROUP-KEY",
+     "offset": 0,
+     "size": 16,
+     "line": 5,
+     "file": "CVTRA02Y.cpy"
+    },
+    {
+     "level": 10,
+     "name": "DIS-ACCT-GROUP-ID",
+     "offset": 0,
+     "size": 10,
+     "line": 6,
+     "file": "CVTRA02Y.cpy",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 10,
+     "name": "DIS-TRAN-TYPE-CD",
+     "offset": 10,
+     "size": 2,
+     "line": 7,
+     "file": "CVTRA02Y.cpy",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 10,
+     "name": "DIS-TRAN-CAT-CD",
+     "offset": 12,
+     "size": 4,
+     "line": 8,
+     "file": "CVTRA02Y.cpy",
+     "pic": "9(4)",
+     "kind": "9",
+     "digits": 4,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "DIS-INT-RATE",
+     "offset": 16,
+     "size": 6,
+     "line": 9,
+     "file": "CVTRA02Y.cpy",
+     "pic": "S9(4)V9(2)",
+     "kind": "9",
+     "digits": 6,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FILLER",
+     "offset": 22,
+     "size": 28,
+     "line": 10,
+     "file": "CVTRA02Y.cpy",
+     "pic": "X(28)",
+     "kind": "X",
+     "digits": 28,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "DISCGRP-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 108,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "DISCGRP-STAT1",
+     "offset": 0,
+     "size": 1,
+     "line": 109,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "DISCGRP-STAT2",
+     "offset": 1,
+     "size": 1,
+     "line": 110,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "ACCOUNT-RECORD",
+   "offset": 0,
+   "size": 300,
+   "line": 4,
+   "file": "CVACT01Y.cpy",
+   "fields": [
+    {
+     "level": 5,
+     "name": "ACCT-ID",
+     "offset": 0,
+     "size": 11,
+     "line": 5,
+     "file": "CVACT01Y.cpy",
+     "pic": "9(11)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-ACTIVE-STATUS",
+     "offset": 11,
+     "size": 1,
+     "line": 6,
+     "file": "CVACT01Y.cpy",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-CURR-BAL",
+     "offset": 12,
+     "size": 12,
+     "line": 7,
+     "file": "CVACT01Y.cpy",
+     "pic": "S9(10)V9(2)",
+     "kind": "9",
+     "digits": 12,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-CREDIT-LIMIT",
+     "offset": 24,
+     "size": 12,
+     "line": 8,
+     "file": "CVACT01Y.cpy",
+     "pic": "S9(10)V9(2)",
+     "kind": "9",
+     "digits": 12,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-CASH-CREDIT-LIMIT",
+     "offset": 36,
+     "size": 12,
+     "line": 9,
+     "file": "CVACT01Y.cpy",
+     "pic": "S9(10)V9(2)",
+     "kind": "9",
+     "digits": 12,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-OPEN-DATE",
+     "offset": 48,
+     "size": 10,
+     "line": 10,
+     "file": "CVACT01Y.cpy",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-EXPIRAION-DATE",
+     "offset": 58,
+     "size": 10,
+     "line": 11,
+     "file": "CVACT01Y.cpy",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-REISSUE-DATE",
+     "offset": 68,
+     "size": 10,
+     "line": 12,
+     "file": "CVACT01Y.cpy",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-CURR-CYC-CREDIT",
+     "offset": 78,
+     "size": 12,
+     "line": 13,
+     "file": "CVACT01Y.cpy",
+     "pic": "S9(10)V9(2)",
+     "kind": "9",
+     "digits": 12,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-CURR-CYC-DEBIT",
+     "offset": 90,
+     "size": 12,
+     "line": 14,
+     "file": "CVACT01Y.cpy",
+     "pic": "S9(10)V9(2)",
+     "kind": "9",
+     "digits": 12,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-ADDR-ZIP",
+     "offset": 102,
+     "size": 10,
+     "line": 15,
+     "file": "CVACT01Y.cpy",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCT-GROUP-ID",
+     "offset": 112,
+     "size": 10,
+     "line": 16,
+     "file": "CVACT01Y.cpy",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FILLER",
+     "offset": 122,
+     "size": 178,
+     "line": 17,
+     "file": "CVACT01Y.cpy",
+     "pic": "X(178)",
+     "kind": "X",
+     "digits": 178,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "ACCTFILE-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 113,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "ACCTFILE-STAT1",
+     "offset": 0,
+     "size": 1,
+     "line": 114,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "ACCTFILE-STAT2",
+     "offset": 1,
+     "size": 1,
+     "line": 115,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TRAN-RECORD",
+   "offset": 0,
+   "size": 350,
+   "line": 4,
+   "file": "CVTRA05Y.cpy",
+   "fields": [
+    {
+     "level": 5,
+     "name": "TRAN-ID",
+     "offset": 0,
+     "size": 16,
+     "line": 5,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(16)",
+     "kind": "X",
+     "digits": 16,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-TYPE-CD",
+     "offset": 16,
+     "size": 2,
+     "line": 6,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-CAT-CD",
+     "offset": 18,
+     "size": 4,
+     "line": 7,
+     "file": "CVTRA05Y.cpy",
+     "pic": "9(4)",
+     "kind": "9",
+     "digits": 4,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-SOURCE",
+     "offset": 22,
+     "size": 10,
+     "line": 8,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-DESC",
+     "offset": 32,
+     "size": 100,
+     "line": 9,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(100)",
+     "kind": "X",
+     "digits": 100,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-AMT",
+     "offset": 132,
+     "size": 11,
+     "line": 10,
+     "file": "CVTRA05Y.cpy",
+     "pic": "S9(9)V9(2)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-MERCHANT-ID",
+     "offset": 143,
+     "size": 9,
+     "line": 11,
+     "file": "CVTRA05Y.cpy",
+     "pic": "9(9)",
+     "kind": "9",
+     "digits": 9,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-MERCHANT-NAME",
+     "offset": 152,
+     "size": 50,
+     "line": 12,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(50)",
+     "kind": "X",
+     "digits": 50,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-MERCHANT-CITY",
+     "offset": 202,
+     "size": 50,
+     "line": 13,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(50)",
+     "kind": "X",
+     "digits": 50,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-MERCHANT-ZIP",
+     "offset": 252,
+     "size": 10,
+     "line": 14,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-CARD-NUM",
+     "offset": 262,
+     "size": 16,
+     "line": 15,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(16)",
+     "kind": "X",
+     "digits": 16,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-ORIG-TS",
+     "offset": 278,
+     "size": 26,
+     "line": 16,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(26)",
+     "kind": "X",
+     "digits": 26,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRAN-PROC-TS",
+     "offset": 304,
+     "size": 26,
+     "line": 17,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(26)",
+     "kind": "X",
+     "digits": 26,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "FILLER",
+     "offset": 330,
+     "size": 20,
+     "line": 18,
+     "file": "CVTRA05Y.cpy",
+     "pic": "X(20)",
+     "kind": "X",
+     "digits": 20,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TRANFILE-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 118,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "TRANFILE-STAT1",
+     "offset": 0,
+     "size": 1,
+     "line": 119,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TRANFILE-STAT2",
+     "offset": 1,
+     "size": 1,
+     "line": 120,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "IO-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 122,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "IO-STAT1",
+     "offset": 0,
+     "size": 1,
+     "line": 123,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "IO-STAT2",
+     "offset": 1,
+     "size": 1,
+     "line": 124,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TWO-BYTES-BINARY",
+   "offset": 0,
+   "size": 2,
+   "line": 125,
+   "file": "CBACT04C.cbl",
+   "pic": "9(4) COMP",
+   "kind": "9",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "BINARY",
+   "fields": []
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TWO-BYTES-ALPHA",
+   "offset": 0,
+   "size": 2,
+   "line": 126,
+   "file": "CBACT04C.cbl",
+   "redefines": "TWO-BYTES-BINARY",
+   "fields": [
+    {
+     "level": 5,
+     "name": "TWO-BYTES-LEFT",
+     "offset": 0,
+     "size": 1,
+     "line": 127,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "TWO-BYTES-RIGHT",
+     "offset": 1,
+     "size": 1,
+     "line": 128,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "IO-STATUS-04",
+   "offset": 0,
+   "size": 4,
+   "line": 129,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "IO-STATUS-0401",
+     "offset": 0,
+     "size": 1,
+     "line": 130,
+     "file": "CBACT04C.cbl",
+     "pic": "9(1)",
+     "kind": "9",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "IO-STATUS-0403",
+     "offset": 1,
+     "size": 3,
+     "line": 131,
+     "file": "CBACT04C.cbl",
+     "pic": "9(3)",
+     "kind": "9",
+     "digits": 3,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "APPL-RESULT",
+   "offset": 0,
+   "size": 4,
+   "line": 133,
+   "file": "CBACT04C.cbl",
+   "pic": "S9(9) COMP",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": true,
+   "usage": "BINARY",
+   "fields": []
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "END-OF-FILE",
+   "offset": 0,
+   "size": 1,
+   "line": 137,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "fields": []
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "ABCODE",
+   "offset": 0,
+   "size": 4,
+   "line": 138,
+   "file": "CBACT04C.cbl",
+   "pic": "S9(9) COMP",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": true,
+   "usage": "BINARY",
+   "fields": []
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TIMING",
+   "offset": 0,
+   "size": 4,
+   "line": 139,
+   "file": "CBACT04C.cbl",
+   "pic": "S9(9) COMP",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": true,
+   "usage": "BINARY",
+   "fields": []
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "COBOL-TS",
+   "offset": 0,
+   "size": 21,
+   "line": 141,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "COB-YYYY",
+     "offset": 0,
+     "size": 4,
+     "line": 142,
+     "file": "CBACT04C.cbl",
+     "pic": "X(4)",
+     "kind": "X",
+     "digits": 4,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "COB-MM",
+     "offset": 4,
+     "size": 2,
+     "line": 143,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "COB-DD",
+     "offset": 6,
+     "size": 2,
+     "line": 144,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "COB-HH",
+     "offset": 8,
+     "size": 2,
+     "line": 145,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "COB-MIN",
+     "offset": 10,
+     "size": 2,
+     "line": 146,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "COB-SS",
+     "offset": 12,
+     "size": 2,
+     "line": 147,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "COB-MIL",
+     "offset": 14,
+     "size": 2,
+     "line": 148,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "COB-REST",
+     "offset": 16,
+     "size": 5,
+     "line": 149,
+     "file": "CBACT04C.cbl",
+     "pic": "X(5)",
+     "kind": "X",
+     "digits": 5,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "DB2-FORMAT-TS",
+   "offset": 0,
+   "size": 26,
+   "line": 150,
+   "file": "CBACT04C.cbl",
+   "pic": "X(26)",
+   "kind": "X",
+   "digits": 26,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "fields": []
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "FILLER",
+   "offset": 0,
+   "size": 26,
+   "line": 151,
+   "file": "CBACT04C.cbl",
+   "redefines": "DB2-FORMAT-TS",
+   "fields": [
+    {
+     "level": 6,
+     "name": "DB2-YYYY",
+     "offset": 0,
+     "size": 4,
+     "line": 152,
+     "file": "CBACT04C.cbl",
+     "pic": "X(4)",
+     "kind": "X",
+     "digits": 4,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-STREEP-1",
+     "offset": 4,
+     "size": 1,
+     "line": 153,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-MM",
+     "offset": 5,
+     "size": 2,
+     "line": 154,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-STREEP-2",
+     "offset": 7,
+     "size": 1,
+     "line": 155,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-DD",
+     "offset": 8,
+     "size": 2,
+     "line": 156,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-STREEP-3",
+     "offset": 10,
+     "size": 1,
+     "line": 157,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-HH",
+     "offset": 11,
+     "size": 2,
+     "line": 158,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-DOT-1",
+     "offset": 13,
+     "size": 1,
+     "line": 159,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-MIN",
+     "offset": 14,
+     "size": 2,
+     "line": 160,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-DOT-2",
+     "offset": 16,
+     "size": 1,
+     "line": 161,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-SS",
+     "offset": 17,
+     "size": 2,
+     "line": 162,
+     "file": "CBACT04C.cbl",
+     "pic": "X(2)",
+     "kind": "X",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-DOT-3",
+     "offset": 19,
+     "size": 1,
+     "line": 163,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-MIL",
+     "offset": 20,
+     "size": 2,
+     "line": 164,
+     "file": "CBACT04C.cbl",
+     "pic": "9(2)",
+     "kind": "9",
+     "digits": 2,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 6,
+     "name": "DB2-REST",
+     "offset": 22,
+     "size": 4,
+     "line": 165,
+     "file": "CBACT04C.cbl",
+     "pic": "X(4)",
+     "kind": "X",
+     "digits": 4,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "WS-MISC-VARS",
+   "offset": 0,
+   "size": 34,
+   "line": 166,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "WS-LAST-ACCT-NUM",
+     "offset": 0,
+     "size": 11,
+     "line": 167,
+     "file": "CBACT04C.cbl",
+     "pic": "X(11)",
+     "kind": "X",
+     "digits": 11,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "WS-MONTHLY-INT",
+     "offset": 11,
+     "size": 11,
+     "line": 168,
+     "file": "CBACT04C.cbl",
+     "pic": "S9(9)V9(2)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "WS-TOTAL-INT",
+     "offset": 22,
+     "size": 11,
+     "line": 169,
+     "file": "CBACT04C.cbl",
+     "pic": "S9(9)V9(2)",
+     "kind": "9",
+     "digits": 11,
+     "scale": 2,
+     "signed": true,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "WS-FIRST-TIME",
+     "offset": 33,
+     "size": 1,
+     "line": 170,
+     "file": "CBACT04C.cbl",
+     "pic": "X(1)",
+     "kind": "X",
+     "digits": 1,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "WS-COUNTERS",
+   "offset": 0,
+   "size": 15,
+   "line": 171,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "WS-RECORD-COUNT",
+     "offset": 0,
+     "size": 9,
+     "line": 172,
+     "file": "CBACT04C.cbl",
+     "pic": "9(9)",
+     "kind": "9",
+     "digits": 9,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    },
+    {
+     "level": 5,
+     "name": "WS-TRANID-SUFFIX",
+     "offset": 9,
+     "size": 6,
+     "line": 173,
+     "file": "CBACT04C.cbl",
+     "pic": "9(6)",
+     "kind": "9",
+     "digits": 6,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  },
+  {
+   "section": "LINKAGE",
+   "level": 1,
+   "name": "EXTERNAL-PARMS",
+   "offset": 0,
+   "size": 12,
+   "line": 176,
+   "file": "CBACT04C.cbl",
+   "fields": [
+    {
+     "level": 5,
+     "name": "PARM-LENGTH",
+     "offset": 0,
+     "size": 2,
+     "line": 177,
+     "file": "CBACT04C.cbl",
+     "pic": "S9(4) COMP",
+     "kind": "9",
+     "digits": 4,
+     "scale": 0,
+     "signed": true,
+     "usage": "BINARY"
+    },
+    {
+     "level": 5,
+     "name": "PARM-DATE",
+     "offset": 2,
+     "size": 10,
+     "line": 178,
+     "file": "CBACT04C.cbl",
+     "pic": "X(10)",
+     "kind": "X",
+     "digits": 10,
+     "scale": 0,
+     "signed": false,
+     "usage": "DISPLAY"
+    }
+   ]
+  }
+ ],
+ "fields": {
+  "FD-TRAN-CAT-BAL-RECORD": {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-TRAN-CAT-BAL-RECORD",
+   "offset": 0,
+   "size": 50,
+   "line": 62,
+   "file": "CBACT04C.cbl",
+   "record": "FD-TRAN-CAT-BAL-RECORD"
+  },
+  "FD-TRAN-CAT-KEY": {
+   "level": 5,
+   "name": "FD-TRAN-CAT-KEY",
+   "offset": 0,
+   "size": 17,
+   "line": 63,
+   "file": "CBACT04C.cbl",
+   "record": "FD-TRAN-CAT-BAL-RECORD",
+   "section": "FILE"
+  },
+  "FD-TRANCAT-ACCT-ID": {
+   "level": 10,
+   "name": "FD-TRANCAT-ACCT-ID",
+   "offset": 0,
+   "size": 11,
+   "line": 64,
+   "file": "CBACT04C.cbl",
+   "pic": "9(11)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-TRAN-CAT-BAL-RECORD",
+   "section": "FILE"
+  },
+  "FD-TRANCAT-TYPE-CD": {
+   "level": 10,
+   "name": "FD-TRANCAT-TYPE-CD",
+   "offset": 11,
+   "size": 2,
+   "line": 65,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-TRAN-CAT-BAL-RECORD",
+   "section": "FILE"
+  },
+  "FD-TRANCAT-CD": {
+   "level": 10,
+   "name": "FD-TRANCAT-CD",
+   "offset": 13,
+   "size": 4,
+   "line": 66,
+   "file": "CBACT04C.cbl",
+   "pic": "9(4)",
+   "kind": "9",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-TRAN-CAT-BAL-RECORD",
+   "section": "FILE"
+  },
+  "FD-FD-TRAN-CAT-DATA": {
+   "level": 5,
+   "name": "FD-FD-TRAN-CAT-DATA",
+   "offset": 17,
+   "size": 33,
+   "line": 67,
+   "file": "CBACT04C.cbl",
+   "pic": "X(33)",
+   "kind": "X",
+   "digits": 33,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-TRAN-CAT-BAL-RECORD",
+   "section": "FILE"
+  },
+  "FD-XREFFILE-REC": {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-XREFFILE-REC",
+   "offset": 0,
+   "size": 50,
+   "line": 70,
+   "file": "CBACT04C.cbl",
+   "record": "FD-XREFFILE-REC"
+  },
+  "FD-XREF-CARD-NUM": {
+   "level": 5,
+   "name": "FD-XREF-CARD-NUM",
+   "offset": 0,
+   "size": 16,
+   "line": 71,
+   "file": "CBACT04C.cbl",
+   "pic": "X(16)",
+   "kind": "X",
+   "digits": 16,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-XREFFILE-REC",
+   "section": "FILE"
+  },
+  "FD-XREF-CUST-NUM": {
+   "level": 5,
+   "name": "FD-XREF-CUST-NUM",
+   "offset": 16,
+   "size": 9,
+   "line": 72,
+   "file": "CBACT04C.cbl",
+   "pic": "9(9)",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-XREFFILE-REC",
+   "section": "FILE"
+  },
+  "FD-XREF-ACCT-ID": {
+   "level": 5,
+   "name": "FD-XREF-ACCT-ID",
+   "offset": 25,
+   "size": 11,
+   "line": 73,
+   "file": "CBACT04C.cbl",
+   "pic": "9(11)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-XREFFILE-REC",
+   "section": "FILE"
+  },
+  "FD-XREF-FILLER": {
+   "level": 5,
+   "name": "FD-XREF-FILLER",
+   "offset": 36,
+   "size": 14,
+   "line": 74,
+   "file": "CBACT04C.cbl",
+   "pic": "X(14)",
+   "kind": "X",
+   "digits": 14,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-XREFFILE-REC",
+   "section": "FILE"
+  },
+  "FD-DISCGRP-REC": {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-DISCGRP-REC",
+   "offset": 0,
+   "size": 50,
+   "line": 77,
+   "file": "CBACT04C.cbl",
+   "record": "FD-DISCGRP-REC"
+  },
+  "FD-DISCGRP-KEY": {
+   "level": 5,
+   "name": "FD-DISCGRP-KEY",
+   "offset": 0,
+   "size": 16,
+   "line": 78,
+   "file": "CBACT04C.cbl",
+   "record": "FD-DISCGRP-REC",
+   "section": "FILE"
+  },
+  "FD-DIS-ACCT-GROUP-ID": {
+   "level": 10,
+   "name": "FD-DIS-ACCT-GROUP-ID",
+   "offset": 0,
+   "size": 10,
+   "line": 79,
+   "file": "CBACT04C.cbl",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-DISCGRP-REC",
+   "section": "FILE"
+  },
+  "FD-DIS-TRAN-TYPE-CD": {
+   "level": 10,
+   "name": "FD-DIS-TRAN-TYPE-CD",
+   "offset": 10,
+   "size": 2,
+   "line": 80,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-DISCGRP-REC",
+   "section": "FILE"
+  },
+  "FD-DIS-TRAN-CAT-CD": {
+   "level": 10,
+   "name": "FD-DIS-TRAN-CAT-CD",
+   "offset": 12,
+   "size": 4,
+   "line": 81,
+   "file": "CBACT04C.cbl",
+   "pic": "9(4)",
+   "kind": "9",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-DISCGRP-REC",
+   "section": "FILE"
+  },
+  "FD-DISCGRP-DATA": {
+   "level": 5,
+   "name": "FD-DISCGRP-DATA",
+   "offset": 16,
+   "size": 34,
+   "line": 82,
+   "file": "CBACT04C.cbl",
+   "pic": "X(34)",
+   "kind": "X",
+   "digits": 34,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-DISCGRP-REC",
+   "section": "FILE"
+  },
+  "FD-ACCTFILE-REC": {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-ACCTFILE-REC",
+   "offset": 0,
+   "size": 300,
+   "line": 85,
+   "file": "CBACT04C.cbl",
+   "record": "FD-ACCTFILE-REC"
+  },
+  "FD-ACCT-ID": {
+   "level": 5,
+   "name": "FD-ACCT-ID",
+   "offset": 0,
+   "size": 11,
+   "line": 86,
+   "file": "CBACT04C.cbl",
+   "pic": "9(11)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-ACCTFILE-REC",
+   "section": "FILE"
+  },
+  "FD-ACCT-DATA": {
+   "level": 5,
+   "name": "FD-ACCT-DATA",
+   "offset": 11,
+   "size": 289,
+   "line": 87,
+   "file": "CBACT04C.cbl",
+   "pic": "X(289)",
+   "kind": "X",
+   "digits": 289,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-ACCTFILE-REC",
+   "section": "FILE"
+  },
+  "FD-TRANFILE-REC": {
+   "section": "FILE",
+   "level": 1,
+   "name": "FD-TRANFILE-REC",
+   "offset": 0,
+   "size": 350,
+   "line": 90,
+   "file": "CBACT04C.cbl",
+   "record": "FD-TRANFILE-REC"
+  },
+  "FD-TRANS-ID": {
+   "level": 5,
+   "name": "FD-TRANS-ID",
+   "offset": 0,
+   "size": 16,
+   "line": 91,
+   "file": "CBACT04C.cbl",
+   "pic": "X(16)",
+   "kind": "X",
+   "digits": 16,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FD-TRANFILE-REC",
+   "section": "FILE"
+  },
+  "TRAN-CAT-BAL-RECORD": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TRAN-CAT-BAL-RECORD",
+   "offset": 0,
+   "size": 50,
+   "line": 4,
+   "file": "CVTRA01Y.cpy",
+   "record": "TRAN-CAT-BAL-RECORD"
+  },
+  "TRAN-CAT-KEY": {
+   "level": 5,
+   "name": "TRAN-CAT-KEY",
+   "offset": 0,
+   "size": 17,
+   "line": 5,
+   "file": "CVTRA01Y.cpy",
+   "record": "TRAN-CAT-BAL-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRANCAT-ACCT-ID": {
+   "level": 10,
+   "name": "TRANCAT-ACCT-ID",
+   "offset": 0,
+   "size": 11,
+   "line": 6,
+   "file": "CVTRA01Y.cpy",
+   "pic": "9(11)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-CAT-BAL-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRANCAT-TYPE-CD": {
+   "level": 10,
+   "name": "TRANCAT-TYPE-CD",
+   "offset": 11,
+   "size": 2,
+   "line": 7,
+   "file": "CVTRA01Y.cpy",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-CAT-BAL-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRANCAT-CD": {
+   "level": 10,
+   "name": "TRANCAT-CD",
+   "offset": 13,
+   "size": 4,
+   "line": 8,
+   "file": "CVTRA01Y.cpy",
+   "pic": "9(4)",
+   "kind": "9",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-CAT-BAL-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-CAT-BAL": {
+   "level": 5,
+   "name": "TRAN-CAT-BAL",
+   "offset": 17,
+   "size": 11,
+   "line": 9,
+   "file": "CVTRA01Y.cpy",
+   "pic": "S9(9)V9(2)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "TRAN-CAT-BAL-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TCATBALF-STATUS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TCATBALF-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 98,
+   "file": "CBACT04C.cbl",
+   "record": "TCATBALF-STATUS"
+  },
+  "TCATBALF-STAT1": {
+   "level": 5,
+   "name": "TCATBALF-STAT1",
+   "offset": 0,
+   "size": 1,
+   "line": 99,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TCATBALF-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "TCATBALF-STAT2": {
+   "level": 5,
+   "name": "TCATBALF-STAT2",
+   "offset": 1,
+   "size": 1,
+   "line": 100,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TCATBALF-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "CARD-XREF-RECORD": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "CARD-XREF-RECORD",
+   "offset": 0,
+   "size": 50,
+   "line": 4,
+   "file": "CVACT03Y.cpy",
+   "record": "CARD-XREF-RECORD"
+  },
+  "XREF-CARD-NUM": {
+   "level": 5,
+   "name": "XREF-CARD-NUM",
+   "offset": 0,
+   "size": 16,
+   "line": 5,
+   "file": "CVACT03Y.cpy",
+   "pic": "X(16)",
+   "kind": "X",
+   "digits": 16,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "CARD-XREF-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "XREF-CUST-ID": {
+   "level": 5,
+   "name": "XREF-CUST-ID",
+   "offset": 16,
+   "size": 9,
+   "line": 6,
+   "file": "CVACT03Y.cpy",
+   "pic": "9(9)",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "CARD-XREF-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "XREF-ACCT-ID": {
+   "level": 5,
+   "name": "XREF-ACCT-ID",
+   "offset": 25,
+   "size": 11,
+   "line": 7,
+   "file": "CVACT03Y.cpy",
+   "pic": "9(11)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "CARD-XREF-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "XREFFILE-STATUS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "XREFFILE-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 103,
+   "file": "CBACT04C.cbl",
+   "record": "XREFFILE-STATUS"
+  },
+  "XREFFILE-STAT1": {
+   "level": 5,
+   "name": "XREFFILE-STAT1",
+   "offset": 0,
+   "size": 1,
+   "line": 104,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "XREFFILE-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "XREFFILE-STAT2": {
+   "level": 5,
+   "name": "XREFFILE-STAT2",
+   "offset": 1,
+   "size": 1,
+   "line": 105,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "XREFFILE-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "DIS-GROUP-RECORD": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "DIS-GROUP-RECORD",
+   "offset": 0,
+   "size": 50,
+   "line": 4,
+   "file": "CVTRA02Y.cpy",
+   "record": "DIS-GROUP-RECORD"
+  },
+  "DIS-GROUP-KEY": {
+   "level": 5,
+   "name": "DIS-GROUP-KEY",
+   "offset": 0,
+   "size": 16,
+   "line": 5,
+   "file": "CVTRA02Y.cpy",
+   "record": "DIS-GROUP-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "DIS-ACCT-GROUP-ID": {
+   "level": 10,
+   "name": "DIS-ACCT-GROUP-ID",
+   "offset": 0,
+   "size": 10,
+   "line": 6,
+   "file": "CVTRA02Y.cpy",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "DIS-GROUP-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "DIS-TRAN-TYPE-CD": {
+   "level": 10,
+   "name": "DIS-TRAN-TYPE-CD",
+   "offset": 10,
+   "size": 2,
+   "line": 7,
+   "file": "CVTRA02Y.cpy",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "DIS-GROUP-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "DIS-TRAN-CAT-CD": {
+   "level": 10,
+   "name": "DIS-TRAN-CAT-CD",
+   "offset": 12,
+   "size": 4,
+   "line": 8,
+   "file": "CVTRA02Y.cpy",
+   "pic": "9(4)",
+   "kind": "9",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "DIS-GROUP-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "DIS-INT-RATE": {
+   "level": 5,
+   "name": "DIS-INT-RATE",
+   "offset": 16,
+   "size": 6,
+   "line": 9,
+   "file": "CVTRA02Y.cpy",
+   "pic": "S9(4)V9(2)",
+   "kind": "9",
+   "digits": 6,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "DIS-GROUP-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "DISCGRP-STATUS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "DISCGRP-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 108,
+   "file": "CBACT04C.cbl",
+   "record": "DISCGRP-STATUS"
+  },
+  "DISCGRP-STAT1": {
+   "level": 5,
+   "name": "DISCGRP-STAT1",
+   "offset": 0,
+   "size": 1,
+   "line": 109,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "DISCGRP-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "DISCGRP-STAT2": {
+   "level": 5,
+   "name": "DISCGRP-STAT2",
+   "offset": 1,
+   "size": 1,
+   "line": 110,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "DISCGRP-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCOUNT-RECORD": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "ACCOUNT-RECORD",
+   "offset": 0,
+   "size": 300,
+   "line": 4,
+   "file": "CVACT01Y.cpy",
+   "record": "ACCOUNT-RECORD"
+  },
+  "ACCT-ID": {
+   "level": 5,
+   "name": "ACCT-ID",
+   "offset": 0,
+   "size": 11,
+   "line": 5,
+   "file": "CVACT01Y.cpy",
+   "pic": "9(11)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-ACTIVE-STATUS": {
+   "level": 5,
+   "name": "ACCT-ACTIVE-STATUS",
+   "offset": 11,
+   "size": 1,
+   "line": 6,
+   "file": "CVACT01Y.cpy",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-CURR-BAL": {
+   "level": 5,
+   "name": "ACCT-CURR-BAL",
+   "offset": 12,
+   "size": 12,
+   "line": 7,
+   "file": "CVACT01Y.cpy",
+   "pic": "S9(10)V9(2)",
+   "kind": "9",
+   "digits": 12,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-CREDIT-LIMIT": {
+   "level": 5,
+   "name": "ACCT-CREDIT-LIMIT",
+   "offset": 24,
+   "size": 12,
+   "line": 8,
+   "file": "CVACT01Y.cpy",
+   "pic": "S9(10)V9(2)",
+   "kind": "9",
+   "digits": 12,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-CASH-CREDIT-LIMIT": {
+   "level": 5,
+   "name": "ACCT-CASH-CREDIT-LIMIT",
+   "offset": 36,
+   "size": 12,
+   "line": 9,
+   "file": "CVACT01Y.cpy",
+   "pic": "S9(10)V9(2)",
+   "kind": "9",
+   "digits": 12,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-OPEN-DATE": {
+   "level": 5,
+   "name": "ACCT-OPEN-DATE",
+   "offset": 48,
+   "size": 10,
+   "line": 10,
+   "file": "CVACT01Y.cpy",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-EXPIRAION-DATE": {
+   "level": 5,
+   "name": "ACCT-EXPIRAION-DATE",
+   "offset": 58,
+   "size": 10,
+   "line": 11,
+   "file": "CVACT01Y.cpy",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-REISSUE-DATE": {
+   "level": 5,
+   "name": "ACCT-REISSUE-DATE",
+   "offset": 68,
+   "size": 10,
+   "line": 12,
+   "file": "CVACT01Y.cpy",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-CURR-CYC-CREDIT": {
+   "level": 5,
+   "name": "ACCT-CURR-CYC-CREDIT",
+   "offset": 78,
+   "size": 12,
+   "line": 13,
+   "file": "CVACT01Y.cpy",
+   "pic": "S9(10)V9(2)",
+   "kind": "9",
+   "digits": 12,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-CURR-CYC-DEBIT": {
+   "level": 5,
+   "name": "ACCT-CURR-CYC-DEBIT",
+   "offset": 90,
+   "size": 12,
+   "line": 14,
+   "file": "CVACT01Y.cpy",
+   "pic": "S9(10)V9(2)",
+   "kind": "9",
+   "digits": 12,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-ADDR-ZIP": {
+   "level": 5,
+   "name": "ACCT-ADDR-ZIP",
+   "offset": 102,
+   "size": 10,
+   "line": 15,
+   "file": "CVACT01Y.cpy",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCT-GROUP-ID": {
+   "level": 5,
+   "name": "ACCT-GROUP-ID",
+   "offset": 112,
+   "size": 10,
+   "line": 16,
+   "file": "CVACT01Y.cpy",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "ACCOUNT-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCTFILE-STATUS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "ACCTFILE-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 113,
+   "file": "CBACT04C.cbl",
+   "record": "ACCTFILE-STATUS"
+  },
+  "ACCTFILE-STAT1": {
+   "level": 5,
+   "name": "ACCTFILE-STAT1",
+   "offset": 0,
+   "size": 1,
+   "line": 114,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "ACCTFILE-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "ACCTFILE-STAT2": {
+   "level": 5,
+   "name": "ACCTFILE-STAT2",
+   "offset": 1,
+   "size": 1,
+   "line": 115,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "ACCTFILE-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-RECORD": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TRAN-RECORD",
+   "offset": 0,
+   "size": 350,
+   "line": 4,
+   "file": "CVTRA05Y.cpy",
+   "record": "TRAN-RECORD"
+  },
+  "TRAN-ID": {
+   "level": 5,
+   "name": "TRAN-ID",
+   "offset": 0,
+   "size": 16,
+   "line": 5,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(16)",
+   "kind": "X",
+   "digits": 16,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-TYPE-CD": {
+   "level": 5,
+   "name": "TRAN-TYPE-CD",
+   "offset": 16,
+   "size": 2,
+   "line": 6,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-CAT-CD": {
+   "level": 5,
+   "name": "TRAN-CAT-CD",
+   "offset": 18,
+   "size": 4,
+   "line": 7,
+   "file": "CVTRA05Y.cpy",
+   "pic": "9(4)",
+   "kind": "9",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-SOURCE": {
+   "level": 5,
+   "name": "TRAN-SOURCE",
+   "offset": 22,
+   "size": 10,
+   "line": 8,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-DESC": {
+   "level": 5,
+   "name": "TRAN-DESC",
+   "offset": 32,
+   "size": 100,
+   "line": 9,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(100)",
+   "kind": "X",
+   "digits": 100,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-AMT": {
+   "level": 5,
+   "name": "TRAN-AMT",
+   "offset": 132,
+   "size": 11,
+   "line": 10,
+   "file": "CVTRA05Y.cpy",
+   "pic": "S9(9)V9(2)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-MERCHANT-ID": {
+   "level": 5,
+   "name": "TRAN-MERCHANT-ID",
+   "offset": 143,
+   "size": 9,
+   "line": 11,
+   "file": "CVTRA05Y.cpy",
+   "pic": "9(9)",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-MERCHANT-NAME": {
+   "level": 5,
+   "name": "TRAN-MERCHANT-NAME",
+   "offset": 152,
+   "size": 50,
+   "line": 12,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(50)",
+   "kind": "X",
+   "digits": 50,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-MERCHANT-CITY": {
+   "level": 5,
+   "name": "TRAN-MERCHANT-CITY",
+   "offset": 202,
+   "size": 50,
+   "line": 13,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(50)",
+   "kind": "X",
+   "digits": 50,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-MERCHANT-ZIP": {
+   "level": 5,
+   "name": "TRAN-MERCHANT-ZIP",
+   "offset": 252,
+   "size": 10,
+   "line": 14,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-CARD-NUM": {
+   "level": 5,
+   "name": "TRAN-CARD-NUM",
+   "offset": 262,
+   "size": 16,
+   "line": 15,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(16)",
+   "kind": "X",
+   "digits": 16,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-ORIG-TS": {
+   "level": 5,
+   "name": "TRAN-ORIG-TS",
+   "offset": 278,
+   "size": 26,
+   "line": 16,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(26)",
+   "kind": "X",
+   "digits": 26,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRAN-PROC-TS": {
+   "level": 5,
+   "name": "TRAN-PROC-TS",
+   "offset": 304,
+   "size": 26,
+   "line": 17,
+   "file": "CVTRA05Y.cpy",
+   "pic": "X(26)",
+   "kind": "X",
+   "digits": 26,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRAN-RECORD",
+   "section": "WORKING-STORAGE"
+  },
+  "TRANFILE-STATUS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TRANFILE-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 118,
+   "file": "CBACT04C.cbl",
+   "record": "TRANFILE-STATUS"
+  },
+  "TRANFILE-STAT1": {
+   "level": 5,
+   "name": "TRANFILE-STAT1",
+   "offset": 0,
+   "size": 1,
+   "line": 119,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRANFILE-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "TRANFILE-STAT2": {
+   "level": 5,
+   "name": "TRANFILE-STAT2",
+   "offset": 1,
+   "size": 1,
+   "line": 120,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TRANFILE-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "IO-STATUS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "IO-STATUS",
+   "offset": 0,
+   "size": 2,
+   "line": 122,
+   "file": "CBACT04C.cbl",
+   "record": "IO-STATUS"
+  },
+  "IO-STAT1": {
+   "level": 5,
+   "name": "IO-STAT1",
+   "offset": 0,
+   "size": 1,
+   "line": 123,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "IO-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "IO-STAT2": {
+   "level": 5,
+   "name": "IO-STAT2",
+   "offset": 1,
+   "size": 1,
+   "line": 124,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "IO-STATUS",
+   "section": "WORKING-STORAGE"
+  },
+  "TWO-BYTES-BINARY": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TWO-BYTES-BINARY",
+   "offset": 0,
+   "size": 2,
+   "line": 125,
+   "file": "CBACT04C.cbl",
+   "pic": "9(4) COMP",
+   "kind": "9",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "BINARY",
+   "record": "TWO-BYTES-BINARY"
+  },
+  "TWO-BYTES-ALPHA": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TWO-BYTES-ALPHA",
+   "offset": 0,
+   "size": 2,
+   "line": 126,
+   "file": "CBACT04C.cbl",
+   "redefines": "TWO-BYTES-BINARY",
+   "record": "TWO-BYTES-ALPHA"
+  },
+  "TWO-BYTES-LEFT": {
+   "level": 5,
+   "name": "TWO-BYTES-LEFT",
+   "offset": 0,
+   "size": 1,
+   "line": 127,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TWO-BYTES-ALPHA",
+   "section": "WORKING-STORAGE"
+  },
+  "TWO-BYTES-RIGHT": {
+   "level": 5,
+   "name": "TWO-BYTES-RIGHT",
+   "offset": 1,
+   "size": 1,
+   "line": 128,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "TWO-BYTES-ALPHA",
+   "section": "WORKING-STORAGE"
+  },
+  "IO-STATUS-04": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "IO-STATUS-04",
+   "offset": 0,
+   "size": 4,
+   "line": 129,
+   "file": "CBACT04C.cbl",
+   "record": "IO-STATUS-04"
+  },
+  "IO-STATUS-0401": {
+   "level": 5,
+   "name": "IO-STATUS-0401",
+   "offset": 0,
+   "size": 1,
+   "line": 130,
+   "file": "CBACT04C.cbl",
+   "pic": "9(1)",
+   "kind": "9",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "IO-STATUS-04",
+   "section": "WORKING-STORAGE"
+  },
+  "IO-STATUS-0403": {
+   "level": 5,
+   "name": "IO-STATUS-0403",
+   "offset": 1,
+   "size": 3,
+   "line": 131,
+   "file": "CBACT04C.cbl",
+   "pic": "9(3)",
+   "kind": "9",
+   "digits": 3,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "IO-STATUS-04",
+   "section": "WORKING-STORAGE"
+  },
+  "APPL-RESULT": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "APPL-RESULT",
+   "offset": 0,
+   "size": 4,
+   "line": 133,
+   "file": "CBACT04C.cbl",
+   "pic": "S9(9) COMP",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": true,
+   "usage": "BINARY",
+   "record": "APPL-RESULT"
+  },
+  "END-OF-FILE": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "END-OF-FILE",
+   "offset": 0,
+   "size": 1,
+   "line": 137,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "END-OF-FILE"
+  },
+  "ABCODE": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "ABCODE",
+   "offset": 0,
+   "size": 4,
+   "line": 138,
+   "file": "CBACT04C.cbl",
+   "pic": "S9(9) COMP",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": true,
+   "usage": "BINARY",
+   "record": "ABCODE"
+  },
+  "TIMING": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "TIMING",
+   "offset": 0,
+   "size": 4,
+   "line": 139,
+   "file": "CBACT04C.cbl",
+   "pic": "S9(9) COMP",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": true,
+   "usage": "BINARY",
+   "record": "TIMING"
+  },
+  "COBOL-TS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "COBOL-TS",
+   "offset": 0,
+   "size": 21,
+   "line": 141,
+   "file": "CBACT04C.cbl",
+   "record": "COBOL-TS"
+  },
+  "COB-YYYY": {
+   "level": 5,
+   "name": "COB-YYYY",
+   "offset": 0,
+   "size": 4,
+   "line": 142,
+   "file": "CBACT04C.cbl",
+   "pic": "X(4)",
+   "kind": "X",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "COBOL-TS",
+   "section": "WORKING-STORAGE"
+  },
+  "COB-MM": {
+   "level": 5,
+   "name": "COB-MM",
+   "offset": 4,
+   "size": 2,
+   "line": 143,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "COBOL-TS",
+   "section": "WORKING-STORAGE"
+  },
+  "COB-DD": {
+   "level": 5,
+   "name": "COB-DD",
+   "offset": 6,
+   "size": 2,
+   "line": 144,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "COBOL-TS",
+   "section": "WORKING-STORAGE"
+  },
+  "COB-HH": {
+   "level": 5,
+   "name": "COB-HH",
+   "offset": 8,
+   "size": 2,
+   "line": 145,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "COBOL-TS",
+   "section": "WORKING-STORAGE"
+  },
+  "COB-MIN": {
+   "level": 5,
+   "name": "COB-MIN",
+   "offset": 10,
+   "size": 2,
+   "line": 146,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "COBOL-TS",
+   "section": "WORKING-STORAGE"
+  },
+  "COB-SS": {
+   "level": 5,
+   "name": "COB-SS",
+   "offset": 12,
+   "size": 2,
+   "line": 147,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "COBOL-TS",
+   "section": "WORKING-STORAGE"
+  },
+  "COB-MIL": {
+   "level": 5,
+   "name": "COB-MIL",
+   "offset": 14,
+   "size": 2,
+   "line": 148,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "COBOL-TS",
+   "section": "WORKING-STORAGE"
+  },
+  "COB-REST": {
+   "level": 5,
+   "name": "COB-REST",
+   "offset": 16,
+   "size": 5,
+   "line": 149,
+   "file": "CBACT04C.cbl",
+   "pic": "X(5)",
+   "kind": "X",
+   "digits": 5,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "COBOL-TS",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-FORMAT-TS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "DB2-FORMAT-TS",
+   "offset": 0,
+   "size": 26,
+   "line": 150,
+   "file": "CBACT04C.cbl",
+   "pic": "X(26)",
+   "kind": "X",
+   "digits": 26,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "DB2-FORMAT-TS"
+  },
+  "FILLER": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "FILLER",
+   "offset": 0,
+   "size": 26,
+   "line": 151,
+   "file": "CBACT04C.cbl",
+   "redefines": "DB2-FORMAT-TS",
+   "record": "FILLER"
+  },
+  "DB2-YYYY": {
+   "level": 6,
+   "name": "DB2-YYYY",
+   "offset": 0,
+   "size": 4,
+   "line": 152,
+   "file": "CBACT04C.cbl",
+   "pic": "X(4)",
+   "kind": "X",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-STREEP-1": {
+   "level": 6,
+   "name": "DB2-STREEP-1",
+   "offset": 4,
+   "size": 1,
+   "line": 153,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-MM": {
+   "level": 6,
+   "name": "DB2-MM",
+   "offset": 5,
+   "size": 2,
+   "line": 154,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-STREEP-2": {
+   "level": 6,
+   "name": "DB2-STREEP-2",
+   "offset": 7,
+   "size": 1,
+   "line": 155,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-DD": {
+   "level": 6,
+   "name": "DB2-DD",
+   "offset": 8,
+   "size": 2,
+   "line": 156,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-STREEP-3": {
+   "level": 6,
+   "name": "DB2-STREEP-3",
+   "offset": 10,
+   "size": 1,
+   "line": 157,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-HH": {
+   "level": 6,
+   "name": "DB2-HH",
+   "offset": 11,
+   "size": 2,
+   "line": 158,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-DOT-1": {
+   "level": 6,
+   "name": "DB2-DOT-1",
+   "offset": 13,
+   "size": 1,
+   "line": 159,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-MIN": {
+   "level": 6,
+   "name": "DB2-MIN",
+   "offset": 14,
+   "size": 2,
+   "line": 160,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-DOT-2": {
+   "level": 6,
+   "name": "DB2-DOT-2",
+   "offset": 16,
+   "size": 1,
+   "line": 161,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-SS": {
+   "level": 6,
+   "name": "DB2-SS",
+   "offset": 17,
+   "size": 2,
+   "line": 162,
+   "file": "CBACT04C.cbl",
+   "pic": "X(2)",
+   "kind": "X",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-DOT-3": {
+   "level": 6,
+   "name": "DB2-DOT-3",
+   "offset": 19,
+   "size": 1,
+   "line": 163,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-MIL": {
+   "level": 6,
+   "name": "DB2-MIL",
+   "offset": 20,
+   "size": 2,
+   "line": 164,
+   "file": "CBACT04C.cbl",
+   "pic": "9(2)",
+   "kind": "9",
+   "digits": 2,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "DB2-REST": {
+   "level": 6,
+   "name": "DB2-REST",
+   "offset": 22,
+   "size": 4,
+   "line": 165,
+   "file": "CBACT04C.cbl",
+   "pic": "X(4)",
+   "kind": "X",
+   "digits": 4,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "FILLER",
+   "section": "WORKING-STORAGE"
+  },
+  "WS-MISC-VARS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "WS-MISC-VARS",
+   "offset": 0,
+   "size": 34,
+   "line": 166,
+   "file": "CBACT04C.cbl",
+   "record": "WS-MISC-VARS"
+  },
+  "WS-LAST-ACCT-NUM": {
+   "level": 5,
+   "name": "WS-LAST-ACCT-NUM",
+   "offset": 0,
+   "size": 11,
+   "line": 167,
+   "file": "CBACT04C.cbl",
+   "pic": "X(11)",
+   "kind": "X",
+   "digits": 11,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "WS-MISC-VARS",
+   "section": "WORKING-STORAGE"
+  },
+  "WS-MONTHLY-INT": {
+   "level": 5,
+   "name": "WS-MONTHLY-INT",
+   "offset": 11,
+   "size": 11,
+   "line": 168,
+   "file": "CBACT04C.cbl",
+   "pic": "S9(9)V9(2)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "WS-MISC-VARS",
+   "section": "WORKING-STORAGE"
+  },
+  "WS-TOTAL-INT": {
+   "level": 5,
+   "name": "WS-TOTAL-INT",
+   "offset": 22,
+   "size": 11,
+   "line": 169,
+   "file": "CBACT04C.cbl",
+   "pic": "S9(9)V9(2)",
+   "kind": "9",
+   "digits": 11,
+   "scale": 2,
+   "signed": true,
+   "usage": "DISPLAY",
+   "record": "WS-MISC-VARS",
+   "section": "WORKING-STORAGE"
+  },
+  "WS-FIRST-TIME": {
+   "level": 5,
+   "name": "WS-FIRST-TIME",
+   "offset": 33,
+   "size": 1,
+   "line": 170,
+   "file": "CBACT04C.cbl",
+   "pic": "X(1)",
+   "kind": "X",
+   "digits": 1,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "WS-MISC-VARS",
+   "section": "WORKING-STORAGE"
+  },
+  "WS-COUNTERS": {
+   "section": "WORKING-STORAGE",
+   "level": 1,
+   "name": "WS-COUNTERS",
+   "offset": 0,
+   "size": 15,
+   "line": 171,
+   "file": "CBACT04C.cbl",
+   "record": "WS-COUNTERS"
+  },
+  "WS-RECORD-COUNT": {
+   "level": 5,
+   "name": "WS-RECORD-COUNT",
+   "offset": 0,
+   "size": 9,
+   "line": 172,
+   "file": "CBACT04C.cbl",
+   "pic": "9(9)",
+   "kind": "9",
+   "digits": 9,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "WS-COUNTERS",
+   "section": "WORKING-STORAGE"
+  },
+  "WS-TRANID-SUFFIX": {
+   "level": 5,
+   "name": "WS-TRANID-SUFFIX",
+   "offset": 9,
+   "size": 6,
+   "line": 173,
+   "file": "CBACT04C.cbl",
+   "pic": "9(6)",
+   "kind": "9",
+   "digits": 6,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "WS-COUNTERS",
+   "section": "WORKING-STORAGE"
+  },
+  "EXTERNAL-PARMS": {
+   "section": "LINKAGE",
+   "level": 1,
+   "name": "EXTERNAL-PARMS",
+   "offset": 0,
+   "size": 12,
+   "line": 176,
+   "file": "CBACT04C.cbl",
+   "record": "EXTERNAL-PARMS"
+  },
+  "PARM-LENGTH": {
+   "level": 5,
+   "name": "PARM-LENGTH",
+   "offset": 0,
+   "size": 2,
+   "line": 177,
+   "file": "CBACT04C.cbl",
+   "pic": "S9(4) COMP",
+   "kind": "9",
+   "digits": 4,
+   "scale": 0,
+   "signed": true,
+   "usage": "BINARY",
+   "record": "EXTERNAL-PARMS",
+   "section": "LINKAGE"
+  },
+  "PARM-DATE": {
+   "level": 5,
+   "name": "PARM-DATE",
+   "offset": 2,
+   "size": 10,
+   "line": 178,
+   "file": "CBACT04C.cbl",
+   "pic": "X(10)",
+   "kind": "X",
+   "digits": 10,
+   "scale": 0,
+   "signed": false,
+   "usage": "DISPLAY",
+   "record": "EXTERNAL-PARMS",
+   "section": "LINKAGE"
+  }
+ }
+}
