@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 
 from .paths import CBL_DIR, CPY_DIR, GENERATED
+from .spans import clause_spans
 
 
 def _lines(name: str) -> list[str]:
@@ -15,11 +16,12 @@ def cited_sha(rule: dict) -> str:
     h = hashlib.sha256()
     for part in ("given", "when", "then"):
         for c in rule["scenario"][part]:
-            f, ln = c["source"]["file"], c["source"]["lines"]
-            try:
-                h.update("\n".join(_lines(f)[ln[0] - 1: ln[1]]).encode())
-            except Exception:
-                h.update(b"?")
+            for s in clause_spans(c):
+                f, ln = s["file"], s["lines"]
+                try:
+                    h.update("\n".join(_lines(f)[ln[0] - 1: ln[1]]).encode())
+                except Exception:
+                    h.update(b"?")
     return h.hexdigest()[:16]
 
 

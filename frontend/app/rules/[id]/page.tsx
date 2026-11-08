@@ -31,7 +31,7 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
   if (!rule) return <div className="p-10 text-ink-soft">Loading {id}</div>;
 
   const progFile = `${rule.program}.cbl`;
-  const spans = PARTS.flatMap((p) => rule.scenario[p].map((c) => c.source));
+  const spans = PARTS.flatMap((p) => rule.scenario[p].flatMap((c) => [c.source, ...(c.also ?? [])]));
   const files = Array.from(new Set([progFile, ...spans.map((s) => s.file)]));
   const activeClause: Clause | null = active ? rule.scenario[active.part][active.index] : null;
   const shownFile = file ?? activeClause?.source.file ?? progFile;
@@ -81,7 +81,9 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
                         <span>
                           <span className="font-serif text-[16px] leading-[1.55] block">{c.text}</span>
                           <span className="text-[12.5px] text-ink-soft mt-1 flex flex-wrap gap-x-3">
-                            <span className="text-ink underline decoration-rule underline-offset-2">{c.source.file} {c.source.lines[0]}{c.source.lines[1] !== c.source.lines[0] ? `–${c.source.lines[1]}` : ""}</span>
+                            {[c.source, ...(c.also ?? [])].map((s, k) => (
+                              <span key={k} className="text-ink underline decoration-rule underline-offset-2">{s.file} {s.lines[0]}{s.lines[1] !== s.lines[0] ? `–${s.lines[1]}` : ""}</span>
+                            ))}
                             {c.fields.length > 0 && <span>{c.fields.join(", ")}</span>}
                             {c.literals.length > 0 && <span>{c.literals.map((l) => `'${l}'`).join(", ")}</span>}
                           </span>

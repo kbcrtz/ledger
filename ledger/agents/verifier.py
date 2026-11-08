@@ -11,6 +11,7 @@ import re
 
 from .. import log
 from ..llm import run_agent
+from ..spans import clause_spans, MAX_EXTRA
 from .common import parsed, lines_of, code_lines, numbered, tokens_in
 
 MAX_SPAN = 30
@@ -21,25 +22,38 @@ def allowed_files(program: str) -> set[str]:
     return {p["file"]} | {f"{c['name']}.cpy" for c in p["copybooks"]}
 
 
+def _span_label(spans: list[tuple[str, int, int]]) -> str:
+    return " + ".join(f"{f}:{a}-{b}" for f, a, b in spans)
+
+
 def check_clause(program: str, clause: dict) -> list[str]:
+    """Deterministic check over every cited span (primary `source` plus `also`).
+    Each span must be valid and tight; every listed field and literal must appear in
+    at least one of them."""
     errs = []
-    src = clause.get("source") or {}
-    f = src.get("file") or f"{program}.cbl"
-    if f not in allowed_files(program):
-        return [f"file {f} is not {program}.cbl or one of its copybooks"]
-    lines = list(src.get("lines") or [])
-    if len(lines) == 1:
-        lines = [lines[0], lines[0]]
-    if len(lines) != 2:
-        return ["lines must be [first, last]"]
-    a, b = lines
-    n = len(lines_of(f))
-    if not (1 <= a <= b <= n):
-        return [f"lines {a}-{b} outside 1-{n}"]
-    if b - a + 1 > MAX_SPAN:
-        errs.append(f"span {a}-{b} is {b - a + 1} lines (max {MAX_SPAN})")
-    code = code_lines(f, a, b)
-    text = "\n".join(code)
+    raw = clause_spans(clause) or [{}]
+    if len(raw) > 1 + MAX_EXTRA:
+        errs.append(f"{len(raw) - 1} extra spans (max {MAX_EXTRA})")
+    spans, texts = [], []
+    for s in raw:
+        f = s.get("file") or f"{program}.cbl"
+        if f not in allowed_files(program):
+            return [f"file {f} is not {program}.cbl or one of its copybooks"]
+        lines = list(s.get("lines") or [])
+        if len(lines) == 1:
+            lines = [lines[0], lines[0]]
+        if len(lines) != 2:
+            return ["lines must be [first, last]"]
+        a, b = lines
+        n = len(lines_of(f))
+        if not (1 <= a <= b <= n):
+            return [f"lines {a}-{b} of {f} outside 1-{n}"]
+        if b - a + 1 > MAX_SPAN:
+            errs.append(f"span {f}:{a}-{b} is {b - a + 1} lines (max {MAX_SPAN})")
+        spans.append((f, a, b))
+        texts.append("\n".join(code_lines(f, a, b)))
+    text = "\n".join(texts)
+    where = _span_label(spans)
     toks = tokens_in(text)
     if not clause.get("fields") and not clause.get("literals"):
         errs.append("clause lists no fields or literals, so its citation cannot be checked")
@@ -48,7 +62,7 @@ def check_clause(program: str, clause: dict) -> list[str]:
         # allow reference modification / subscripts written like DALYTRAN-ORIG-TS (1:10)
         name = re.sub(r"\s*\(.*\)$", "", name)
         if name not in toks:
-            errs.append(f"field {fld} does not appear in {f}:{a}-{b}")
+            errs.append(f"field {fld} does not appear in {where}")
     for lit in clause.get("literals", []):
         s = lit.strip().strip("'\"")
         if not s:
@@ -58,7 +72,7 @@ def check_clause(program: str, clause: dict) -> list[str]:
         else:
             ok = s in text or s.upper() in text.upper()
         if not ok:
-            errs.append(f"literal {lit!r} does not appear in {f}:{a}-{b}")
+            errs.append(f"literal {lit!r} does not appear in {where}")
     return errs
 
 
@@ -79,7 +93,7 @@ JUDGE_SCHEMA = {
 
 JUDGE_SYSTEM = """You are the verifier judge in Ledger. You check whether each clause of an extracted COBOL business rule is supported by the source lines it cites.
 
-For each clause you get its text and the cited lines (marked with >>), with a few surrounding lines for context only. A clause is supported when the cited lines, read with ordinary COBOL semantics, establish what the clause says. Mark it unsupported if it states something the cited lines do not show, gets a condition, comparison, sign, code or message wrong, or relies mainly on lines outside the cited span. Be strict about meaning, not about wording. Give a one-sentence reason either way."""
+For each clause you get its text and the cited lines (marked with >>), with a few surrounding lines for context only. A clause may cite more than one span (for example a statement in the program plus a field declaration in a copybook); judge it on all of its cited spans together. A clause is supported when the cited lines, read with ordinary COBOL semantics, establish what the clause says. Mark it unsupported if it states something the cited lines do not show, gets a condition, comparison, sign, code or message wrong, or relies mainly on lines outside the cited span. Be strict about meaning, not about wording. Give a one-sentence reason either way."""
 
 
 def judge_rule(program: str, rule: dict) -> dict[str, dict]:
@@ -87,16 +101,18 @@ def judge_rule(program: str, rule: dict) -> dict[str, dict]:
     for part in ("given", "when", "then"):
         for i, c in enumerate(rule["scenario"][part]):
             cid = f"{part}[{i}]"
-            src = c.get("source") or {}
-            f = src.get("file") or f"{program}.cbl"
-            ln2 = list(src.get("lines") or [1])
-            a, b = (ln2 + ln2)[:2]
-            ls = lines_of(f)
-            ctx = []
-            for ln in range(max(1, a - 4), min(len(ls), b + 4) + 1):
-                mark = ">>" if a <= ln <= b else "  "
-                ctx.append(f"{mark}{ln:4d} {ls[ln - 1]}")
-            parts.append(f"### {cid}: {c['text']}\nfields={c.get('fields')} literals={c.get('literals')}\n{f}:\n" + "\n".join(ctx))
+            blocks = []
+            for src in clause_spans(c) or [{}]:
+                f = src.get("file") or f"{program}.cbl"
+                ln2 = list(src.get("lines") or [1])
+                a, b = (ln2 + ln2)[:2]
+                ls = lines_of(f)
+                ctx = []
+                for ln in range(max(1, a - 4), min(len(ls), b + 4) + 1):
+                    mark = ">>" if a <= ln <= b else "  "
+                    ctx.append(f"{mark}{ln:4d} {ls[ln - 1]}")
+                blocks.append(f"{f}:\n" + "\n".join(ctx))
+            parts.append(f"### {cid}: {c['text']}\nfields={c.get('fields')} literals={c.get('literals')}\n" + "\n".join(blocks))
     prompt = f"Rule {rule['id']}: {rule['title']}\n\n" + "\n\n".join(parts)
     out = run_agent("verifier", JUDGE_SYSTEM, prompt, schema=JUDGE_SCHEMA, effort="medium", max_tokens=32000)
     return {v["clause"]: v for v in out["verdicts"]}

@@ -19,10 +19,15 @@ CLAUSE = {
         "text": {"type": "string", "description": "Plain-English statement a policy owner can read."},
         "file": {"type": "string", "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"},
         "lines": {"type": "array", "items": {"type": "integer"}, "description": "[first, last] line numbers, inclusive"},
-        "fields": {"type": "array", "items": {"type": "string"}, "description": "COBOL data names this clause relies on; each must appear in the cited lines"},
-        "literals": {"type": "array", "items": {"type": "string"}, "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in the cited lines"},
+        "also": {"type": "array", "description": "Extra spans, only when the fact needs a second place (for example the statement in the program plus the field's PIC declaration in a copybook). At most 2; usually empty.",
+                 "items": {"type": "object",
+                           "properties": {"file": {"type": "string"},
+                                          "lines": {"type": "array", "items": {"type": "integer"}, "description": "[first, last] line numbers, inclusive"}},
+                           "required": ["file", "lines"], "additionalProperties": False}},
+        "fields": {"type": "array", "items": {"type": "string"}, "description": "COBOL data names this clause relies on; each must appear in one of the cited spans"},
+        "literals": {"type": "array", "items": {"type": "string"}, "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in one of the cited spans"},
     },
-    "required": ["text", "file", "lines", "fields", "literals"],
+    "required": ["text", "file", "lines", "also", "fields", "literals"],
     "additionalProperties": False,
 }
 RULE = {
@@ -50,7 +55,8 @@ SYSTEM = """You are the extractor in Ledger, a system that documents legacy COBO
 Write business rules as Given/When/Then scenarios in plain English that a policy owner can read and approve. Hard requirements:
 
 - Every clause cites the exact source lines it comes from (file plus [first, last] line numbers from the numbered listing; keep spans tight, normally 1-12 lines). If a statement cannot be sourced to specific lines, leave it out.
-- Every clause lists the COBOL data names ("fields") and literal values ("literals": codes, messages, constants, without quotes) it relies on. Each listed field and literal must literally appear in the cited lines; a checker will reject the clause otherwise. Cite a declaration line (for example a PIC clause in WORKING-STORAGE) when the clause depends on a field's size or precision.
+- When a fact needs a second place, add it under "also" (at most 2 extra spans, each with its own file and [first, last]). Typical case: the statement in the program that does something (a COMPUTE, a reference modification like (1:10), a MOVE) plus the field's PIC declaration in a copybook that fixes its size or precision. A clause is judged only on the lines it cites, so cite every line its claim depends on.
+- Every clause lists the COBOL data names ("fields") and literal values ("literals": codes, messages, constants, without quotes) it relies on. Each listed field and literal must literally appear in one of the cited spans; a checker will reject the clause otherwise. Cite a declaration line (for example a PIC clause in WORKING-STORAGE) when the clause depends on a field's size or precision.
 - Describe what the code actually does, not what it was probably meant to do. If the code has surprising behaviour (a later check overwriting an earlier result, a branch that can never run, arithmetic that truncates, a check that ignores something), state that behaviour precisely in the rule.
 - Separate business logic from file plumbing. Opening/closing files, file-status checks, and abend handling are plumbing; leave them out unless they change a business outcome. Balance and record updates (for example 2700-*, 2800-*, 1050-* paragraphs) are business logic: a port that skips them would produce different output files.
 - Be precise enough that a developer who never sees the COBOL could reproduce the outputs exactly: name the output fields set, the exact codes and message texts, the order of checks, signs and arithmetic (COBOL truncates toward zero unless ROUNDED is written), and which records are created versus updated.

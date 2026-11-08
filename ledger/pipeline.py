@@ -22,10 +22,9 @@ from .units import UNITS
 
 
 def _clause(c: dict) -> dict:
-    lines = list(c.get("lines") or [])
-    if len(lines) == 1:
-        lines = lines * 2
-    return {"text": c["text"], "source": {"file": c.get("file") or "", "lines": lines[:2]},
+    from .spans import norm_span
+    return {"text": c["text"], "source": norm_span(c),
+            "also": [norm_span(s) for s in (c.get("also") or [])],
             "fields": c.get("fields", []), "literals": c.get("literals", [])}
 
 
@@ -282,6 +281,7 @@ def json_dumps_short(files):
 def cmd_coverage(args):
     from .agents.common import parsed, lines_of
     from .cobol.layout import is_comment
+    from .spans import lines_in
     results = store.load(RESULTS, {})
     rules = store.load_rules()
     cov = {}
@@ -310,10 +310,8 @@ def cmd_coverage(args):
                 continue
             for part in ("given", "when", "then"):
                 for c in r["scenario"][part]:
-                    if c["source"]["file"] == p["file"] and len(c["source"]["lines"]) == 2:
-                        a, b = c["source"]["lines"]
-                        for ln in range(a, b + 1):
-                            cited.setdefault(ln, set()).add(r["id"])
+                    for ln in lines_in(c, p["file"]):
+                        cited.setdefault(ln, set()).add(r["id"])
         sample_exec = set(results.get("sample", {}).get(prog, {}).get("executed_lines", []))
         uncovered = [ln for ln in stmt_lines if ln not in cited and ln not in executed_by]
         para_of = {}

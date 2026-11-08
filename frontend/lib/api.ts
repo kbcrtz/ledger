@@ -23,6 +23,7 @@ export async function post<T>(path: string, body: unknown): Promise<T> {
 export type Clause = {
   text: string;
   source: { file: string; lines: number[] };
+  also?: { file: string; lines: number[] }[];
   fields: string[];
   literals: string[];
   edited?: boolean;

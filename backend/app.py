@@ -28,6 +28,7 @@ sys.path.insert(0, str(ROOT))
 from ledger import store  # noqa: E402
 from ledger.paths import DATA, CBL_DIR, CPY_DIR, GENERATED  # noqa: E402
 from ledger.integrity import cited_sha, port_sha  # noqa: E402
+from ledger.spans import clause_spans, lines_in  # noqa: E402
 
 app = FastAPI(title="Ledger")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -131,7 +132,7 @@ def impact(rule: dict, res: dict) -> dict:
     fields = set()
     for part in ("given", "when", "then"):
         for c in rule["scenario"][part]:
-            lines.append({"file": c["source"]["file"], "lines": c["source"]["lines"]})
+            lines.extend({"file": s["file"], "lines": s["lines"]} for s in clause_spans(c))
             fields |= set(c["fields"])
     prog_file = f"{rule['program']}.cbl"
     cited = {ln for l in lines if l["file"] == prog_file and len(l["lines"]) == 2 for ln in range(l["lines"][0], l["lines"][1] + 1)}
@@ -150,8 +151,7 @@ def impact(rule: dict, res: dict) -> dict:
             continue
         ofields = {f for part in ("given", "when", "then") for c in o["scenario"][part] for f in c["fields"]}
         olines = {ln for part in ("given", "when", "then") for c in o["scenario"][part]
-                  if c["source"]["file"] == prog_file and len(c["source"]["lines"]) == 2
-                  for ln in range(c["source"]["lines"][0], c["source"]["lines"][1] + 1)}
+                  for ln in lines_in(c, prog_file)}
         shared_lines = sorted(cited & olines)
         if shared_lines:
             others.append({"id": o["id"], "title": o["title"], "shared_lines": shared_lines,
