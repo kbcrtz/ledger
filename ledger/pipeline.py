@@ -33,6 +33,7 @@ def _rule_from_draft(rule_id: str, unit: dict, d: dict) -> dict:
         "id": rule_id, "title": d["title"], "program": unit["program"], "paragraph": d["paragraph"],
         "summary": d["summary"], "unit": unit["id"],
         "scenario": {k: [_clause(c) for c in d[k]] for k in ("given", "when", "then")},
+        "notes": d.get("notes", []),
         "status": "extracted", "status_history": [{"status": "extracted", "why": "drafted by extractor", "by": "extractor"}],
         "verification": {"attempts": []}, "port_function": None, "tests": [],
     }
@@ -61,6 +62,7 @@ def _verify_and_retry(rule: dict) -> dict:
         if fixed:
             rule.update({k: fixed[k] for k in ("title", "paragraph", "summary")})
             rule["scenario"] = {k: [_clause(c) for c in fixed[k]] for k in ("given", "when", "then")}
+            rule["notes"] = fixed.get("notes", [])
             rule["status_history"].append({"status": "extracted", "why": "retried after verifier rejection", "by": "extractor"})
             res = verify_rule(prog, rule, prior=prior)
             kept = sum(1 for c in res["clauses"] if c.get("reused"))

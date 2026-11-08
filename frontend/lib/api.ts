@@ -83,6 +83,7 @@ export type Impact = {
 };
 export type Rule = RuleSummary & {
   scenario: Record<Part, Clause[]>;
+  notes?: string[];
   status_history: { status: string; why: string; by: string }[];
   verification: { attempts: { passed: boolean; clauses: ClauseCheck[]; failures: unknown[] }[] };
   port_functions?: string[];

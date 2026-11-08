@@ -39,8 +39,10 @@ RULE = {
         "given": {"type": "array", "items": CLAUSE},
         "when": {"type": "array", "items": CLAUSE},
         "then": {"type": "array", "items": CLAUSE},
+        "notes": {"type": "array", "items": {"type": "string"},
+                  "description": "Observations for the human reviewer that no cited line can prove, such as something the code never checks or never resets. Not verified and not given to the port. Usually empty."},
     },
-    "required": ["title", "paragraph", "summary", "given", "when", "then"],
+    "required": ["title", "paragraph", "summary", "given", "when", "then", "notes"],
     "additionalProperties": False,
 }
 RULES_SCHEMA = {
@@ -61,6 +63,8 @@ Write business rules as Given/When/Then scenarios in plain English that a policy
 - Separate business logic from file plumbing. Opening/closing files, file-status checks, and abend handling are plumbing; leave them out unless they change a business outcome. Balance and record updates (for example 2700-*, 2800-*, 1050-* paragraphs) are business logic: a port that skips them would produce different output files.
 - Be precise enough that a developer who never sees the COBOL could reproduce the outputs exactly: name the output fields set, the exact codes and message texts, the order of checks, signs and arithmetic (COBOL truncates toward zero unless ROUNDED is written), and which records are created versus updated.
 - Keep each clause to one checkable fact. When a fact depends on a record layout, field size or precision, put it in its own clause that cites the declaration. Do not restate in one clause what another clause (or another part of the program) establishes.
+- Keep rules small: at most 8 clauses per rule. If a behaviour needs more, keep only the clauses that change the program's outputs.
+- Do not write clauses that claim something is absent or never happens ("never checks the active status", "the counter is never reset", "no other code reads it"). Cited lines cannot prove an absence. Put such observations in "notes" instead; notes are shown to the reviewer as unverified and are not given to the port.
 - Use the field names exactly as declared. Use the tools to read any other paragraph or field layout you need; do not guess line numbers.
 
 Return only rules for the unit you are given, at most the number requested, each one a distinct behaviour with an observable effect on the program's outputs."""
@@ -143,13 +147,14 @@ def extract_unit(unit: dict) -> list[dict]:
 
 REPAIR_SYSTEM = SYSTEM + """
 
-You are now repairing one rule whose clauses failed verification. For each failed clause, fix the citation (lines, fields, literals) or the wording so it is exactly supported by the cited code, or remove the clause if it cannot be sourced. Keep passing clauses unchanged. Return the corrected rule as a single-element "rules" array."""
+You are now repairing one rule whose clauses failed verification. For each failed clause, fix the citation (lines, fields, literals, extra spans under "also") or the wording so it is exactly supported by the cited code, move it to "notes" if it states an absence the code cannot show, or remove it if it cannot be sourced. Keep passing clauses exactly unchanged, character for character: unchanged clauses keep their verdict and are not re-checked. Return the corrected rule as a single-element "rules" array."""
 
 
 def repair_rule(unit: dict, rule: dict, failures: list[dict]) -> dict | None:
     prog = unit["program"]
     tools, impl = tools_for(prog)
-    body = {k: rule[k] for k in ("title", "paragraph", "summary")} | {k: rule["scenario"][k] for k in ("given", "when", "then")}
+    body = ({k: rule[k] for k in ("title", "paragraph", "summary")} | {k: rule["scenario"][k] for k in ("given", "when", "then")}
+            | {"notes": rule.get("notes", [])})
     prompt = (unit_prompt(unit) + "\n\nRule to repair:\n" + json.dumps(body, indent=1)
               + "\n\nVerifier failures:\n" + json.dumps(failures, indent=1))
     log.event(prog, "extractor", "retry", f"{rule['id']}: repairing {len(failures)} failed clause(s)")

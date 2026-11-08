@@ -103,6 +103,15 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
               </ol>
             </div>
           ))}
+          {rule.notes && rule.notes.length > 0 && (
+            <div className="mb-5">
+              <h2 className="font-serif text-[18px] font-semibold border-b border-ink pb-1">Reviewer notes</h2>
+              <p className="text-[12.5px] text-ink-soft mt-1">Not verified: no cited line can prove these. They are not given to the port.</p>
+              <ul className="mt-1.5 list-disc ml-5 text-[14.5px] leading-[1.5] grid gap-1">
+                {rule.notes.map((n, i) => <li key={i}>{n}</li>)}
+              </ul>
+            </div>
+          )}
           {attempts > 1 && <RetryNote rule={rule} />}
         </section>
 
