@@ -29,9 +29,6 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <Mark />
             <span className="text-[16px] font-semibold tracking-[-0.01em]">Legibol</span>
           </Link>
-          <span className="text-night-soft text-[16px]">/</span>
-          <span className="text-[15px] text-night-ink">aws-carddemo</span>
-          <span className="hidden md:inline text-[12px] text-night-soft border border-night-line rounded-full px-2 py-[1px] ml-1">COBOL batch, 2 programs</span>
           <button onClick={() => setLogOpen((v) => !v)}
             className="ml-auto btn !h-8 !text-[13.5px]">
             {logOpen ? "Hide pipeline log" : "Pipeline log"}
