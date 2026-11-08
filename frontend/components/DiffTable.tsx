@@ -14,7 +14,7 @@ export default function DiffTable({ diffs, total }: { diffs: Diff[]; total: numb
         <thead>
           <tr className="text-left text-ink-soft border-b border-rule">
             <th className="font-normal py-1 pr-4">File</th><th className="font-normal pr-4">Record</th>
-            <th className="font-normal pr-4">Field</th><th className="font-normal pr-4">Legacy COBOL</th><th className="font-normal">Python port</th>
+            <th className="font-normal pr-4">Field</th><th className="font-normal pr-4">Original COBOL</th><th className="font-normal">Python rebuild</th>
           </tr>
         </thead>
         <tbody>

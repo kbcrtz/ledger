@@ -58,6 +58,7 @@ export type RuleSummary = {
   id: string; title: string; program: string; paragraph: string; summary: string;
   status: string; status_why: string; pipeline_status: string;
   tests_passed: number; tests_total: number; port_function: string | null;
+  sourced?: boolean; signed_off?: boolean;
 };
 export type Edit = {
   by: string; note: string | null; at: string;

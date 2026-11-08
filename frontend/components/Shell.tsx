@@ -27,7 +27,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
-          <span className="ml-auto text-[13px] text-ink-soft hidden md:inline">CardDemo batch: CBTRN02C, CBACT04C</span>
+          <span className="ml-auto text-[13px] text-ink-soft hidden md:inline">AWS CardDemo, two batch COBOL programs</span>
           <button onClick={() => setLogOpen((v) => !v)}
             className="text-[13px] px-3 py-1 border border-rule rounded-sm hover:border-ink-soft">
             {logOpen ? "Hide pipeline log" : "Pipeline log"}

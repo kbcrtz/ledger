@@ -121,9 +121,17 @@ def list_rules():
     out = []
     for r in rules():
         v = rule_view(r, res)
-        out.append({k: v[k] for k in ("id", "title", "program", "paragraph", "summary", "status", "status_why",
-                                      "pipeline_status", "tests_passed", "tests_total", "port_function")})
+        row = {k: v[k] for k in ("id", "title", "program", "paragraph", "summary", "status", "status_why",
+                                 "pipeline_status", "tests_passed", "tests_total", "port_function")}
+        # Checkpoint flags for the UI's proof chain: sourced by the verifier, rebuilt in Python, signed off by a person.
+        row["sourced"] = sourced(r)
+        row["signed_off"] = (v.get("review") or {}).get("decision") == "approved" or v["status"] == "diverged"
+        out.append(row)
     return out
+
+
+def sourced(rule: dict) -> bool:
+    return any(h.get("by") == "verifier" and h.get("status") == "traced" for h in rule.get("status_history", []))
 
 
 def impact(rule: dict, res: dict) -> dict:
