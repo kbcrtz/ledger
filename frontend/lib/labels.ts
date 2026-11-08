@@ -27,7 +27,7 @@ export const STATUS_HELP: Record<string, string> = {
   flagged: "A check failed. A person should read this rule.",
   approved: "A person read the rule and signed off on it.",
   rejected: "A person read the rule and rejected it.",
-  diverged: "A person changed this rule on purpose and approved the new behaviour.",
+  diverged: "A person changed this rule on purpose and approved the new behavior.",
   stale: "The rule, its COBOL lines or its Python code changed since it was verified.",
   extracted: "Drafted by the AI, not checked yet.",
 };

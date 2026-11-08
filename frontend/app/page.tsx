@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { get, RuleSummary } from "@/lib/api";
 import { StatusMark } from "@/components/Status";
+import ProofChain, { stateOf } from "@/components/ProofChain";
+import { FINDINGS, PROGRAM_BLURB, PROGRAM_NAME, fileName, outcomeText, plural } from "@/lib/labels";
 
 type Summary = {
   totals: Record<string, number>;
@@ -12,14 +14,12 @@ type Summary = {
     files: Record<string, { legacy_records: number; port_records: number; differences: number }> }>;
 };
 
-const TOTALS = ["verified", "flagged", "approved", "diverged"] as const;
+const PROGRAMS = ["CBTRN02C", "CBACT04C"];
 
-export default function Catalog() {
+export default function Home() {
   const [rules, setRules] = useState<RuleSummary[] | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [program, setProgram] = useState("all");
-  const [status, setStatus] = useState("all");
 
   useEffect(() => {
     Promise.all([get<RuleSummary[]>("/api/rules"), get<Summary>("/api/summary")])
@@ -27,110 +27,118 @@ export default function Catalog() {
       .catch((e) => setError(String(e)));
   }, []);
 
-  const shown = useMemo(() => (rules ?? []).filter((r) =>
-    (program === "all" || r.program === program) && (status === "all" || r.status === status)), [rules, program, status]);
-  const statuses = useMemo(() => Array.from(new Set((rules ?? []).map((r) => r.status))).sort(), [rules]);
+  const byId = useMemo(() => Object.fromEntries((rules ?? []).map((r) => [r.id, r])), [rules]);
 
   if (error) return <Empty>The review API is not reachable ({error}). Start it with <code>uvicorn backend.app:app --port 8000</code>.</Empty>;
   if (!rules || !summary) return <Empty>Loading rules</Empty>;
   if (rules.length === 0) return <Empty>No rules yet. Run <code>python -m ledger.pipeline all</code> to extract and verify them.</Empty>;
 
-  return (
-    <div className="mx-auto max-w-[1180px] px-5 py-8">
-      <div className="flex items-end gap-10 flex-wrap">
-        <div>
-          <h1 className="font-serif text-[30px] leading-tight font-semibold">Business rules</h1>
-          <p className="text-ink-soft text-[15px] mt-1 max-w-[62ch]">
-            Extracted from two CardDemo batch programs. Each clause cites its COBOL lines; each rule is checked by
-            running the original program and a port written only from the rules.
-          </p>
-        </div>
-        <table className="ml-auto text-[14px]">
-          <tbody>
-            <tr className="double-rule">
-              {TOTALS.map((t) => (
-                <td key={t} className="px-4 pb-1 text-right">
-                  <div className="text-ink-soft capitalize">{t}</div>
-                  <div className="font-serif text-[26px] leading-none mt-1">{summary.totals[t] ?? 0}</div>
-                </td>
-              ))}
-              <td className="pl-6 pb-1 text-right">
-                <div className="text-ink-soft">Cases matching</div>
-                <div className="font-serif text-[26px] leading-none mt-1">{summary.cases.passed}<span className="text-ink-soft text-[18px]">/{summary.cases.total}</span></div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  const n = rules.length;
+  const sourced = rules.filter((r) => r.sourced).length;
+  const rebuilt = rules.filter((r) => r.port_function).length;
+  const tested = rules.filter((r) => r.tests_total > 0 && r.tests_passed === r.tests_total).length;
+  const signed = rules.filter((r) => r.signed_off).length;
+  const findings = FINDINGS.filter((f) => byId[f.rule]);
 
-      <section className="mt-6 border-t border-b border-rule py-3 overflow-x-auto">
-        <table className="text-[14px] w-full">
-          <caption className="text-left text-ink-soft text-[13px] pb-1">CardDemo&apos;s own sample data, run through the COBOL and the port (CBACT04C runs on the files CBTRN02C posted)</caption>
-          <tbody>
-            {Object.entries(summary.sample).map(([p, s]) => (
-              <tr key={p} className="align-baseline">
-                <td className="pr-6 py-0.5 font-medium whitespace-nowrap">{p}</td>
-                <td className={`pr-6 whitespace-nowrap ${s.match ? "text-verified" : "text-flagged"}`}>
-                  {s.match ? "legacy and port match" : `${s.difference_count} differing field${s.difference_count === 1 ? "" : "s"}`}
-                </td>
-                <td className="pr-6 text-ink-soft whitespace-nowrap">run outcome {s.outcome.legacy === s.outcome.port ? s.outcome.legacy : `${s.outcome.legacy} vs ${s.outcome.port}`}</td>
-                <td className="text-ink-soft">{Object.entries(s.files).map(([f, v]) => `${f} ${v.legacy_records}${v.differences ? ` (${v.differences} differing)` : ""}`).join(", ")}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  return (
+    <div className="mx-auto max-w-[1120px] px-5 pt-10 pb-16">
+      <section aria-label="What Ledger does">
+        <h1 className="font-serif text-[34px] leading-[1.15] font-semibold max-w-[24ch]">
+          What two old COBOL programs actually do, written down and checked
+        </h1>
+        <p className="mt-3 text-[16.5px] leading-relaxed text-ink-soft max-w-[68ch]">
+          Ledger read AWS CardDemo&apos;s batch programs and wrote their business rules in plain English.
+          Every rule then went through four checks, in order. A rule only counts as verified once it passes the first three;
+          the last one is a person&apos;s call.
+        </p>
+        <div className="mt-8">
+          <ProofChain steps={[
+            { title: "Sourced", value: `${sourced} of ${plural(n, "rule")}`, state: stateOf(sourced, n),
+              detail: "Every sentence points to the COBOL lines it came from, and a checker confirmed those lines say it." },
+            { title: "Rebuilt", value: `${rebuilt} of ${plural(n, "rule")}`, state: stateOf(rebuilt, n),
+              detail: "A separate AI wrote a Python version from the rules alone. It never saw the COBOL." },
+            { title: "Tested", value: `${summary.cases.passed} of ${plural(summary.cases.total, "test")} match`, state: stateOf(tested, n),
+              detail: "The original COBOL and the Python rebuild ran on the same inputs and produced the same outputs." },
+            { title: "Signed off", value: signed ? `${signed} of ${plural(n, "rule")}` : "Not yet", state: stateOf(signed, n),
+              detail: "A person reads each rule beside its code and approves or rejects it." },
+          ]} />
+        </div>
       </section>
 
-      <div className="mt-6 flex gap-6 text-[14px] items-center flex-wrap">
-        <Filter label="Program" value={program} set={setProgram} options={["all", "CBTRN02C", "CBACT04C"]} />
-        <Filter label="Status" value={status} set={setStatus} options={["all", ...statuses]} />
-        <span className="ml-auto text-ink-soft">{shown.length} of {rules.length} rules</span>
-      </div>
+      <section aria-label="Real data" className="mt-12 border-t border-ink pt-5">
+        <h2 className="font-serif text-[22px] font-semibold">Checked on CardDemo&apos;s own data</h2>
+        <p className="mt-1 text-[14.5px] text-ink-soft max-w-[70ch]">
+          The tests above were written from the rules. This data wasn&apos;t, so it can catch anything the rules missed.
+        </p>
+        <ul className="mt-4 grid md:grid-cols-2 gap-x-10 gap-y-4">
+          {PROGRAMS.filter((p) => summary.sample[p]).map((p) => {
+            const s = summary.sample[p];
+            return (
+              <li key={p} className="text-[15px] leading-relaxed">
+                <div className="font-medium">{PROGRAM_NAME[p]}</div>
+                <div className={s.match ? "text-verified" : "text-flagged"}>
+                  {s.match ? "✓ Identical results from the original and the rebuild" : `${plural(s.difference_count, "field")} differ between the original and the rebuild`}
+                </div>
+                <div className="text-ink-soft text-[14px]">
+                  {Object.entries(s.files).map(([f, v]) => `${v.legacy_records} ${fileName(f)}`).join(", ")}; {outcomeText(s.outcome.legacy)}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
-      <table className="w-full mt-3 text-[14.5px] border-collapse">
-        <thead>
-          <tr className="text-left text-ink-soft text-[13px] border-b border-ink">
-            <th className="py-2 pr-4 font-normal w-[150px]">Rule</th>
-            <th className="py-2 pr-4 font-normal">Behaviour</th>
-            <th className="py-2 pr-4 font-normal w-[110px]">Status</th>
-            <th className="py-2 pr-4 font-normal w-[90px] text-right">Cases</th>
-            <th className="py-2 font-normal w-[220px]">Port function</th>
-          </tr>
-        </thead>
-        <tbody>
-          {shown.map((r) => (
-            <tr key={r.id} className="border-b border-rule align-top hover:bg-sheet">
-              <td className="py-3 pr-4">
-                <Link href={`/rules/${r.id}`} className="font-medium hover:underline">{r.id.replace("BR-", "")}</Link>
-                <div className="text-[12.5px] text-ink-soft mt-0.5">{r.paragraph}</div>
-              </td>
-              <td className="py-3 pr-4">
-                <Link href={`/rules/${r.id}`} className="font-serif text-[16px] leading-snug hover:underline">{r.title}</Link>
-                <div className="text-[13px] text-ink-soft mt-1 max-w-[70ch]">{r.status_why}</div>
-              </td>
-              <td className="py-3 pr-4"><StatusMark status={r.status} /></td>
-              <td className="py-3 pr-4 text-right whitespace-nowrap">
-                {r.tests_total ? <span className={r.tests_passed === r.tests_total ? "text-verified" : "text-flagged"}>{r.tests_passed}/{r.tests_total}</span> : <span className="text-ink-soft">none</span>}
-              </td>
-              <td className="py-3 text-[13px] break-all">{r.port_function ?? <span className="text-ink-soft">not ported</span>}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+      {findings.length > 0 && (
+        <section aria-label="Findings" className="mt-12 border-t border-ink pt-5">
+          <h2 className="font-serif text-[22px] font-semibold">What it found in the code</h2>
+          <p className="mt-1 text-[14.5px] text-ink-soft max-w-[70ch]">
+            Behavior nobody wrote down. Each one is a sentence in a verified rule, so you can see the exact COBOL lines behind it.
+          </p>
+          <ul className="mt-3">
+            {findings.map((f) => (
+              <li key={f.rule + f.clause} className="border-b border-rule">
+                <Link href={`/rules/${f.rule}${f.clause ? `?clause=${encodeURIComponent(f.clause)}` : ""}`}
+                  className="group flex items-baseline gap-4 py-3 hover:bg-sheet px-1">
+                  <span className="font-serif text-[17.5px] leading-snug flex-1">{f.headline}</span>
+                  <span className="text-[13px] text-ink-soft group-hover:text-ink whitespace-nowrap">
+                    {PROGRAM_NAME[byId[f.rule].program]}: see the code
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-function Filter({ label, value, set, options }: { label: string; value: string; set: (v: string) => void; options: string[] }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-ink-soft">{label}</span>
-      {options.map((o) => (
-        <button key={o} onClick={() => set(o)}
-          className={`px-2 py-0.5 rounded-sm border ${value === o ? "border-ink bg-sheet" : "border-transparent text-ink-soft hover:text-ink"}`}>
-          {o === "all" ? "All" : o}
-        </button>
-      ))}
+      {PROGRAMS.map((p) => {
+        const rs = rules.filter((r) => r.program === p);
+        if (!rs.length) return null;
+        return (
+          <section key={p} aria-label={PROGRAM_NAME[p]} className="mt-12 border-t border-ink pt-5">
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <h2 className="font-serif text-[22px] font-semibold">{PROGRAM_NAME[p]}</h2>
+              <span className="text-[13px] text-ink-soft">{p}.cbl, {plural(rs.length, "rule")}</span>
+            </div>
+            <p className="mt-1 text-[14.5px] text-ink-soft max-w-[70ch]">{PROGRAM_BLURB[p]}</p>
+            <ul className="mt-3">
+              {rs.map((r) => (
+                <li key={r.id} className="border-b border-rule">
+                  <Link href={`/rules/${r.id}`} className="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_170px_150px] gap-x-6 gap-y-1 py-3 px-1 hover:bg-sheet items-baseline">
+                    <span>
+                      <span className="font-serif text-[17px] leading-snug block">{r.title}</span>
+                      <span className="text-[12.5px] text-ink-soft">{r.id.replace("BR-", "")}</span>
+                    </span>
+                    <span className={`text-[14px] hidden md:block ${r.tests_total && r.tests_passed === r.tests_total ? "text-verified" : r.tests_total ? "text-flagged" : "text-ink-soft"}`}>
+                      {r.tests_total ? `${r.tests_passed} of ${plural(r.tests_total, "test")} match` : "No tests yet"}
+                    </span>
+                    <span className="justify-self-end md:justify-self-start"><StatusMark status={r.status} /></span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }
