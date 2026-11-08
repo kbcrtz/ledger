@@ -10,9 +10,9 @@ export type Step = {
 };
 
 const RING: Record<Step["state"], string> = {
-  done: "bg-verified text-white border-verified",
-  partial: "bg-sheet text-flagged border-flagged",
-  todo: "bg-sheet text-ink-soft border-rule",
+  done: "bg-verified-fill text-white border-verified-fill",
+  partial: "bg-canvas text-flagged border-flagged",
+  todo: "bg-canvas text-ink-soft border-rule-strong",
 };
 
 export default function ProofChain({ steps, compact = false }: { steps: Step[]; compact?: boolean }) {
@@ -22,12 +22,12 @@ export default function ProofChain({ steps, compact = false }: { steps: Step[]; 
         <li key={s.title} className="relative pr-5">
           {/* connector to the next step */}
           {i < steps.length - 1 && (
-            <span aria-hidden className={`hidden ${compact ? "sm:block" : "md:block"} absolute top-[15px] left-[38px] right-0 h-px ${s.state === "done" ? "bg-verified" : "bg-rule"}`} />
+            <span aria-hidden className={`hidden ${compact ? "sm:block" : "md:block"} absolute top-[14px] left-[36px] right-0 h-px ${s.state === "done" ? "bg-verified-fill" : "bg-rule-strong"}`} />
           )}
-          <span aria-hidden className={`relative z-10 inline-flex h-[31px] w-[31px] items-center justify-center rounded-full border-2 text-[14px] font-semibold ${RING[s.state]}`}>
+          <span aria-hidden className={`relative z-10 inline-flex h-[28px] w-[28px] items-center justify-center rounded-full border-2 text-[13px] font-semibold ${RING[s.state]}`}>
             {s.state === "done" ? "✓" : i + 1}
           </span>
-          <div className={`mt-2.5 font-serif font-semibold leading-tight ${compact ? "text-[17px]" : "text-[20px]"}`}>{s.title}</div>
+          <div className={`mt-2.5 font-semibold leading-tight ${compact ? "text-[15px]" : "text-[18px]"}`}>{s.title}</div>
           <div className={`mt-1 ${compact ? "text-[14px]" : "text-[15.5px]"} ${s.state === "done" ? "text-verified" : s.state === "partial" ? "text-flagged" : "text-ink-soft"}`}>
             {s.href ? <a href={s.href} className="underline underline-offset-2 decoration-rule hover:decoration-current">{s.value}</a> : s.value}
           </div>

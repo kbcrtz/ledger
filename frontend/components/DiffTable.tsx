@@ -22,9 +22,9 @@ export default function DiffTable({ diffs, total }: { diffs: Diff[]; total: numb
             <tr key={i} className="border-b border-rule/60 align-top">
               <td className="py-1 pr-4">{d.file}</td>
               <td className="pr-4 text-ink-soft">{d.key ?? (d.record ?? "")}</td>
-              <td className="pr-4 font-medium">{d.field}</td>
-              <td className="pr-4 whitespace-pre-wrap">{show(d.legacy)}</td>
-              <td className="whitespace-pre-wrap text-rejected">{show(d.port)}</td>
+              <td className="pr-4 font-mono text-[12.5px]">{d.field}</td>
+              <td className="pr-4 whitespace-pre-wrap font-mono text-[12.5px]">{show(d.legacy)}</td>
+              <td className="whitespace-pre-wrap text-rejected font-mono text-[12.5px]">{show(d.port)}</td>
             </tr>
           ))}
         </tbody>
