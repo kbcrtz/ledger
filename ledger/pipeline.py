@@ -1,4 +1,4 @@
-"""Ledger pipeline CLI.
+"""Legibol pipeline CLI.
 
   python -m ledger.pipeline parse        # deterministic parser -> data/parsed/
   python -m ledger.pipeline extract      # extractor + verifier -> data/rules.json

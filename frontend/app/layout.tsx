@@ -9,7 +9,7 @@ const sans = Geist({ variable: "--font-geist", subsets: ["latin"], weight: ["400
 const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], weight: ["400", "500"] });
 
 export const metadata: Metadata = {
-  title: "Ledger",
+  title: "Legibol",
   description: "CardDemo business rules, traced to source and verified against the running COBOL.",
 };
 

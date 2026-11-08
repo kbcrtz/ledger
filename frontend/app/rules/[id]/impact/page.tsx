@@ -63,7 +63,7 @@ export default function Impact({ params }: { params: Promise<{ id: string }> }) 
         <StatusMark status={rule.status} large />
       </div>
       <p className="text-[15px] mt-1.5 max-w-[80ch]">{rule.title}</p>
-      <p className="text-[14px] text-ink-soft mt-1 max-w-[80ch]">Modernizing means some behavior should change on purpose. Edit the rule, and Ledger shows what that touches, rebuilds the Python code, and re-runs every test so a person can approve the differences.</p>
+      <p className="text-[14px] text-ink-soft mt-1 max-w-[80ch]">Modernizing means some behavior should change on purpose. Edit the rule, and Legibol shows what that touches, rebuilds the Python code, and re-runs every test so a person can approve the differences.</p>
 
       <div className="mt-6 box px-5 py-5">
         <ProofChain compact steps={[

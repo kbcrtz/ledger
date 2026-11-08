@@ -1,4 +1,4 @@
-"""Filesystem locations used across Ledger."""
+"""Filesystem locations used across Legibol."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent

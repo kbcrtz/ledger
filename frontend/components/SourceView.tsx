@@ -29,7 +29,7 @@ function registerCobol(monaco: Monaco) {
       ],
     },
   });
-  // GitHub dark syntax colors on Ledger's box surface.
+  // GitHub dark syntax colors on Legibol's box surface.
   monaco.editor.defineTheme("ledger-paper", {
     base: "vs-dark",
     inherit: true,

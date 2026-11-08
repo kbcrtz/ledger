@@ -63,7 +63,7 @@ export function plural(n: number, one: string, many = `${one}s`) {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-// Things Ledger found in the code. Each points at the rule sentence that states it;
+// Things Legibol found in the code. Each points at the rule sentence that states it;
 // the sentence itself (with its cited lines) is the evidence.
 export const FINDINGS: { rule: string; clause: string; headline: string }[] = [
   { rule: "BR-CBACT04C-002", clause: "then[3]", headline: "The last account in the file never gets its interest added." },

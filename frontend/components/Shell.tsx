@@ -25,9 +25,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col">
       <header className="bg-night text-night-ink">
         <div className="mx-auto max-w-[1600px] px-6 h-14 flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2.5" aria-label="Ledger home">
+          <Link href="/" className="flex items-center gap-2.5" aria-label="Legibol home">
             <Mark />
-            <span className="text-[16px] font-semibold tracking-[-0.01em]">Ledger</span>
+            <span className="text-[16px] font-semibold tracking-[-0.01em]">Legibol</span>
           </Link>
           <span className="text-night-soft text-[16px]">/</span>
           <span className="text-[15px] text-night-ink">aws-carddemo</span>
@@ -58,7 +58,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Ledger mark: three ruled lines with a tick, a ledger page that has been checked.
+// Legibol mark: three ruled lines with a tick, a ledger page that has been checked.
 function Mark() {
   return (
     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden>

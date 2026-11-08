@@ -1,4 +1,4 @@
-"""Ledger review API (FastAPI).
+"""Legibol review API (FastAPI).
 
 Pipeline outputs (data/rules.json, tests.json, results.json, coverage.json, port.json,
 pipeline_log.jsonl) are read-only here. Human decisions and rule edits are stored in
@@ -30,7 +30,7 @@ from ledger.paths import DATA, CBL_DIR, CPY_DIR, GENERATED  # noqa: E402
 from ledger.integrity import cited_sha, port_sha  # noqa: E402
 from ledger.spans import clause_spans, lines_in  # noqa: E402
 
-app = FastAPI(title="Ledger")
+app = FastAPI(title="Legibol")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 REVIEW = DATA / "review"
 _lock = threading.Lock()

@@ -1,10 +1,10 @@
-# Ledger
+# Legibol
 
-Ledger reads legacy COBOL, writes its business rules in plain English, and proves them, by citing every line and by rebuilding the program from the rules alone and diffing it against the original.
+Legibol reads legacy COBOL, writes its business rules in plain English, and proves them, by citing every line and by rebuilding the program from the rules alone and diffing it against the original.
 
 ## Why it matters
 
-Ledger extracts business rules from the legacy code, and every clause cites the exact
+Legibol extracts business rules from the legacy code, and every clause cites the exact
 source lines it came from. Each rule is then checked against the unchanged legacy program:
 a Python port written from the rules alone must produce the same outputs. A named reviewer
 can then approve or reject each rule, with a note, in the review UI.
@@ -14,7 +14,7 @@ can then approve or reject each rule, with a note, in the review UI.
 
 ## How it works
 
-Ledger runs on two AWS CardDemo batch COBOL programs: **CBTRN02C** (daily transaction
+Legibol runs on two AWS CardDemo batch COBOL programs: **CBTRN02C** (daily transaction
 posting) and **CBACT04C** (interest calculation).
 
 1. **Parse** (code). A deterministic parser reads divisions, paragraphs, the PERFORM graph
@@ -95,7 +95,7 @@ No API key is needed for this. On the committed cache this makes 75 cache hits a
 Prerequisites: Docker, Python 3.11+ (built with 3.13), Node 20+ (built with 22), macOS or Linux.
 
 ```bash
-git clone https://github.com/kbcrtz/ledger && cd ledger
+git clone https://github.com/kbcrtz/legibol && cd legibol
 
 # CardDemo is gitignored: clone it into vendor/carddemo (built against commit 59cc6c2, 2025-10-16)
 git clone https://github.com/aws-samples/aws-mainframe-modernization-carddemo vendor/carddemo

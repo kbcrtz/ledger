@@ -1,4 +1,4 @@
-"""Claude client for Ledger's agents: plain Python, manual tool loop, disk cache.
+"""Claude client for Legibol's agents: plain Python, manual tool loop, disk cache.
 
 Every Messages API request is cached under cache/llm/<agent>/<sha256 of request>.json.
 A tool loop is deterministic on replay because each turn's request includes the

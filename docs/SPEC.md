@@ -1,10 +1,10 @@
-# Ledger: CardDemo Rule Extraction & Verification Spec
+# Legibol: CardDemo Rule Extraction & Verification Spec
 
 Nov 7, 2026 · @Kobe
 
 ## Overview
 
-Ledger reads the AWS CardDemo COBOL app, extracts its business rules as plain-English Given/When/Then specs traced to exact source lines, and checks that a modern Python port behaves identically by running both on the same inputs.
+Legibol reads the AWS CardDemo COBOL app, extracts its business rules as plain-English Given/When/Then specs traced to exact source lines, and checks that a modern Python port behaves identically by running both on the same inputs.
 
 **Problem.** In legacy systems the code is the only accurate spec, the people who wrote it are gone, and rewrites stall because no one can show the new system matches the old one.
 
@@ -65,7 +65,7 @@ CardDemo's sample data only triggers reason 102. Reasons 100, 101, 103 and the 1
 
 Four agents sit between two deterministic ends: a parser that structures the COBOL and a harness that runs it, so every LLM claim is checked by something that is not an LLM.
 
-&#91;embedded content: Ledger pipeline · 4 agents, 1 deterministic parser, 1 harness\]
+&#91;embedded content: Legibol pipeline · 4 agents, 1 deterministic parser, 1 harness\]
 
 Rules flow down from the source. The verifier sends uncited clauses back for one retry; only `traced` rules reach the port, the tests and the reviewer.
 
@@ -198,7 +198,7 @@ Any organization still running decades-old core systems, where an error costs mo
 
 The judges' first question will be how this differs from "Claude, turn this COBOL into Python."
 
-| "Claude, translate this" | Ledger |
+| "Claude, translate this" | Legibol |
 | --- | --- |
 | Produces code and nothing to check it against | Produces code plus evidence: every rule tested against the running original |
 | Copies bugs silently; CBACT04C's last-account bug would come straight across | Surfaces the bug as a rule a human can read, then lets them keep or fix it |
@@ -207,7 +207,7 @@ The judges' first question will be how this differs from "Claude, turn this COBO
 | Change one thing and you don't know what else broke | Change a rule and see every line, test and function affected |
 | "The model wrote it" | A named person approved every rule and every intentional change |
 
-**Say:** "Translation moves the mystery to a new language. Ledger writes down what the system does, shows it's right, and lets a human decide what to change."
+**Say:** "Translation moves the mystery to a new language. Legibol writes down what the system does, shows it's right, and lets a human decide what to change."
 
 **For a technical judge:** "If you ask an AI to translate, the only test is whether you trust the AI. We write the new code without the old code, so the only way it can match is if the rules are right."
 
@@ -228,7 +228,7 @@ The demo doesn't need to be live. Record the three moments that make the case (6
 | Section | Time | Content |
 | --- | --- | --- |
 | Problem | ~15s | Medicare made $28.8B in improper payments last year, through claims systems built on decades-old code. Rewrites stall because no one can show the new system matches. |
-| What Ledger does | ~20s | Reads COBOL, writes plain-English rules traced to the line, rebuilds from the rules alone, and checks the rebuild against the original |
+| What Legibol does | ~20s | Reads COBOL, writes plain-English rules traced to the line, rebuilds from the rules alone, and checks the rebuild against the original |
 | Recorded demo | 60 to 75s | The three moments above |
 | Why not just translate | ~30s | The differentiator line and table above |
 | Who needs this | ~20s | Banking, insurance, government, travel, manufacturing |

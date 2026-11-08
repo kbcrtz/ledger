@@ -59,14 +59,14 @@ export default function Home() {
 
   return (
     <>
-      <section aria-label="What Ledger does" className="dot-grid border-b border-rule">
+      <section aria-label="What Legibol does" className="dot-grid border-b border-rule">
         <div className="mx-auto max-w-[1600px] px-6 pt-12 pb-10">
           <h1 className="text-[40px] leading-[1.06] font-semibold tracking-[-0.03em]">
             <span className="block text-[#8e8784]">What the old code actually does,</span>
             <span className="block">written down and checked against it.</span>
           </h1>
           <p className="mt-4 text-[16px] leading-relaxed text-ink-soft max-w-[68ch]">
-            Ledger read two of AWS CardDemo&apos;s COBOL batch programs, wrote their business rules in plain English,
+            Legibol read two of AWS CardDemo&apos;s COBOL batch programs, wrote their business rules in plain English,
             and checked every rule against the running original.
           </p>
         </div>

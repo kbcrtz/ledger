@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Ledger tokens, dark. Structure borrows GitHub's (boxes, header bars, tabs, checks);
+/* Legibol tokens, dark. Structure borrows GitHub's (boxes, header bars, tabs, checks);
    palette borrows 8090's dark "linen" surfaces and azure accent, with GitHub-dark state colors. */
 @theme {
   /* surfaces */
