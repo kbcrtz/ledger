@@ -5,9 +5,12 @@ import { get, post, Rule, Clause, Part, CaseResult, ClauseCheck } from "@/lib/ap
 import SourceView from "@/components/SourceView";
 import { StatusMark, Tick } from "@/components/Status";
 import DiffTable from "@/components/DiffTable";
+import ProofChain, { stateOf } from "@/components/ProofChain";
+import { PROGRAM_NAME, fileName, outcomeText, plural } from "@/lib/labels";
 
 const PARTS: Part[] = ["given", "when", "then"];
 const PART_LABEL: Record<Part, string> = { given: "Given", when: "When", then: "Then" };
+const PART_HINT: Record<Part, string> = { given: "the starting situation", when: "what triggers the rule", then: "what the program does" };
 
 export default function RuleDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -19,6 +22,13 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
   const [file, setFile] = useState<string | null>(null);
 
   useEffect(() => { get<Rule>(`/api/rules/${id}`).then(setRule).catch((e) => setError(String(e))); }, [id]);
+
+  // Deep link from the home page's findings: /rules/<id>?clause=then[3] opens that sentence.
+  useEffect(() => {
+    if (!rule) return;
+    const m = /^(given|when|then)\[(\d+)\]$/.exec(new URLSearchParams(window.location.search).get("clause") ?? "");
+    if (m && rule.scenario[m[1] as Part][Number(m[2])]) setActive({ part: m[1] as Part, index: Number(m[2]) });
+  }, [rule]);
 
   const checks = useMemo(() => {
     const last = rule?.verification.attempts.at(-1);
@@ -37,35 +47,51 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
   const shownFile = file ?? activeClause?.source.file ?? progFile;
   const execCase = execFor ? rule.cases.find((c) => c.id === execFor) : null;
   const attempts = rule.verification.attempts.length;
+  const allClauses = PARTS.flatMap((p) => rule.scenario[p].map((_, i) => `${p}[${i}]`));
+  const passedClauses = allClauses.filter((k) => checks[k]?.passed).length;
+  const sourced = rule.status_history.some((h) => h.by === "verifier" && h.status === "traced");
+  const fns = rule.port_functions?.length ? rule.port_functions : rule.port_function ? [rule.port_function] : [];
+  const signedOff = rule.review.decision === "approved" || rule.status === "diverged";
 
   return (
     <div className="mx-auto max-w-[1500px] px-5 py-6">
-      <div className="text-[13px] text-ink-soft"><Link href="/" className="hover:text-ink">Rules</Link> / {rule.program}</div>
-      <div className="mt-2 flex items-start gap-4 flex-wrap">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-[15px] font-medium">{rule.id}</span>
+      <div className="text-[13px] text-ink-soft"><Link href="/" className="hover:text-ink underline-offset-2 hover:underline">All rules</Link> / {PROGRAM_NAME[rule.program] ?? rule.program}</div>
+      <div className="mt-3">
+        <div className="min-w-0">
+          <h1 className="font-serif text-[30px] leading-[1.18] font-semibold max-w-[40ch]">{rule.title}</h1>
+          <p className="text-[16px] leading-relaxed mt-2.5 max-w-[72ch]">{rule.summary}</p>
+          <div className="mt-3 flex items-center gap-3 flex-wrap text-[13px] text-ink-soft">
             <StatusMark status={rule.status} large />
-            {rule.status !== rule.pipeline_status && <span className="text-[13px] text-ink-soft">pipeline status: {rule.pipeline_status}</span>}
+            <span>Rule {rule.id.replace("BR-", "")}, from paragraph {rule.paragraph} of {rule.program}.cbl</span>
+            <Link href={`/rules/${rule.id}/impact`} className="text-traced underline underline-offset-2 decoration-rule hover:decoration-current">Change this rule</Link>
           </div>
-          <h1 className="font-serif text-[28px] leading-tight font-semibold mt-2 max-w-[48ch]">{rule.title}</h1>
-          <p className="text-[14px] text-ink-soft mt-1.5 max-w-[90ch]">{rule.status_why}</p>
         </div>
-        <dl className="grid grid-cols-[auto_auto] gap-x-4 gap-y-1 text-[13.5px] border-l border-rule pl-4">
-          <dt className="text-ink-soft">Paragraph</dt><dd>{rule.paragraph}</dd>
-          <dt className="text-ink-soft">Port function</dt><dd className="break-all">{rule.port_functions?.join(", ") || rule.port_function || "not ported"}</dd>
-          <dt className="text-ink-soft">Cases</dt>
-          <dd>{rule.tests_total ? <span className={rule.tests_passed === rule.tests_total ? "text-verified" : "text-flagged"}>{rule.tests_passed} of {rule.tests_total} match legacy</span> : "none (only traced rules get tests)"}</dd>
-          <dt className="text-ink-soft">Citations</dt><dd>{attempts === 0 ? "not checked" : attempts === 1 ? "checked once" : "checked, then re-checked after one retry"}</dd>
-          <dd className="col-span-2 pt-1"><Link href={`/rules/${rule.id}/impact`} className="text-traced hover:underline">Edit this rule and see its impact</Link></dd>
-        </dl>
+        <div className="mt-6 border-t border-b border-rule py-5">
+          <ProofChain compact steps={[
+            { title: "Sourced", state: sourced ? "done" : "partial",
+              value: `${passedClauses} of ${plural(allClauses.length, "sentence")} checked`,
+              detail: attempts > 1 ? "Passed after one retry. Click a sentence to see why." : "Click a sentence to see why it passed." },
+            { title: "Rebuilt", state: fns.length ? "done" : "todo",
+              value: fns.length ? "In Python" : "Not yet", detail: fns.length ? `As ${fns.join(", ")}, written without seeing the COBOL.` : "Only sourced rules are rebuilt." },
+            { title: "Tested", state: rule.tests_total ? stateOf(rule.tests_passed, rule.tests_total) : "todo", href: "#tests",
+              value: rule.tests_total ? `${rule.tests_passed} of ${plural(rule.tests_total, "test")} match` : "No tests yet",
+              detail: "Original COBOL and Python rebuild, same inputs." },
+            { title: "Signed off", state: signedOff ? "done" : "todo", href: "#review",
+              value: signedOff ? `By ${rule.review.by ?? rule.edit?.divergence?.by}` : "Not yet",
+              detail: signedOff ? "A person approved this rule." : "Read the rule, then approve or reject it below." },
+          ]} />
+        </div>
       </div>
 
-      <div className="mt-6 grid lg:grid-cols-[minmax(0,44fr)_minmax(0,56fr)] gap-6">
-        <section aria-label="Scenario" className="min-w-0">
+      <div className="mt-8 grid lg:grid-cols-[minmax(0,44fr)_minmax(0,56fr)] gap-6">
+        <section aria-label="What the rule says" className="min-w-0">
+          <div className="flex items-baseline gap-3 flex-wrap mb-3">
+            <h2 className="font-serif text-[22px] font-semibold">What the rule says</h2>
+            <span className="text-[13px] text-ink-soft">Click a sentence to see the COBOL it comes from.</span>
+          </div>
           {PARTS.map((part) => (
             <div key={part} className="mb-5">
-              <h2 className="font-serif text-[18px] font-semibold border-b border-ink pb-1">{PART_LABEL[part]}</h2>
+              <h3 className="border-b border-ink pb-1 flex items-baseline gap-2"><span className="font-serif text-[18px] font-semibold">{PART_LABEL[part]}</span><span className="text-[13px] text-ink-soft">{PART_HINT[part]}</span></h3>
               <ol>
                 {rule.scenario[part].map((c, i) => {
                   const key = `${part}[${i}]`;
@@ -76,25 +102,24 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
                       <button onClick={() => { setActive(isActive ? null : { part, index: i }); setFile(null); }}
                         className="w-full text-left grid grid-cols-[22px_1fr] gap-2 py-2.5 px-1 hover:bg-sheet">
                         <span className="pt-[3px] text-[15px]">
-                          <Tick ok={chk ? chk.passed : null} title={chk ? (chk.passed ? "citation and meaning verified" : "failed verification") : "not verified"} />
+                          <Tick ok={chk ? chk.passed : null} title={chk ? (chk.passed ? "Backed by the cited COBOL lines" : "Not backed by the cited lines") : "Not checked"} />
                         </span>
                         <span>
                           <span className="font-serif text-[16px] leading-[1.55] block">{c.text}</span>
                           <span className="text-[12.5px] text-ink-soft mt-1 flex flex-wrap gap-x-3">
                             {[c.source, ...(c.also ?? [])].map((s, k) => (
-                              <span key={k} className="text-ink underline decoration-rule underline-offset-2">{s.file} {s.lines[0]}{s.lines[1] !== s.lines[0] ? `–${s.lines[1]}` : ""}</span>
+                              <span key={k}>{s.file} {s.lines[1] !== s.lines[0] ? `lines ${s.lines[0]}–${s.lines[1]}` : `line ${s.lines[0]}`}</span>
                             ))}
-                            {c.fields.length > 0 && <span>{c.fields.join(", ")}</span>}
-                            {c.literals.length > 0 && <span>{c.literals.map((l) => `'${l}'`).join(", ")}</span>}
                           </span>
                         </span>
                       </button>
                       {isActive && chk && (
-                        <div className="ml-[30px] mb-3 mr-2 text-[13px] grid gap-1">
-                          <div><Tick ok={chk.deterministic.passed} /> Cited lines contain every listed field and literal
+                        <div className="ml-[30px] mb-3 mr-2 text-[13.5px] grid gap-1.5 border-l-2 border-marker-strong pl-3">
+                          <div className="text-ink-soft">Why this sentence counts as sourced:</div>
+                          <div><Tick ok={chk.deterministic.passed} /> The highlighted lines contain {[...c.fields, ...c.literals.map((l) => `'${l}'`)].join(", ") || "what it names"}.
                             {chk.deterministic.errors.length > 0 && <ul className="text-rejected ml-4 list-disc">{chk.deterministic.errors.map((e) => <li key={e}>{e}</li>)}</ul>}
                           </div>
-                          {chk.judge && <div><Tick ok={chk.judge.supported} /> Judge: {chk.judge.reason}</div>}
+                          {chk.judge && <div><Tick ok={chk.judge.supported} /> An AI reviewer read only those lines and agreed: {chk.judge.reason}</div>}
                         </div>
                       )}
                     </li>
@@ -105,8 +130,8 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
           ))}
           {rule.notes && rule.notes.length > 0 && (
             <div className="mb-5">
-              <h2 className="font-serif text-[18px] font-semibold border-b border-ink pb-1">Reviewer notes</h2>
-              <p className="text-[12.5px] text-ink-soft mt-1">Not verified: no cited line can prove these. They are not given to the port.</p>
+              <h3 className="font-serif text-[18px] font-semibold border-b border-ink pb-1">Notes for the reviewer</h3>
+              <p className="text-[12.5px] text-ink-soft mt-1">Observations no single line can prove, so they are not checked and not used to build the Python version.</p>
               <ul className="mt-1.5 list-disc ml-5 text-[14.5px] leading-[1.5] grid gap-1">
                 {rule.notes.map((n, i) => <li key={i}>{n}</li>)}
               </ul>
@@ -123,7 +148,7 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
                   className={`px-3 py-1.5 border-b-2 -mb-px ${shownFile === f ? "border-ink text-ink" : "border-transparent text-ink-soft hover:text-ink"}`}>{f}</button>
               ))}
               <span className="ml-auto text-ink-soft pr-1">
-                {execCase ? <>Green ticks in the gutter: lines {execCase.id} executed <button className="underline ml-1" onClick={() => setExecFor(null)}>clear</button></> : "Highlighted: lines this rule cites"}
+                {execCase ? <>Green marks: lines test {execCase.id} ran <button className="underline ml-1" onClick={() => setExecFor(null)}>clear</button></> : <><span className="inline-block w-3 h-3 align-[-1px] bg-marker mr-1.5 border border-marker-strong" />lines this rule cites</>}
               </span>
             </div>
             <div className="h-[68vh] border border-t-0 border-rule bg-sheet">
@@ -134,12 +159,12 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
         </section>
       </div>
 
-      <section className="mt-8" aria-label="Test cases">
-        <div className="flex items-baseline gap-4 border-b border-ink pb-1">
-          <h2 className="font-serif text-[20px] font-semibold">Legacy against port</h2>
-          <span className="text-[13.5px] text-ink-soft">Each case runs the unchanged COBOL under GnuCOBOL and the Python port on the same input files. Timestamps written from the clock are masked.</span>
+      <section className="mt-10 scroll-mt-4" aria-label="Tests" id="tests">
+        <div className="border-b border-ink pb-1.5">
+          <h2 className="font-serif text-[22px] font-semibold">Tests: original COBOL against the Python rebuild</h2>
+          <p className="text-[14px] text-ink-soft mt-0.5 max-w-[90ch]">Each test feeds the same input files to the unchanged COBOL and to the Python version built from the rules, then compares every output field. Clock timestamps are ignored.</p>
         </div>
-        {rule.cases.length === 0 && <p className="py-4 text-[14px] text-ink-soft">No generated cases. Tests are written only for rules whose every clause passed verification.</p>}
+        {rule.cases.length === 0 && <p className="py-4 text-[14px] text-ink-soft">No tests yet. Tests are written only for rules whose sentences all passed the source check.</p>}
         <ul>
           {rule.cases.map((c) => (
             <CaseRow key={c.id} c={c} open={openCase === c.id} onToggle={() => setOpenCase(openCase === c.id ? null : c.id)}
@@ -149,14 +174,14 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
         {rule.sample && (
           <div className="mt-4 text-[14px] border border-rule bg-sheet px-4 py-3">
             <div className="flex gap-3 items-baseline flex-wrap">
-              <span className="font-medium">CardDemo sample data, whole program</span>
+              <span className="font-medium">CardDemo&apos;s own data, whole program</span>
               <span className={rule.sample.match ? "text-verified" : "text-flagged"}>
-                {rule.sample.match ? "legacy and port match" : `${rule.sample.difference_count} difference${rule.sample.difference_count === 1 ? "" : "s"}`}
+                {rule.sample.match ? "✓ Identical results" : `${plural(rule.sample.difference_count, "field")} differ`}
               </span>
-              <span className="text-ink-soft">{Object.entries(rule.sample.files).map(([f, v]) => `${f}: ${v.legacy_records} records, ${v.differences} differing`).join("; ")}</span>
+              <span className="text-ink-soft">{Object.entries(rule.sample.files).map(([f, v]) => `${v.legacy_records} ${fileName(f)}`).join(", ")}</span>
             </div>
             {!rule.sample.match && <div className="mt-2"><DiffTable diffs={rule.sample.differences.slice(0, 12)} total={rule.sample.difference_count} /></div>}
-            <p className="text-[12.5px] text-ink-soft mt-2">Not generated from the rules, so it can expose behaviour the extractor missed. Reported per program, not counted toward a single rule.</p>
+            <p className="text-[12.5px] text-ink-soft mt-2">This data was not written from the rules, so it can catch behavior they missed. It covers the whole program, not just this rule.</p>
           </div>
         )}
       </section>
@@ -191,26 +216,26 @@ function CaseRow({ c, open, onToggle, onShowLines }: { c: CaseResult; open: bool
         <span className="text-[13.5px] font-medium">{c.id}</span>
         <span className="text-[14.5px]">{c.title}<span className="block text-[12.5px] text-ink-soft">{c.condition}</span></span>
         <span className={`text-[13px] ${c.match ? "text-verified" : "text-rejected"}`}>
-          {c.match ? "match" : `${c.difference_count} differing field${c.difference_count === 1 ? "" : "s"}`}
+          {c.match ? "Same result" : `${plural(c.difference_count, "field")} differ`}
         </span>
       </button>
       {open && (
         <div className="pl-[34px] pr-2 pb-4 grid gap-3 text-[13.5px]">
-          <p className="text-ink-soft">Rule expectation (a note, not the oracle): {c.expectation}</p>
+          <p className="text-ink-soft">What the test writer expected (for reference only; the comparison decides pass or fail): {c.expectation}</p>
           <table className="text-[13px] w-full max-w-[640px]">
-            <thead><tr className="text-ink-soft text-left border-b border-rule"><th className="font-normal py-1">Output</th><th className="font-normal">Legacy COBOL</th><th className="font-normal">Python port</th><th className="font-normal">Differing fields</th></tr></thead>
+            <thead><tr className="text-ink-soft text-left border-b border-rule"><th className="font-normal py-1">Output</th><th className="font-normal">Original COBOL</th><th className="font-normal">Python rebuild</th><th className="font-normal">Differing fields</th></tr></thead>
             <tbody>
-              <tr className="border-b border-rule/60"><td className="py-1">Run outcome</td><td>{c.outcome.legacy}</td><td>{c.outcome.port}</td><td>{c.outcome.legacy === c.outcome.port ? "" : <span className="text-rejected">differs</span>}</td></tr>
+              <tr className="border-b border-rule/60"><td className="py-1">How the run ended</td><td>{outcomeText(c.outcome.legacy)}</td><td>{outcomeText(c.outcome.port)}</td><td>{c.outcome.legacy === c.outcome.port ? "" : <span className="text-rejected">differs</span>}</td></tr>
               {Object.entries(c.files).map(([f, v]) => (
-                <tr key={f} className="border-b border-rule/60"><td className="py-1">{f}</td><td>{v.legacy_records} records</td><td>{v.port_records} records</td><td className={v.differences ? "text-rejected" : "text-ink-soft"}>{v.differences || "none"}{v.masked.length ? <span className="text-ink-soft"> (masked {v.masked.join(", ")})</span> : null}</td></tr>
+                <tr key={f} className="border-b border-rule/60"><td className="py-1">{fileName(f)}</td><td>{v.legacy_records} records</td><td>{v.port_records} records</td><td className={v.differences ? "text-rejected" : "text-ink-soft"}>{v.differences || "none"}{v.masked.length ? <span className="text-ink-soft"> (timestamps ignored)</span> : null}</td></tr>
               ))}
             </tbody>
           </table>
           {!c.match && <DiffTable diffs={c.differences} total={c.difference_count} />}
           <OutputPeek c={c} />
           <div className="flex gap-4">
-            <button onClick={onShowLines} className="text-traced hover:underline">Show the {c.executed_lines.length} COBOL lines this case executed</button>
-            <details><summary className="cursor-pointer text-traced">Input fixture</summary>
+            <button onClick={onShowLines} className="text-traced hover:underline">Show the {c.executed_lines.length} COBOL lines this test ran</button>
+            <details><summary className="cursor-pointer text-traced">Input records</summary>
               <pre className="mt-2 text-[12px] bg-sheet border border-rule p-2 overflow-x-auto max-h-[300px]">{JSON.stringify(Object.fromEntries(Object.entries(c.fixture).map(([f, recs]) => [f, recs.map((r) => Object.fromEntries(r.values.map((v) => [v.field, v.value])))])), null, 1)}</pre>
             </details>
           </div>
@@ -229,15 +254,15 @@ function OutputPeek({ c }: { c: CaseResult }) {
   const cols = Object.keys(L[0] ?? P[0] ?? {}).slice(0, 40);
   return (
     <details>
-      <summary className="cursor-pointer text-traced">Output records side by side</summary>
+      <summary className="cursor-pointer text-traced">Output records, original and rebuild side by side</summary>
       <div className="flex gap-2 mt-2 text-[12.5px]">{names.map((n) => <button key={n} onClick={() => setF(n)} className={`px-2 border rounded-sm ${n === f ? "border-ink" : "border-rule text-ink-soft"}`}>{n}</button>)}</div>
       <div className="overflow-x-auto mt-2 border border-rule max-h-[340px]">
         <table className="text-[12px] whitespace-pre">
           <thead className="bg-sheet sticky top-0"><tr><th className="px-2 py-1 text-left font-normal text-ink-soft">#</th><th className="px-2 text-left font-normal text-ink-soft">side</th>{cols.map((k) => <th key={k} className="px-2 text-left font-normal text-ink-soft">{k}</th>)}</tr></thead>
           <tbody>
             {Array.from({ length: Math.max(L.length, P.length) }).flatMap((_, i) => [
-              <tr key={`l${i}`} className="border-t border-rule"><td className="px-2">{i}</td><td className="px-2 text-ink-soft">legacy</td>{cols.map((k) => <td key={k} className={`px-2 ${diffFields.has(`${i}:${k}`) ? "bg-[#f6dcd8]" : ""}`}>{fmt(L[i]?.[k])}</td>)}</tr>,
-              <tr key={`p${i}`}><td className="px-2"></td><td className="px-2 text-ink-soft">port</td>{cols.map((k) => <td key={k} className={`px-2 ${diffFields.has(`${i}:${k}`) ? "bg-[#f6dcd8]" : ""}`}>{fmt(P[i]?.[k])}</td>)}</tr>,
+              <tr key={`l${i}`} className="border-t border-rule"><td className="px-2">{i}</td><td className="px-2 text-ink-soft">original</td>{cols.map((k) => <td key={k} className={`px-2 ${diffFields.has(`${i}:${k}`) ? "bg-[#f6dcd8]" : ""}`}>{fmt(L[i]?.[k])}</td>)}</tr>,
+              <tr key={`p${i}`}><td className="px-2"></td><td className="px-2 text-ink-soft">rebuild</td>{cols.map((k) => <td key={k} className={`px-2 ${diffFields.has(`${i}:${k}`) ? "bg-[#f6dcd8]" : ""}`}>{fmt(P[i]?.[k])}</td>)}</tr>,
             ])}
           </tbody>
         </table>
@@ -263,16 +288,16 @@ function ReviewBox({ rule, onChange }: { rule: Rule; onChange: (r: Rule) => void
   }
   const rv = rule.review;
   return (
-    <section aria-label="Review">
-      <h2 className="font-serif text-[20px] font-semibold border-b border-ink pb-1">Review</h2>
+    <section aria-label="Sign off" id="review" className="scroll-mt-4">
+      <h2 className="font-serif text-[22px] font-semibold border-b border-ink pb-1">Sign off</h2>
       {rv.decision ? (
         <p className="mt-3 text-[14.5px]">
           <StatusMark status={rv.decision} /> by <span className="font-medium">{rv.by}</span> on {rv.at?.replace("T", " ")}{rv.note ? `: “${rv.note}”` : ""}
           <button onClick={() => decide("clear")} className="ml-3 text-[13px] text-ink-soft underline">Clear decision</button>
         </p>
-      ) : <p className="mt-3 text-[14px] text-ink-soft">No decision yet. A named reviewer approves or rejects the rule as written.</p>}
+      ) : <p className="mt-3 text-[14px] text-ink-soft max-w-[60ch]">Nobody has signed off yet. Read the rule beside its code, then approve it if it matches what the business intends, or reject it if it doesn&apos;t.</p>}
       <div className="mt-3 grid gap-2 max-w-[520px]">
-        <label className="text-[13px] text-ink-soft">Reviewer
+        <label className="text-[13px] text-ink-soft">Your name
           <input value={by} onChange={(e) => setBy(e.target.value)} className="mt-1 w-full border border-rule bg-sheet px-2 py-1.5 text-[14px] text-ink" placeholder="Your name" />
         </label>
         <label className="text-[13px] text-ink-soft">Note
@@ -290,8 +315,8 @@ function ReviewBox({ rule, onChange }: { rule: Rule; onChange: (r: Rule) => void
 
 function Trail({ rule }: { rule: Rule }) {
   return (
-    <section aria-label="Audit trail">
-      <h2 className="font-serif text-[20px] font-semibold border-b border-ink pb-1">Audit trail</h2>
+    <section aria-label="History">
+      <h2 className="font-serif text-[22px] font-semibold border-b border-ink pb-1">History</h2>
       <ol className="mt-2 text-[13.5px]">
         {rule.status_history.map((h, i) => (
           <li key={`s${i}`} className="py-1.5 border-b border-rule/60 grid grid-cols-[96px_1fr] gap-3">

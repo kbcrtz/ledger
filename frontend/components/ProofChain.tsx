@@ -31,7 +31,7 @@ export default function ProofChain({ steps, compact = false }: { steps: Step[]; 
           <div className={`mt-1 ${compact ? "text-[14px]" : "text-[15.5px]"} ${s.state === "done" ? "text-verified" : s.state === "partial" ? "text-flagged" : "text-ink-soft"}`}>
             {s.href ? <a href={s.href} className="underline underline-offset-2 decoration-rule hover:decoration-current">{s.value}</a> : s.value}
           </div>
-          <p className={`mt-1 text-ink-soft max-w-[30ch] ${compact ? "text-[12.5px] leading-snug" : "text-[13.5px] leading-snug"}`}>{s.detail}</p>
+          <p className={`mt-1 text-ink-soft max-w-[34ch] break-words ${compact ? "text-[12.5px] leading-snug" : "text-[13.5px] leading-snug"}`}>{s.detail}</p>
         </li>
       ))}
     </ol>
