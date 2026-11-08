@@ -17,7 +17,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 
 from . import log, store
-from .llm import STATS, have_key, LLMUnavailable
+from .llm import STATS
 from .units import UNITS
 
 
@@ -79,8 +79,8 @@ def _verify_and_retry(rule: dict) -> dict:
 
 def cmd_extract(args):
     from .agents.extractor import extract_unit
-    if not have_key():
-        raise LLMUnavailable("ANTHROPIC_API_KEY missing: cannot run the extractor")
+    # No key check here: cached answers replay without one, and llm.create raises
+    # LLMUnavailable only when a call actually has to reach the API.
     units = [u for u in UNITS if not args.unit or u["id"] in args.unit]
     with ThreadPoolExecutor(max_workers=6) as ex:
         drafts = list(ex.map(extract_unit, units))

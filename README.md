@@ -55,7 +55,7 @@ git clone https://github.com/aws-samples/aws-mainframe-modernization-carddemo ve
 git -C vendor/carddemo checkout 59cc6c2fd7ebd7ef7925cad552a01a4b8b6e4d5e   # optional, for exact line numbers
 
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-cp .env.example .env        # then set ANTHROPIC_API_KEY (needed only for cache misses)
+cp .env.example .env        # optional: set ANTHROPIC_API_KEY only for a fresh run; replay needs no key
 
 # GnuCOBOL 3.1.2 image (debian:bookworm-slim + gnucobol3); the harness also builds it on demand
 docker build -t ledger-cobol:3.1.2 harness/docker
@@ -90,7 +90,7 @@ replays deterministically. To prove that nothing is called live:
 LEDGER_REPLAY_ONLY=1 .venv/bin/python -m ledger.pipeline all   # fails on any cache miss
 ```
 
-On the committed cache this makes 75 cache hits and 0 API calls, and reproduces
+No API key is needed for this. On the committed cache this makes 75 cache hits and 0 API calls, and reproduces
 `rules.json` and `results.json` exactly. Only the Docker runs are live, about 5 seconds in all.
 
 Tests (codec, citation checker, and the spec's harness acceptance checks; the latter needs Docker):
