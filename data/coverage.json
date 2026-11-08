@@ -1,10 +1,10 @@
 {
  "CBTRN02C": {
   "statement_lines": 339,
-  "executed_any": 231,
+  "executed_any": 233,
   "executed_by_sample": 226,
   "trace_lines_sample": 251,
-  "cited_by_rules": 94,
+  "cited_by_rules": 66,
   "neither": 104,
   "uncovered_lines": [
    {
@@ -530,201 +530,186 @@
   ],
   "lines": {
    "194": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "195": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "196": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "197": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "198": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "199": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "200": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "202": {
-    "executed": 27,
-    "cited_by": [
-     "BR-CBTRN02C-005"
-    ]
+    "executed": 37,
+    "cited_by": []
    },
    "203": {
-    "executed": 27,
-    "cited_by": [
-     "BR-CBTRN02C-005"
-    ]
+    "executed": 37,
+    "cited_by": []
    },
    "204": {
-    "executed": 27,
-    "cited_by": [
-     "BR-CBTRN02C-005"
-    ]
+    "executed": 37,
+    "cited_by": []
    },
    "205": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-005"
     ]
    },
    "206": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-005"
     ]
    },
    "208": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-001",
      "BR-CBTRN02C-005",
-     "BR-CBTRN02C-007"
+     "BR-CBTRN02C-006"
     ]
    },
    "209": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-001",
      "BR-CBTRN02C-005",
-     "BR-CBTRN02C-007"
+     "BR-CBTRN02C-006"
     ]
    },
    "210": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
-     "BR-CBTRN02C-005"
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-006"
     ]
    },
    "211": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-001",
      "BR-CBTRN02C-002",
-     "BR-CBTRN02C-003",
-     "BR-CBTRN02C-004",
      "BR-CBTRN02C-005",
      "BR-CBTRN02C-006",
      "BR-CBTRN02C-007"
     ]
    },
    "212": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
      "BR-CBTRN02C-001",
      "BR-CBTRN02C-002",
-     "BR-CBTRN02C-003",
-     "BR-CBTRN02C-004",
      "BR-CBTRN02C-005",
      "BR-CBTRN02C-006",
      "BR-CBTRN02C-007"
     ]
    },
    "214": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": [
      "BR-CBTRN02C-001",
      "BR-CBTRN02C-002",
-     "BR-CBTRN02C-003",
-     "BR-CBTRN02C-004",
-     "BR-CBTRN02C-005",
-     "BR-CBTRN02C-007"
+     "BR-CBTRN02C-005"
     ]
    },
    "215": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": [
      "BR-CBTRN02C-001",
      "BR-CBTRN02C-002",
-     "BR-CBTRN02C-003",
-     "BR-CBTRN02C-004",
-     "BR-CBTRN02C-005",
-     "BR-CBTRN02C-007"
+     "BR-CBTRN02C-005"
     ]
    },
    "221": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "222": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "223": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "224": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "225": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "226": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "227": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-005"
     ]
    },
    "228": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-005"
     ]
    },
    "229": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-005"
     ]
    },
    "230": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": [
      "BR-CBTRN02C-005"
     ]
    },
    "232": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "234": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "237": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "238": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "239": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "240": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "242": {
@@ -732,11 +717,11 @@
     "cited_by": []
    },
    "244": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "245": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "247": {
@@ -756,23 +741,23 @@
     "cited_by": []
    },
    "252": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "255": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "256": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "257": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "258": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "260": {
@@ -780,11 +765,11 @@
     "cited_by": []
    },
    "262": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "263": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "265": {
@@ -804,23 +789,23 @@
     "cited_by": []
    },
    "270": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "274": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "275": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "276": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "277": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "279": {
@@ -828,11 +813,11 @@
     "cited_by": []
    },
    "281": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "282": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "284": {
@@ -852,23 +837,23 @@
     "cited_by": []
    },
    "289": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "292": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "293": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "294": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "295": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "297": {
@@ -876,11 +861,11 @@
     "cited_by": []
    },
    "299": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "300": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "302": {
@@ -900,23 +885,23 @@
     "cited_by": []
    },
    "307": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "310": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "311": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "312": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "313": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "315": {
@@ -924,11 +909,11 @@
     "cited_by": []
    },
    "317": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "318": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "320": {
@@ -948,23 +933,23 @@
     "cited_by": []
    },
    "325": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "328": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "329": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "330": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "331": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "333": {
@@ -972,11 +957,11 @@
     "cited_by": []
    },
    "335": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "336": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "338": {
@@ -996,27 +981,27 @@
     "cited_by": []
    },
    "343": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "346": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "347": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "348": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "351": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "352": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "354": {
@@ -1024,19 +1009,19 @@
     "cited_by": []
    },
    "357": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "358": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "360": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "361": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "363": {
@@ -1056,83 +1041,84 @@
     "cited_by": []
    },
    "369": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "371": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-001"
     ]
    },
    "372": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-001",
      "BR-CBTRN02C-002"
     ]
    },
    "373": {
-    "executed": 23,
+    "executed": 32,
     "cited_by": [
      "BR-CBTRN02C-001",
      "BR-CBTRN02C-002"
     ]
    },
    "375": {
-    "executed": 5,
+    "executed": 6,
     "cited_by": [
      "BR-CBTRN02C-001"
     ]
    },
    "378": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "382": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-001"
     ]
    },
    "383": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": [
      "BR-CBTRN02C-001"
     ]
    },
    "385": {
-    "executed": 5,
+    "executed": 6,
     "cited_by": [
      "BR-CBTRN02C-001"
     ]
    },
    "386": {
-    "executed": 5,
+    "executed": 6,
     "cited_by": [
      "BR-CBTRN02C-001"
     ]
    },
    "390": {
-    "executed": 23,
+    "executed": 32,
     "cited_by": []
    },
    "392": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "394": {
-    "executed": 23,
+    "executed": 32,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-007"
     ]
    },
    "395": {
-    "executed": 23,
+    "executed": 32,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004",
      "BR-CBTRN02C-007"
     ]
    },
@@ -1140,25 +1126,27 @@
     "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-002",
-     "BR-CBTRN02C-003"
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004"
     ]
    },
    "398": {
     "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-002",
-     "BR-CBTRN02C-003"
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004"
     ]
    },
    "403": {
-    "executed": 20,
+    "executed": 30,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-003"
     ]
    },
    "407": {
-    "executed": 20,
+    "executed": 30,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-003",
@@ -1166,7 +1154,7 @@
     ]
    },
    "408": {
-    "executed": 19,
+    "executed": 27,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-003",
@@ -1174,7 +1162,7 @@
     ]
    },
    "410": {
-    "executed": 2,
+    "executed": 6,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-003",
@@ -1182,7 +1170,7 @@
     ]
    },
    "411": {
-    "executed": 2,
+    "executed": 6,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-003",
@@ -1190,171 +1178,147 @@
     ]
    },
    "414": {
-    "executed": 20,
+    "executed": 30,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-004"
     ]
    },
    "415": {
-    "executed": 20,
+    "executed": 26,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-004"
     ]
    },
    "417": {
-    "executed": 0,
+    "executed": 5,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-004"
     ]
    },
    "418": {
-    "executed": 0,
+    "executed": 5,
     "cited_by": [
      "BR-CBTRN02C-002",
      "BR-CBTRN02C-004"
     ]
    },
    "422": {
-    "executed": 23,
+    "executed": 32,
     "cited_by": []
    },
    "425": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "426": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "427": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "428": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "429": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "430": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "431": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "432": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "433": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "434": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "435": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "436": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "437": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "438": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "440": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
-     "BR-CBTRN02C-007"
+     "BR-CBTRN02C-005"
     ]
    },
    "441": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
+     "BR-CBTRN02C-005",
      "BR-CBTRN02C-007"
     ]
    },
    "442": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
+     "BR-CBTRN02C-005",
      "BR-CBTRN02C-007"
     ]
    },
    "444": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "447": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": [
      "BR-CBTRN02C-005"
     ]
    },
    "448": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": [
      "BR-CBTRN02C-005"
     ]
    },
    "450": {
-    "executed": 11,
-    "cited_by": []
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
    },
    "451": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": [
      "BR-CBTRN02C-005"
     ]
    },
    "452": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": []
    },
    "453": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": []
    },
    "455": {
@@ -1362,11 +1326,11 @@
     "cited_by": []
    },
    "457": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": []
    },
    "458": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": []
    },
    "460": {
@@ -1386,57 +1350,57 @@
     "cited_by": []
    },
    "465": {
-    "executed": 11,
+    "executed": 19,
     "cited_by": []
    },
    "469": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "470": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "471": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "473": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "474": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "476": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "478": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "481": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "482": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "484": {
@@ -1444,11 +1408,11 @@
     "cited_by": []
    },
    "486": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "487": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "489": {
@@ -1468,69 +1432,69 @@
     "cited_by": []
    },
    "495": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "496": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "498": {
-    "executed": 17,
+    "executed": 22,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "501": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "504": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "505": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "506": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "507": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "508": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "510": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "512": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": []
    },
    "513": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": []
    },
    "515": {
@@ -1538,11 +1502,11 @@
     "cited_by": []
    },
    "517": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": []
    },
    "518": {
-    "executed": 5,
+    "executed": 4,
     "cited_by": []
    },
    "520": {
@@ -1562,23 +1526,23 @@
     "cited_by": []
    },
    "527": {
-    "executed": 17,
+    "executed": 22,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "528": {
-    "executed": 17,
+    "executed": 22,
     "cited_by": [
      "BR-CBTRN02C-006"
     ]
    },
    "530": {
-    "executed": 17,
+    "executed": 22,
     "cited_by": []
    },
    "531": {
-    "executed": 17,
+    "executed": 22,
     "cited_by": []
    },
    "533": {
@@ -1586,11 +1550,11 @@
     "cited_by": []
    },
    "535": {
-    "executed": 17,
+    "executed": 22,
     "cited_by": []
    },
    "536": {
-    "executed": 17,
+    "executed": 22,
     "cited_by": []
    },
    "538": {
@@ -1610,70 +1574,65 @@
     "cited_by": []
    },
    "547": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
      "BR-CBTRN02C-007"
     ]
    },
    "548": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
      "BR-CBTRN02C-007"
     ]
    },
    "549": {
-    "executed": 15,
+    "executed": 20,
     "cited_by": [
      "BR-CBTRN02C-007"
     ]
    },
    "551": {
-    "executed": 7,
+    "executed": 6,
     "cited_by": [
      "BR-CBTRN02C-007"
     ]
    },
    "554": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": [
-     "BR-CBTRN02C-005",
      "BR-CBTRN02C-007"
     ]
    },
    "556": {
     "executed": 0,
     "cited_by": [
-     "BR-CBTRN02C-005",
      "BR-CBTRN02C-007"
     ]
    },
    "557": {
     "executed": 0,
     "cited_by": [
-     "BR-CBTRN02C-005",
      "BR-CBTRN02C-007"
     ]
    },
    "560": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "563": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "564": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "566": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "567": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "569": {
@@ -1681,11 +1640,11 @@
     "cited_by": []
    },
    "571": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "572": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "574": {
@@ -1705,23 +1664,23 @@
     "cited_by": []
    },
    "579": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "583": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "584": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "585": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "586": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "588": {
@@ -1729,11 +1688,11 @@
     "cited_by": []
    },
    "590": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "591": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "593": {
@@ -1753,23 +1712,23 @@
     "cited_by": []
    },
    "598": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "601": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "602": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "603": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "604": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "606": {
@@ -1777,11 +1736,11 @@
     "cited_by": []
    },
    "608": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "609": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "611": {
@@ -1801,23 +1760,23 @@
     "cited_by": []
    },
    "616": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "620": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "621": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "622": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "623": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "625": {
@@ -1825,11 +1784,11 @@
     "cited_by": []
    },
    "627": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "628": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "630": {
@@ -1849,23 +1808,23 @@
     "cited_by": []
    },
    "635": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "638": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "639": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "640": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "641": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "643": {
@@ -1873,11 +1832,11 @@
     "cited_by": []
    },
    "645": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "646": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "648": {
@@ -1897,23 +1856,23 @@
     "cited_by": []
    },
    "653": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "656": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "657": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "658": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "659": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "661": {
@@ -1921,11 +1880,11 @@
     "cited_by": []
    },
    "663": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "664": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "666": {
@@ -1945,23 +1904,23 @@
     "cited_by": []
    },
    "671": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "675": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "676": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "677": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "678": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "680": {
@@ -1969,11 +1928,11 @@
     "cited_by": []
    },
    "682": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "683": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "685": {
@@ -1993,77 +1952,55 @@
     "cited_by": []
    },
    "690": {
-    "executed": 27,
+    "executed": 37,
     "cited_by": []
    },
    "693": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "694": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "695": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "696": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "697": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "698": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "699": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "700": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "701": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "702": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "703": {
-    "executed": 19,
-    "cited_by": [
-     "BR-CBTRN02C-007"
-    ]
+    "executed": 24,
+    "cited_by": []
    },
    "705": {
-    "executed": 19,
+    "executed": 24,
     "cited_by": []
    },
    "708": {
@@ -2129,8 +2066,8 @@
   "executed_any": 206,
   "executed_by_sample": 192,
   "trace_lines_sample": 213,
-  "cited_by_rules": 94,
-  "neither": 77,
+  "cited_by_rules": 89,
+  "neither": 80,
   "uncovered_lines": [
    {
     "line": 240,
@@ -2308,11 +2245,6 @@
     "text": "PERFORM 9999-ABEND-PROGRAM"
    },
    {
-    "line": 375,
-    "paragraph": "1100-GET-ACCT-DATA",
-    "text": "DISPLAY 'ACCOUNT NOT FOUND: ' FD-ACCT-ID"
-   },
-   {
     "line": 381,
     "paragraph": "1100-GET-ACCT-DATA",
     "text": "MOVE 12 TO APPL-RESULT"
@@ -2338,11 +2270,6 @@
     "text": "PERFORM 9999-ABEND-PROGRAM"
    },
    {
-    "line": 397,
-    "paragraph": "1110-GET-XREF-DATA",
-    "text": "DISPLAY 'ACCOUNT NOT FOUND: ' FD-XREF-ACCT-ID"
-   },
-   {
     "line": 403,
     "paragraph": "1110-GET-XREF-DATA",
     "text": "MOVE 12 TO APPL-RESULT"
@@ -2365,6 +2292,31 @@
    {
     "line": 411,
     "paragraph": "1110-GET-XREF-DATA",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 504,
+    "paragraph": "1300-B-WRITE-TX",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 510,
+    "paragraph": "1300-B-WRITE-TX",
+    "text": "DISPLAY 'ERROR WRITING TRANSACTION RECORD'"
+   },
+   {
+    "line": 511,
+    "paragraph": "1300-B-WRITE-TX",
+    "text": "MOVE TRANFILE-STATUS   TO IO-STATUS"
+   },
+   {
+    "line": 512,
+    "paragraph": "1300-B-WRITE-TX",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 513,
+    "paragraph": "1300-B-WRITE-TX",
     "text": "PERFORM 9999-ABEND-PROGRAM"
    },
    {
@@ -2520,72 +2472,79 @@
   ],
   "lines": {
    "181": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "182": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "183": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "184": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "185": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "186": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "188": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-002"
     ]
    },
    "189": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-002"
     ]
    },
    "190": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-002"
     ]
    },
    "191": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": [
+     "BR-CBACT04C-001",
      "BR-CBACT04C-002"
     ]
    },
    "192": {
-    "executed": 15,
-    "cited_by": []
+    "executed": 23,
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
    },
    "193": {
-    "executed": 15,
-    "cited_by": []
+    "executed": 23,
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
    },
    "194": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001",
+     "BR-CBACT04C-002",
      "BR-CBACT04C-004"
     ]
    },
    "195": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001",
+     "BR-CBACT04C-002",
      "BR-CBACT04C-004"
     ]
    },
@@ -2593,99 +2552,100 @@
     "executed": 8,
     "cited_by": [
      "BR-CBACT04C-001",
+     "BR-CBACT04C-002",
      "BR-CBACT04C-004"
     ]
    },
    "198": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001",
      "BR-CBACT04C-004"
     ]
    },
    "200": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001",
      "BR-CBACT04C-004"
     ]
    },
    "201": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001",
      "BR-CBACT04C-004"
     ]
    },
    "202": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001"
     ]
    },
    "203": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001"
     ]
    },
    "204": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001"
     ]
    },
    "205": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001"
     ]
    },
    "210": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
+     "BR-CBACT04C-001",
      "BR-CBACT04C-003"
     ]
    },
    "211": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
+     "BR-CBACT04C-001",
      "BR-CBACT04C-003"
     ]
    },
    "212": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
+     "BR-CBACT04C-001",
      "BR-CBACT04C-003"
     ]
    },
    "213": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
-     "BR-CBACT04C-001",
-     "BR-CBACT04C-004"
+     "BR-CBACT04C-001"
     ]
    },
    "214": {
-    "executed": 14,
+    "executed": 22,
     "cited_by": [
      "BR-CBACT04C-001",
-     "BR-CBACT04C-002",
      "BR-CBACT04C-003",
      "BR-CBACT04C-004"
     ]
    },
    "215": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-001",
-     "BR-CBACT04C-002",
      "BR-CBACT04C-003",
      "BR-CBACT04C-004"
     ]
    },
    "216": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-001",
      "BR-CBACT04C-003",
@@ -2699,47 +2659,47 @@
     ]
    },
    "224": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "225": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "226": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "227": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "228": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "230": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "232": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "235": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "236": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "237": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "238": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "240": {
@@ -2747,11 +2707,11 @@
     "cited_by": []
    },
    "242": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "243": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "245": {
@@ -2771,23 +2731,23 @@
     "cited_by": []
    },
    "250": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "253": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "254": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "255": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "256": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "258": {
@@ -2795,11 +2755,11 @@
     "cited_by": []
    },
    "260": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "261": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "263": {
@@ -2819,23 +2779,23 @@
     "cited_by": []
    },
    "268": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "271": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "272": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "273": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "274": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "276": {
@@ -2843,11 +2803,11 @@
     "cited_by": []
    },
    "278": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "279": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "281": {
@@ -2867,23 +2827,23 @@
     "cited_by": []
    },
    "286": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "290": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "291": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "292": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "293": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "295": {
@@ -2891,11 +2851,11 @@
     "cited_by": []
    },
    "297": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "298": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "300": {
@@ -2915,23 +2875,23 @@
     "cited_by": []
    },
    "305": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "308": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "309": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "310": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "311": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "313": {
@@ -2939,11 +2899,11 @@
     "cited_by": []
    },
    "315": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "316": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "318": {
@@ -2963,55 +2923,51 @@
     "cited_by": []
    },
    "323": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "326": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001"
     ]
    },
    "327": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "328": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "330": {
-    "executed": 15,
-    "cited_by": [
-     "BR-CBACT04C-002"
-    ]
+    "executed": 22,
+    "cited_by": []
    },
    "331": {
-    "executed": 15,
-    "cited_by": [
-     "BR-CBACT04C-002"
-    ]
+    "executed": 22,
+    "cited_by": []
    },
    "333": {
     "executed": 0,
     "cited_by": []
    },
    "336": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "337": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "339": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": [
      "BR-CBACT04C-002"
     ]
    },
    "340": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": [
      "BR-CBACT04C-002"
     ]
@@ -3033,7 +2989,7 @@
     "cited_by": []
    },
    "348": {
-    "executed": 16,
+    "executed": 23,
     "cited_by": []
    },
    "352": {
@@ -3105,19 +3061,23 @@
     "cited_by": []
    },
    "373": {
-    "executed": 15,
-    "cited_by": []
+    "executed": 23,
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
    },
    "375": {
     "executed": 0,
-    "cited_by": []
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
    },
    "378": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "379": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "381": {
@@ -3125,11 +3085,11 @@
     "cited_by": []
    },
    "383": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "384": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "386": {
@@ -3149,25 +3109,27 @@
     "cited_by": []
    },
    "391": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "394": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-001"
     ]
    },
    "397": {
     "executed": 0,
-    "cited_by": []
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
    },
    "400": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "401": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "403": {
@@ -3175,11 +3137,11 @@
     "cited_by": []
    },
    "405": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "406": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "408": {
@@ -3199,31 +3161,35 @@
     "cited_by": []
    },
    "413": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": []
    },
    "416": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
    },
    "418": {
-    "executed": 4,
-    "cited_by": []
+    "executed": 3,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
    },
    "419": {
-    "executed": 4,
-    "cited_by": []
+    "executed": 3,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
    },
    "422": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
    },
    "423": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
@@ -3235,13 +3201,13 @@
     ]
    },
    "428": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
    },
    "429": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
@@ -3271,41 +3237,41 @@
     ]
    },
    "436": {
-    "executed": 15,
+    "executed": 23,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
    },
    "437": {
-    "executed": 4,
+    "executed": 3,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
    },
    "438": {
-    "executed": 4,
+    "executed": 3,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
    },
    "440": {
-    "executed": 14,
+    "executed": 22,
     "cited_by": []
    },
    "444": {
-    "executed": 4,
+    "executed": 3,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
    },
    "446": {
-    "executed": 4,
+    "executed": 3,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
    },
    "447": {
-    "executed": 3,
+    "executed": 2,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
@@ -3317,13 +3283,13 @@
     ]
    },
    "452": {
-    "executed": 4,
+    "executed": 3,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
    },
    "453": {
-    "executed": 3,
+    "executed": 2,
     "cited_by": [
      "BR-CBACT04C-003"
     ]
@@ -3353,210 +3319,186 @@
     ]
    },
    "460": {
-    "executed": 3,
+    "executed": 2,
     "cited_by": []
    },
    "464": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
-     "BR-CBACT04C-004",
-     "BR-CBACT04C-005"
+     "BR-CBACT04C-004"
     ]
    },
    "467": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
-     "BR-CBACT04C-001",
      "BR-CBACT04C-002",
-     "BR-CBACT04C-004",
-     "BR-CBACT04C-005"
+     "BR-CBACT04C-004"
     ]
    },
    "468": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
-     "BR-CBACT04C-002",
-     "BR-CBACT04C-004",
-     "BR-CBACT04C-005"
+     "BR-CBACT04C-004"
     ]
    },
    "470": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": []
    },
    "474": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "476": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "482": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "483": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "484": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "485": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "490": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "491": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "492": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "493": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "494": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "495": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
+     "BR-CBACT04C-001",
      "BR-CBACT04C-005"
     ]
    },
    "496": {
-    "executed": 13,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "executed": 20,
+    "cited_by": []
    },
    "497": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "498": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "500": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
-     "BR-CBACT04C-002",
+     "BR-CBACT04C-004",
      "BR-CBACT04C-005"
     ]
    },
    "501": {
-    "executed": 13,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "executed": 20,
+    "cited_by": []
    },
    "502": {
-    "executed": 13,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "executed": 20,
+    "cited_by": []
    },
    "504": {
     "executed": 0,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "cited_by": []
    },
    "507": {
-    "executed": 13,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "executed": 20,
+    "cited_by": []
    },
    "508": {
-    "executed": 13,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "executed": 20,
+    "cited_by": []
    },
    "510": {
     "executed": 0,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "cited_by": []
    },
    "511": {
     "executed": 0,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "cited_by": []
    },
    "512": {
     "executed": 0,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "cited_by": []
    },
    "513": {
     "executed": 0,
-    "cited_by": [
-     "BR-CBACT04C-005"
-    ]
+    "cited_by": []
    },
    "515": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": []
    },
    "520": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": []
    },
    "523": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "524": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "525": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "526": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "528": {
@@ -3564,11 +3506,11 @@
     "cited_by": []
    },
    "530": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "531": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "533": {
@@ -3588,23 +3530,23 @@
     "cited_by": []
    },
    "538": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "542": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "543": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "544": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "545": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "547": {
@@ -3612,11 +3554,11 @@
     "cited_by": []
    },
    "549": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "550": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "552": {
@@ -3636,23 +3578,23 @@
     "cited_by": []
    },
    "557": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "560": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "561": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "562": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "563": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "565": {
@@ -3660,11 +3602,11 @@
     "cited_by": []
    },
    "567": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "568": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "570": {
@@ -3684,23 +3626,23 @@
     "cited_by": []
    },
    "575": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "578": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "579": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "580": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "581": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "583": {
@@ -3708,11 +3650,11 @@
     "cited_by": []
    },
    "585": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "586": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "588": {
@@ -3732,23 +3674,23 @@
     "cited_by": []
    },
    "593": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "596": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "597": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "598": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "599": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "601": {
@@ -3756,11 +3698,11 @@
     "cited_by": []
    },
    "603": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "604": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "606": {
@@ -3780,77 +3722,77 @@
     "cited_by": []
    },
    "611": {
-    "executed": 15,
+    "executed": 22,
     "cited_by": []
    },
    "614": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "615": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "616": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "617": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "618": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "619": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "620": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "621": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "622": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "623": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "624": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": [
      "BR-CBACT04C-005"
     ]
    },
    "626": {
-    "executed": 13,
+    "executed": 20,
     "cited_by": []
    },
    "629": {

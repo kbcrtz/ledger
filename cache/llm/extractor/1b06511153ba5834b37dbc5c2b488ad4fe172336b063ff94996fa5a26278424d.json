@@ -1,0 +1,454 @@
+{
+ "agent": "extractor",
+ "key": "1b06511153ba5834b37dbc5c2b488ad4fe172336b063ff94996fa5a26278424d",
+ "seconds": 13.7,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 64000,
+  "system": "You are the extractor in Ledger, a system that documents legacy COBOL business rules so that a modern port can be written from the rules alone and checked against the running original.\n\nWrite business rules as Given/When/Then scenarios in plain English that a policy owner can read and approve. Hard requirements:\n\n- Every clause cites the exact source lines it comes from (file plus [first, last] line numbers from the numbered listing; keep spans tight, normally 1-12 lines). If a statement cannot be sourced to specific lines, leave it out.\n- When a fact needs a second place, add it under \"also\" (at most 2 extra spans, each with its own file and [first, last]). Typical case: the statement in the program that does something (a COMPUTE, a reference modification like (1:10), a MOVE) plus the field's PIC declaration in a copybook that fixes its size or precision. A clause is judged only on the lines it cites, so cite every line its claim depends on.\n- Every clause lists the COBOL data names (\"fields\") and literal values (\"literals\": codes, messages, constants, without quotes) it relies on. Each listed field and literal must literally appear in one of the cited spans; a checker will reject the clause otherwise. Cite a declaration line (for example a PIC clause in WORKING-STORAGE) when the clause depends on a field's size or precision.\n- Describe what the code actually does, not what it was probably meant to do. If the code has surprising behaviour (a later check overwriting an earlier result, a branch that can never run, arithmetic that truncates, a check that ignores something), state that behaviour precisely in the rule.\n- Separate business logic from file plumbing. Opening/closing files, file-status checks, and abend handling are plumbing; leave them out unless they change a business outcome. Balance and record updates (for example 2700-*, 2800-*, 1050-* paragraphs) are business logic: a port that skips them would produce different output files.\n- Be precise enough that a developer who never sees the COBOL could reproduce the outputs exactly: name the output fields set, the exact codes and message texts, the order of checks, signs and arithmetic (COBOL truncates toward zero unless ROUNDED is written), and which records are created versus updated.\n- Keep each clause to one checkable fact. When a fact depends on a record layout, field size or precision, put it in its own clause that cites the declaration. Do not restate in one clause what another clause (or another part of the program) establishes.\n- Keep rules small: at most 8 clauses per rule. If a behaviour needs more, keep only the clauses that change the program's outputs.\n- Do not write clauses that claim something is absent or never happens (\"never checks the active status\", \"the counter is never reset\", \"no other code reads it\"). Cited lines cannot prove an absence. Put such observations in \"notes\" instead; notes are shown to the reviewer as unverified and are not given to the port.\n- Use the field names exactly as declared. Use the tools to read any other paragraph or field layout you need; do not guess line numbers.\n\nReturn only rules for the unit you are given, at most the number requested, each one a distinct behaviour with an observable effect on the program's outputs.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Program: CBACT04C (CBACT04C.cbl, 653 lines). Copybooks: CVTRA01Y, CVACT03Y, CVTRA02Y, CVACT01Y, CVTRA05Y.\n\nUnit: CBACT04C-rate. Focus: How the interest rate for a category balance is found in the disclosure group file.\nReturn at most 1 rule(s).\n\nFiles (FILE-CONTROL):\n  TCATBAL-FILE: ASSIGN TCATBALF, INDEXED SEQUENTIAL, key FD-TRAN-CAT-KEY\n  XREF-FILE: ASSIGN XREFFILE, INDEXED RANDOM, key FD-XREF-CARD-NUM, alternate key FD-XREF-ACCT-ID\n  ACCOUNT-FILE: ASSIGN ACCTFILE, INDEXED RANDOM, key FD-ACCT-ID\n  DISCGRP-FILE: ASSIGN DISCGRP, INDEXED RANDOM, key FD-DISCGRP-KEY\n  TRANSACT-FILE: ASSIGN TRANSACT, SEQUENTIAL SEQUENTIAL, key None\n\nSource for this unit (root paragraph(s) and their non-plumbing callees, with line numbers):\n\n--- CBACT04C.cbl paragraph 1200-GET-INTEREST-RATE (lines 415-440) ---\n 415        1200-GET-INTEREST-RATE.\n 416            READ DISCGRP-FILE INTO DIS-GROUP-RECORD\n 417                 INVALID KEY\n 418                    DISPLAY 'DISCLOSURE GROUP RECORD MISSING'\n 419                    DISPLAY 'TRY WITH DEFAULT GROUP CODE'\n 420            END-READ.\n 421 \n 422            IF  DISCGRP-STATUS  = '00'  OR '23'\n 423                MOVE 0 TO APPL-RESULT\n 424            ELSE\n 425                MOVE 12 TO APPL-RESULT\n 426            END-IF\n 427 \n 428            IF  APPL-AOK\n 429                CONTINUE\n 430            ELSE\n 431                DISPLAY 'ERROR READING DISCLOSURE GROUP FILE'\n 432                MOVE DISCGRP-STATUS  TO IO-STATUS\n 433                PERFORM 9910-DISPLAY-IO-STATUS\n 434                PERFORM 9999-ABEND-PROGRAM\n 435            END-IF\n 436            IF  DISCGRP-STATUS  = '23'\n 437                MOVE 'DEFAULT' TO FD-DIS-ACCT-GROUP-ID\n 438                PERFORM 1200-A-GET-DEFAULT-INT-RATE\n 439            END-IF\n 440            EXIT.\n\n--- CBACT04C.cbl paragraph 1200-A-GET-DEFAULT-INT-RATE (lines 443-460) ---\n 443        1200-A-GET-DEFAULT-INT-RATE.\n 444            READ DISCGRP-FILE INTO DIS-GROUP-RECORD\n 445 \n 446            IF  DISCGRP-STATUS  = '00'\n 447                MOVE 0 TO APPL-RESULT\n 448            ELSE\n 449                MOVE 12 TO APPL-RESULT\n 450            END-IF\n 451 \n 452            IF  APPL-AOK\n 453                CONTINUE\n 454            ELSE\n 455                DISPLAY 'ERROR READING DEFAULT DISCLOSURE GROUP'\n 456                MOVE DISCGRP-STATUS  TO IO-STATUS\n 457                PERFORM 9910-DISPLAY-IO-STATUS\n 458                PERFORM 9999-ABEND-PROGRAM\n 459            END-IF\n 460            EXIT.\n\nLayouts of data names referenced above (from the deterministic parser):\nAPPL-RESULT                        S9(9) COMP       record=APPL-RESULT offset=0 size=4 declared=CBACT04C.cbl:133\nDIS-GROUP-RECORD                   group            record=DIS-GROUP-RECORD offset=0 size=50 declared=CVTRA02Y.cpy:4\nDISCGRP-STATUS                     group            record=DISCGRP-STATUS offset=0 size=2 declared=CBACT04C.cbl:108\nFD-DIS-ACCT-GROUP-ID               X(10)            record=FD-DISCGRP-REC offset=0 size=10 declared=CBACT04C.cbl:79\nIO-STATUS                          group            record=IO-STATUS offset=0 size=2 declared=CBACT04C.cbl:122\n\nOther paragraphs you can read with get_paragraph: (main), 0000-TCATBALF-OPEN, 0100-XREFFILE-OPEN, 0200-DISCGRP-OPEN, 0300-ACCTFILE-OPEN, 0400-TRANFILE-OPEN, 1000-TCATBALF-GET-NEXT, 1050-UPDATE-ACCOUNT, 1100-GET-ACCT-DATA, 1110-GET-XREF-DATA, 1300-COMPUTE-INTEREST, 1300-B-WRITE-TX, 1400-COMPUTE-FEES, 9000-TCATBALF-CLOSE, 9100-XREFFILE-CLOSE, 9200-DISCGRP-CLOSE, 9300-ACCTFILE-CLOSE, 9400-TRANFILE-CLOSE, Z-GET-DB2-FORMAT-TIMESTAMP, 9999-ABEND-PROGRAM, 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "role": "assistant",
+    "content": [
+     {
+      "type": "thinking",
+      "thinking": "",
+      "signature": "CAQS2gUKEAgTGAI4AUIIdGhpbmtpbmcSDEmaB1bdaF6bwc5blhoM98RRAfQo00jwhEukIjBi91lAyH2ifwyEgwK14664CkL1zdJBRiDp7tbI+99g/CPgAgcIzUZfdtYNabrzGfwq9wTFUIYn51yGYow0lWFzwuvyEe67Vxt0DrjOfPUwRAgGlDIQmuGyil6fQYsDfNHyS2091rRQuT54CQDSUBZSUu+0BiOWFh34MhdLstrgPQQxxJd3GdXkONU4ANzLSj0SC/zWm9vHYeidK3b3IAWK+xOA66Xa45caa0Q1TzlzoHIrQOVT0FegII5w5P2yHnelJbMUjeIWLnI2Haqd36bdUAepjLt5ykK+iMicijrpulM2aydlLoo5cjZuNlQoJCOe/zGFRBRtnk57tu9sfXYGsiQQS6LdE0yPIaOtKuQ4rPIdmZc3G9hG7bCb1FneUiIiI0f22ecbT4GcgTSOJ6B15MSFWTDrlvTqaND//hU88eCNScjhi6SLj9O+M0i+fAHeqqa8ZYh3MNO6UqJt7zR7e8D8degflRzp2tfPUCqO6zVXph9m/BkgVIkDr3wJIJ4bHNRv7chzDg1Zqk9gKzxk0JXAEz8uTV3nG6L9Miayz/mdhEqxmeZC6vKQzaB5/klTwLz4kNKaml8XKTTvOV9GKoNiJXJtvwOGTFIokW5t1hzNHAc4a/f/WFnTiPD1z0zCzy9E2ztKbpxGLvcBC7U+Wv0EZInWOmAQWQodgkGlCFLP0UE5L00PMpInHd/FoJj/xni6K4qn3GIo97GJ9y5/EkNUttU9/EfIQRtWoT4nEOJwhkE9Feuy7JCSOOacHhAGUS4G/+aoobxnfdkY+JcmEzHkTDr7SVDznHANBJj0UqxBCSbhhHisYohmMz2a10O5XWb8qSizZkWHEEOWKIyhQGbjcOOQ+B9HuW2DDMwELs/vYgc0lfbz3hWnADmVQYg42bZ5ibxOVXgUGAE="
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_0134X5oS51QrQb89YUwsEkvY",
+      "name": "get_paragraph",
+      "input": {
+       "name": "(main)"
+      }
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_018L49uNRJjHkytsoGBUVv4B",
+      "name": "get_lines",
+      "input": {
+       "file": "CBACT04C.cbl",
+       "first": 74,
+       "last": 86
+      }
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_01GiyenXEp47mwH4va8tBv7m",
+      "name": "get_lines",
+      "input": {
+       "file": "CVTRA02Y.cpy",
+       "first": 1,
+       "last": 15
+      }
+     }
+    ]
+   },
+   {
+    "role": "user",
+    "content": [
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_0134X5oS51QrQb89YUwsEkvY",
+      "content": "--- CBACT04C.cbl paragraph (main) (lines 181-232) ---\n 181            DISPLAY 'START OF EXECUTION OF PROGRAM CBACT04C'.\n 182            PERFORM 0000-TCATBALF-OPEN.\n 183            PERFORM 0100-XREFFILE-OPEN.\n 184            PERFORM 0200-DISCGRP-OPEN.\n 185            PERFORM 0300-ACCTFILE-OPEN.\n 186            PERFORM 0400-TRANFILE-OPEN.\n 187 \n 188            PERFORM UNTIL END-OF-FILE = 'Y'\n 189                IF  END-OF-FILE = 'N'\n 190                    PERFORM 1000-TCATBALF-GET-NEXT\n 191                    IF  END-OF-FILE = 'N'\n 192                      ADD 1 TO WS-RECORD-COUNT\n 193                      DISPLAY TRAN-CAT-BAL-RECORD\n 194                      IF TRANCAT-ACCT-ID NOT= WS-LAST-ACCT-NUM\n 195                        IF WS-FIRST-TIME NOT = 'Y'\n 196                           PERFORM 1050-UPDATE-ACCOUNT\n 197                        ELSE\n 198                           MOVE 'N' TO WS-FIRST-TIME\n 199                        END-IF\n 200                        MOVE 0 TO WS-TOTAL-INT\n 201                        MOVE TRANCAT-ACCT-ID TO WS-LAST-ACCT-NUM\n 202                        MOVE TRANCAT-ACCT-ID TO FD-ACCT-ID\n 203                        PERFORM 1100-GET-ACCT-DATA\n 204                        MOVE TRANCAT-ACCT-ID TO FD-XREF-ACCT-ID\n 205                        PERFORM 1110-GET-XREF-DATA\n 206                      END-IF\n 207       *              DISPLAY 'ACCT-GROUP-ID: ' ACCT-GROUP-ID\n 208       *              DISPLAY 'TRANCAT-CD: ' TRANCAT-CD\n 209       *              DISPLAY 'TRANCAT-TYPE-CD: ' TRANCAT-TYPE-CD\n 210                      MOVE ACCT-GROUP-ID TO FD-DIS-ACCT-GROUP-ID\n 211                      MOVE TRANCAT-CD TO FD-DIS-TRAN-CAT-CD\n 212                      MOVE TRANCAT-TYPE-CD TO FD-DIS-TRAN-TYPE-CD\n 213                      PERFORM 1200-GET-INTEREST-RATE\n 214                      IF DIS-INT-RATE NOT = 0\n 215                        PERFORM 1300-COMPUTE-INTEREST\n 216                        PERFORM 1400-COMPUTE-FEES\n 217                      END-IF\n 218                    END-IF\n 219                ELSE\n 220                     PERFORM 1050-UPDATE-ACCOUNT\n 221                END-IF\n 222            END-PERFORM.\n 223 \n 224            PERFORM 9000-TCATBALF-CLOSE.\n 225            PERFORM 9100-XREFFILE-CLOSE.\n 226            PERFORM 9200-DISCGRP-CLOSE.\n 227            PERFORM 9300-ACCTFILE-CLOSE.\n 228            PERFORM 9400-TRANFILE-CLOSE.\n 229 \n 230            DISPLAY 'END OF EXECUTION OF PROGRAM CBACT04C'.\n 231 \n 232            GOBACK.",
+      "is_error": false
+     },
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_018L49uNRJjHkytsoGBUVv4B",
+      "content": "  74            05 FD-XREF-FILLER                    PIC X(14).\n  75 \n  76        FD  DISCGRP-FILE.\n  77        01  FD-DISCGRP-REC.\n  78            05 FD-DISCGRP-KEY.\n  79               10 FD-DIS-ACCT-GROUP-ID           PIC X(10).\n  80               10 FD-DIS-TRAN-TYPE-CD            PIC X(02).\n  81               10 FD-DIS-TRAN-CAT-CD             PIC 9(04).\n  82            05 FD-DISCGRP-DATA                   PIC X(34).\n  83 \n  84        FD  ACCOUNT-FILE.\n  85        01  FD-ACCTFILE-REC.\n  86            05 FD-ACCT-ID                        PIC 9(11).",
+      "is_error": false
+     },
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_01GiyenXEp47mwH4va8tBv7m",
+      "content": "   1       *****************************************************************\n   2       *    Data-structure for disclosure group (RECLN = 50)\n   3       *****************************************************************\n   4        01  DIS-GROUP-RECORD.\n   5            05  DIS-GROUP-KEY.\n   6               10 DIS-ACCT-GROUP-ID                     PIC X(10).\n   7               10 DIS-TRAN-TYPE-CD                      PIC X(02).\n   8               10 DIS-TRAN-CAT-CD                       PIC 9(04).\n   9            05  DIS-INT-RATE                            PIC S9(04)V99.\n  10            05  FILLER                                  PIC X(28).\n  11       *\n  12       * Ver: CardDemo_v1.0-15-g27d6c6f-68 Date: 2022-07-19 23:16:00 CDT\n  13       *\n  14 ",
+      "is_error": false
+     }
+    ]
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "high",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "rules": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "title": {
+          "type": "string"
+         },
+         "paragraph": {
+          "type": "string",
+          "description": "Main paragraph implementing the rule"
+         },
+         "summary": {
+          "type": "string",
+          "description": "One or two sentences for the catalog"
+         },
+         "given": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "also": {
+             "type": "array",
+             "description": "Extra spans, only when the fact needs a second place (for example the statement in the program plus the field's PIC declaration in a copybook). At most 2; usually empty.",
+             "items": {
+              "type": "object",
+              "properties": {
+               "file": {
+                "type": "string"
+               },
+               "lines": {
+                "type": "array",
+                "items": {
+                 "type": "integer"
+                },
+                "description": "[first, last] line numbers, inclusive"
+               }
+              },
+              "required": [
+               "file",
+               "lines"
+              ],
+              "additionalProperties": false
+             }
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in one of the cited spans"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in one of the cited spans"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "also",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "when": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "also": {
+             "type": "array",
+             "description": "Extra spans, only when the fact needs a second place (for example the statement in the program plus the field's PIC declaration in a copybook). At most 2; usually empty.",
+             "items": {
+              "type": "object",
+              "properties": {
+               "file": {
+                "type": "string"
+               },
+               "lines": {
+                "type": "array",
+                "items": {
+                 "type": "integer"
+                },
+                "description": "[first, last] line numbers, inclusive"
+               }
+              },
+              "required": [
+               "file",
+               "lines"
+              ],
+              "additionalProperties": false
+             }
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in one of the cited spans"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in one of the cited spans"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "also",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "then": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "also": {
+             "type": "array",
+             "description": "Extra spans, only when the fact needs a second place (for example the statement in the program plus the field's PIC declaration in a copybook). At most 2; usually empty.",
+             "items": {
+              "type": "object",
+              "properties": {
+               "file": {
+                "type": "string"
+               },
+               "lines": {
+                "type": "array",
+                "items": {
+                 "type": "integer"
+                },
+                "description": "[first, last] line numbers, inclusive"
+               }
+              },
+              "required": [
+               "file",
+               "lines"
+              ],
+              "additionalProperties": false
+             }
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in one of the cited spans"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in one of the cited spans"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "also",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "notes": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          },
+          "description": "Observations for the human reviewer that no cited line can prove, such as something the code never checks or never resets. Not verified and not given to the port. Usually empty."
+         }
+        },
+        "required": [
+         "title",
+         "paragraph",
+         "summary",
+         "given",
+         "when",
+         "then",
+         "notes"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "rules"
+     ],
+     "additionalProperties": false
+    }
+   }
+  },
+  "tools": [
+   {
+    "name": "get_paragraph",
+    "description": "Numbered source of one paragraph of the program.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "name": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   },
+   {
+    "name": "get_lines",
+    "description": "Numbered source lines [first, last] of the program or a copybook (file e.g. 'CVACT01Y.cpy'; default the program).",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "file": {
+       "type": "string"
+      },
+      "first": {
+       "type": "integer"
+      },
+      "last": {
+       "type": "integer"
+      }
+     },
+     "required": [
+      "file",
+      "first",
+      "last"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   },
+   {
+    "name": "get_field",
+    "description": "Layout of a data item: PIC, offset, size, record, declaring file and line.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "name": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   }
+  ]
+ },
+ "response": {
+  "id": "msg_011CgpdZZetzGmvosVoawzSZ",
+  "container": null,
+  "content": [
+   {
+    "signature": "CAQSzQoKEAgTGAI4AUIIdGhpbmtpbmcSDI7JGfuiJ0QFRIjPmhoMYNBCi+Y6fwhgBgCsIjC8P+a66gTYojgwFKVrH0C6EYEjvIm88wTvW8V3Rj+aunRLqoBXgMddhpsgAOfoR2Iq6gmitQYA7VUpjDruN57lJtmRnC9AUlqf4PvsBArNaj2H7VyHoTcy7mTxtkzsBScouYM389nWeqv2sxW9mnJDwyISmzu3s8ZHE4Q9h1NQUNjV1hDPO2t0N2Aheh3SQHXaXeDlu3fPTLFrt+ici0tzqJ9L2fIOpVqbw50x/omuRMTvvhnAng9otz9RUI621B3QmPrPF79GPI73pI/WLR532764/IMeBWwr1Ydx0w+72zxrXcn24RWR6ZVo+VJ1KCSC/t4VBeARlldNSvaiErKxHcxGJBFOFARcwLxmzwBbmtaonuDNI5GBJ95oMUmRnWM/tvnDcqK3Tb3mJXhm4rLpi9SQR2uctDZrQnYjY7A5e+5YduxOkL/l0EHdVoya6KtLApCPfAgfec6LBV6zEK4YQ+CT0GFW2nclJwHufle+i45PYspTjN/eb0VZVXptKxIPI2B7nD730QaiHU3ExsMcSeeD2YPYXMJTE4FMyCCEhH9sEKH2QCjTmzNhk4XL8jRkiL34F+N+GmNThP7NfyKShq1XZti31pj4EU5EuvLJGqHXgPko+WfYmJzXZczrj4F6xRQEhYPgXicskDY3JwKHGjYpiCt/W8hfBtW+Oh+nGuFlLGog3gu97rWKYD5FLOq89dCl1HzID/CT688qS8U1e9BOdW6OjcAe4RmT7jQ/+s5tOSBAGfDKBqHliuJOftpD/Y2gCH4fZZ/VyKdj3GV5V+6a2DFFCfqKTPmTCL3IhYYw5/e+68HauaWGNSZBsnFxbYGe5+mXiiOxlNXfUETRLQydbFaeO8XwN3nhUsdPFlABWmXi+TB8YwieAT+12x5ORO4tYQuOrQDlaER9yvt7/bJJzWbxDRU6JVNC08xDFBriFDLQkRPykLvQbs7fkDXy2MyFOKdMG9aTPBcZgQD93GqrAVqDczOPMfyDOpvj/PW3mZD/HtXnjjfRLijXTgf5jMfzMgHXv3Lpa0uNnWwGgFBAAN6Ys7RPj9XKlsiv7kfcIXZkrcgxjGrCAgNzGDRRijUhviray5zmYkwrWCtmnN9kQPqG3SokMxXmRLanyaaUKJhi0rRZeNGA+7OJtF3kAYjLEAJGajDdJpmeJeyDkIuDjp/gmSdrYHes7y5twHfd9oKKxghejZR6yBqVfk4v6jtlTsj2iz8N8t7QJoeXUsccxwajVLcTUlOghju4wtgTTdGbLbrHIOkzIUEz9Imec88OMcX45umvtuYfz2yUV9WydUD4EwoTubuAKYxcCNtWd3WQ5x3caYFQWe13rOEZGIXrfa3iM+i8OJ2u4boE2Hzgw1dIMDaBmBpLY1cbquLE+FApLqLfUY5ScIBQm3MZTS5b7cohzM4g8uSUo7V60QIqvxfw8v+dS4wJTci/3VKXbVD+v2/SFKRBuHP20eQr9coQqg6Smu0iotODMtZ2cpO0n7KdyItGQJ1WUgz4pO4177ulD1ZeU3pEczM4EtzdCg1polmA7CLZKbNySSv9Kux/BCFF5pgb81L+mS3J0ZGUXpOCRonmTs1ZdZwLeE+/mWQN6TMuD7iqr243+yxZGETVyld1IlkNNKe6YX211BQIw70bTFW+SRftfqGOZyj1UO/YwAqSUpHT9JckzrKgwGzVnYZ0ct2stqmuw83g552n5wjrrWeDmdG+gdE2u64U2cEAYVIBfmgqmVfqGAE=",
+    "thinking": "",
+    "type": "thinking"
+   },
+   {
+    "text": "{\"rules\":[{\"title\":\"Interest rate lookup by account group, with fallback to the DEFAULT disclosure group\",\"paragraph\":\"1200-GET-INTEREST-RATE\",\"summary\":\"For each category balance, the program looks up the interest rate in the disclosure group file using the account's group ID, transaction type code and transaction category code. If no record matches, it tries again with group ID 'DEFAULT' and the same type and category. Any other read failure stops the program. Interest and fees are calculated only when the rate found is not zero.\",\"given\":[{\"text\":\"The disclosure group key is built from three parts in this order: the account's group ID (10 characters), the transaction type code (2 characters) and the transaction category code (4 digits).\",\"file\":\"CBACT04C.cbl\",\"lines\":[210,212],\"also\":[{\"file\":\"CBACT04C.cbl\",\"lines\":[78,81]}],\"fields\":[\"ACCT-GROUP-ID\",\"FD-DIS-ACCT-GROUP-ID\",\"TRANCAT-CD\",\"FD-DIS-TRAN-CAT-CD\",\"TRANCAT-TYPE-CD\",\"FD-DIS-TRAN-TYPE-CD\"],\"literals\":[]},{\"text\":\"The interest rate on the disclosure group record is a signed number with 4 integer digits and 2 decimal places.\",\"file\":\"CVTRA02Y.cpy\",\"lines\":[9,9],\"also\":[],\"fields\":[\"DIS-INT-RATE\"],\"literals\":[]}],\"when\":[{\"text\":\"The program reads the disclosure group file by that key into the disclosure group record.\",\"file\":\"CBACT04C.cbl\",\"lines\":[416,420],\"also\":[],\"fields\":[\"DISCGRP-FILE\",\"DIS-GROUP-RECORD\"],\"literals\":[\"DISCLOSURE GROUP RECORD MISSING\",\"TRY WITH DEFAULT GROUP CODE\"]}],\"then\":[{\"text\":\"If the read status is anything other than '00' (found) or '23' (not found), the program displays 'ERROR READING DISCLOSURE GROUP FILE' and abends.\",\"file\":\"CBACT04C.cbl\",\"lines\":[422,435],\"also\":[],\"fields\":[\"DISCGRP-STATUS\",\"APPL-RESULT\",\"APPL-AOK\"],\"literals\":[\"00\",\"23\",\"ERROR READING DISCLOSURE GROUP FILE\"]},{\"text\":\"If the record is not found (status '23'), the program replaces the group ID in the key with 'DEFAULT', padded with spaces to 10 characters. The type and category codes stay the same, and the program reads the default record.\",\"file\":\"CBACT04C.cbl\",\"lines\":[436,439],\"also\":[{\"file\":\"CBACT04C.cbl\",\"lines\":[443,444]}],\"fields\":[\"DISCGRP-STATUS\",\"FD-DIS-ACCT-GROUP-ID\",\"DISCGRP-FILE\",\"DIS-GROUP-RECORD\"],\"literals\":[\"23\",\"DEFAULT\"]},{\"text\":\"If the DEFAULT record cannot be read (status not '00'), the program displays 'ERROR READING DEFAULT DISCLOSURE GROUP' and abends.\",\"file\":\"CBACT04C.cbl\",\"lines\":[446,459],\"also\":[],\"fields\":[\"DISCGRP-STATUS\",\"APPL-RESULT\",\"APPL-AOK\"],\"literals\":[\"00\",\"ERROR READING DEFAULT DISCLOSURE GROUP\"]},{\"text\":\"Interest and fees are calculated for the category balance only when the interest rate found is not zero. When the rate is zero, the balance is skipped.\",\"file\":\"CBACT04C.cbl\",\"lines\":[214,217],\"also\":[],\"fields\":[\"DIS-INT-RATE\"],\"literals\":[]}],\"notes\":[]}]}",
+    "type": "text"
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 8329,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 8329,
+     "model": null,
+     "output_tokens": 1572,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 1572,
+   "output_tokens_details": {
+    "thinking_tokens": 302
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}

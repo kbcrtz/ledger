@@ -1,0 +1,466 @@
+{
+ "agent": "extractor",
+ "key": "1c2178515e6101894466dc5d9ea2c7261157505b9a7f1fced2c0c17a3b73a1ed",
+ "seconds": 13.2,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 64000,
+  "system": "You are the extractor in Ledger, a system that documents legacy COBOL business rules so that a modern port can be written from the rules alone and checked against the running original.\n\nWrite business rules as Given/When/Then scenarios in plain English that a policy owner can read and approve. Hard requirements:\n\n- Every clause cites the exact source lines it comes from (file plus [first, last] line numbers from the numbered listing; keep spans tight, normally 1-12 lines). If a statement cannot be sourced to specific lines, leave it out.\n- When a fact needs a second place, add it under \"also\" (at most 2 extra spans, each with its own file and [first, last]). Typical case: the statement in the program that does something (a COMPUTE, a reference modification like (1:10), a MOVE) plus the field's PIC declaration in a copybook that fixes its size or precision. A clause is judged only on the lines it cites, so cite every line its claim depends on.\n- Every clause lists the COBOL data names (\"fields\") and literal values (\"literals\": codes, messages, constants, without quotes) it relies on. Each listed field and literal must literally appear in one of the cited spans; a checker will reject the clause otherwise. Cite a declaration line (for example a PIC clause in WORKING-STORAGE) when the clause depends on a field's size or precision.\n- Describe what the code actually does, not what it was probably meant to do. If the code has surprising behaviour (a later check overwriting an earlier result, a branch that can never run, arithmetic that truncates, a check that ignores something), state that behaviour precisely in the rule.\n- Separate business logic from file plumbing. Opening/closing files, file-status checks, and abend handling are plumbing; leave them out unless they change a business outcome. Balance and record updates (for example 2700-*, 2800-*, 1050-* paragraphs) are business logic: a port that skips them would produce different output files.\n- Be precise enough that a developer who never sees the COBOL could reproduce the outputs exactly: name the output fields set, the exact codes and message texts, the order of checks, signs and arithmetic (COBOL truncates toward zero unless ROUNDED is written), and which records are created versus updated.\n- Keep each clause to one checkable fact. When a fact depends on a record layout, field size or precision, put it in its own clause that cites the declaration. Do not restate in one clause what another clause (or another part of the program) establishes.\n- Keep rules small: at most 8 clauses per rule. If a behaviour needs more, keep only the clauses that change the program's outputs.\n- Do not write clauses that claim something is absent or never happens (\"never checks the active status\", \"the counter is never reset\", \"no other code reads it\"). Cited lines cannot prove an absence. Put such observations in \"notes\" instead; notes are shown to the reviewer as unverified and are not given to the port.\n- Use the field names exactly as declared. Use the tools to read any other paragraph or field layout you need; do not guess line numbers.\n\nReturn only rules for the unit you are given, at most the number requested, each one a distinct behaviour with an observable effect on the program's outputs.\n\nYou are now repairing one rule whose clauses failed verification. For each failed clause, fix the citation (lines, fields, literals, extra spans under \"also\") or the wording so it is exactly supported by the cited code, move it to \"notes\" if it states an absence the code cannot show, or remove it if it cannot be sourced. Keep passing clauses exactly unchanged, character for character: unchanged clauses keep their verdict and are not re-checked. Return the corrected rule as a single-element \"rules\" array.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Program: CBACT04C (CBACT04C.cbl, 653 lines). Copybooks: CVTRA01Y, CVACT03Y, CVTRA02Y, CVACT01Y, CVTRA05Y.\n\nUnit: CBACT04C-main. Focus: The top-level loop over category balance records grouped by account, and when and how each account record is updated with accumulated interest. Rate lookup and the interest computation itself are covered by other units.\nReturn at most 2 rule(s).\n\nFiles (FILE-CONTROL):\n  TCATBAL-FILE: ASSIGN TCATBALF, INDEXED SEQUENTIAL, key FD-TRAN-CAT-KEY\n  XREF-FILE: ASSIGN XREFFILE, INDEXED RANDOM, key FD-XREF-CARD-NUM, alternate key FD-XREF-ACCT-ID\n  ACCOUNT-FILE: ASSIGN ACCTFILE, INDEXED RANDOM, key FD-ACCT-ID\n  DISCGRP-FILE: ASSIGN DISCGRP, INDEXED RANDOM, key FD-DISCGRP-KEY\n  TRANSACT-FILE: ASSIGN TRANSACT, SEQUENTIAL SEQUENTIAL, key None\n\nSource for this unit (root paragraph(s) and their non-plumbing callees, with line numbers):\n\n--- CBACT04C.cbl paragraph (main) (lines 181-232) ---\n 181            DISPLAY 'START OF EXECUTION OF PROGRAM CBACT04C'.\n 182            PERFORM 0000-TCATBALF-OPEN.\n 183            PERFORM 0100-XREFFILE-OPEN.\n 184            PERFORM 0200-DISCGRP-OPEN.\n 185            PERFORM 0300-ACCTFILE-OPEN.\n 186            PERFORM 0400-TRANFILE-OPEN.\n 187 \n 188            PERFORM UNTIL END-OF-FILE = 'Y'\n 189                IF  END-OF-FILE = 'N'\n 190                    PERFORM 1000-TCATBALF-GET-NEXT\n 191                    IF  END-OF-FILE = 'N'\n 192                      ADD 1 TO WS-RECORD-COUNT\n 193                      DISPLAY TRAN-CAT-BAL-RECORD\n 194                      IF TRANCAT-ACCT-ID NOT= WS-LAST-ACCT-NUM\n 195                        IF WS-FIRST-TIME NOT = 'Y'\n 196                           PERFORM 1050-UPDATE-ACCOUNT\n 197                        ELSE\n 198                           MOVE 'N' TO WS-FIRST-TIME\n 199                        END-IF\n 200                        MOVE 0 TO WS-TOTAL-INT\n 201                        MOVE TRANCAT-ACCT-ID TO WS-LAST-ACCT-NUM\n 202                        MOVE TRANCAT-ACCT-ID TO FD-ACCT-ID\n 203                        PERFORM 1100-GET-ACCT-DATA\n 204                        MOVE TRANCAT-ACCT-ID TO FD-XREF-ACCT-ID\n 205                        PERFORM 1110-GET-XREF-DATA\n 206                      END-IF\n 207       *              DISPLAY 'ACCT-GROUP-ID: ' ACCT-GROUP-ID\n 208       *              DISPLAY 'TRANCAT-CD: ' TRANCAT-CD\n 209       *              DISPLAY 'TRANCAT-TYPE-CD: ' TRANCAT-TYPE-CD\n 210                      MOVE ACCT-GROUP-ID TO FD-DIS-ACCT-GROUP-ID\n 211                      MOVE TRANCAT-CD TO FD-DIS-TRAN-CAT-CD\n 212                      MOVE TRANCAT-TYPE-CD TO FD-DIS-TRAN-TYPE-CD\n 213                      PERFORM 1200-GET-INTEREST-RATE\n 214                      IF DIS-INT-RATE NOT = 0\n 215                        PERFORM 1300-COMPUTE-INTEREST\n 216                        PERFORM 1400-COMPUTE-FEES\n 217                      END-IF\n 218                    END-IF\n 219                ELSE\n 220                     PERFORM 1050-UPDATE-ACCOUNT\n 221                END-IF\n 222            END-PERFORM.\n 223 \n 224            PERFORM 9000-TCATBALF-CLOSE.\n 225            PERFORM 9100-XREFFILE-CLOSE.\n 226            PERFORM 9200-DISCGRP-CLOSE.\n 227            PERFORM 9300-ACCTFILE-CLOSE.\n 228            PERFORM 9400-TRANFILE-CLOSE.\n 229 \n 230            DISPLAY 'END OF EXECUTION OF PROGRAM CBACT04C'.\n 231 \n 232            GOBACK.\n\n--- CBACT04C.cbl paragraph 1000-TCATBALF-GET-NEXT (lines 325-348) ---\n 325        1000-TCATBALF-GET-NEXT.\n 326            READ TCATBAL-FILE INTO TRAN-CAT-BAL-RECORD.\n 327            IF  TCATBALF-STATUS  = '00'\n 328                MOVE 0 TO APPL-RESULT\n 329            ELSE\n 330                IF  TCATBALF-STATUS  = '10'\n 331                    MOVE 16 TO APPL-RESULT\n 332                ELSE\n 333                    MOVE 12 TO APPL-RESULT\n 334                END-IF\n 335            END-IF\n 336            IF  APPL-AOK\n 337                CONTINUE\n 338            ELSE\n 339                IF  APPL-EOF\n 340                    MOVE 'Y' TO END-OF-FILE\n 341                ELSE\n 342                    DISPLAY 'ERROR READING TRANSACTION CATEGORY FILE'\n 343                    MOVE TCATBALF-STATUS TO IO-STATUS\n 344                    PERFORM 9910-DISPLAY-IO-STATUS\n 345                    PERFORM 9999-ABEND-PROGRAM\n 346                END-IF\n 347            END-IF\n 348            EXIT.\n\n--- CBACT04C.cbl paragraph 1050-UPDATE-ACCOUNT (lines 350-370) ---\n 350        1050-UPDATE-ACCOUNT.\n 351       * Update the balances in account record to reflect posted trans.\n 352            ADD WS-TOTAL-INT  TO ACCT-CURR-BAL\n 353            MOVE 0 TO ACCT-CURR-CYC-CREDIT\n 354            MOVE 0 TO ACCT-CURR-CYC-DEBIT\n 355 \n 356            REWRITE FD-ACCTFILE-REC FROM  ACCOUNT-RECORD\n 357            IF  ACCTFILE-STATUS  = '00'\n 358                MOVE 0 TO APPL-RESULT\n 359            ELSE\n 360                MOVE 12 TO APPL-RESULT\n 361            END-IF\n 362            IF  APPL-AOK\n 363                CONTINUE\n 364            ELSE\n 365                DISPLAY 'ERROR RE-WRITING ACCOUNT FILE'\n 366                MOVE ACCTFILE-STATUS  TO IO-STATUS\n 367                PERFORM 9910-DISPLAY-IO-STATUS\n 368                PERFORM 9999-ABEND-PROGRAM\n 369            END-IF\n 370            EXIT.\n\n--- CBACT04C.cbl paragraph 1100-GET-ACCT-DATA (lines 372-391) ---\n 372        1100-GET-ACCT-DATA.\n 373            READ ACCOUNT-FILE INTO ACCOUNT-RECORD\n 374                INVALID KEY\n 375                   DISPLAY 'ACCOUNT NOT FOUND: ' FD-ACCT-ID\n 376            END-READ\n 377 \n 378            IF  ACCTFILE-STATUS  = '00'\n 379                MOVE 0 TO APPL-RESULT\n 380            ELSE\n 381                MOVE 12 TO APPL-RESULT\n 382            END-IF\n 383            IF  APPL-AOK\n 384                CONTINUE\n 385            ELSE\n 386                DISPLAY 'ERROR READING ACCOUNT FILE'\n 387                MOVE ACCTFILE-STATUS  TO IO-STATUS\n 388                PERFORM 9910-DISPLAY-IO-STATUS\n 389                PERFORM 9999-ABEND-PROGRAM\n 390            END-IF\n 391            EXIT.\n\n--- CBACT04C.cbl paragraph 1110-GET-XREF-DATA (lines 393-413) ---\n 393        1110-GET-XREF-DATA.\n 394            READ XREF-FILE INTO CARD-XREF-RECORD\n 395             KEY IS FD-XREF-ACCT-ID\n 396                INVALID KEY\n 397                   DISPLAY 'ACCOUNT NOT FOUND: ' FD-XREF-ACCT-ID\n 398            END-READ\n 399 \n 400            IF  XREFFILE-STATUS   = '00'\n 401                MOVE 0 TO APPL-RESULT\n 402            ELSE\n 403                MOVE 12 TO APPL-RESULT\n 404            END-IF\n 405            IF  APPL-AOK\n 406                CONTINUE\n 407            ELSE\n 408                DISPLAY 'ERROR READING XREF FILE'\n 409                MOVE XREFFILE-STATUS  TO IO-STATUS\n 410                PERFORM 9910-DISPLAY-IO-STATUS\n 411                PERFORM 9999-ABEND-PROGRAM\n 412            END-IF\n 413            EXIT.\n\n--- CBACT04C.cbl paragraph 1200-GET-INTEREST-RATE (lines 415-440) ---\n 415        1200-GET-INTEREST-RATE.\n 416            READ DISCGRP-FILE INTO DIS-GROUP-RECORD\n 417                 INVALID KEY\n 418                    DISPLAY 'DISCLOSURE GROUP RECORD MISSING'\n 419                    DISPLAY 'TRY WITH DEFAULT GROUP CODE'\n 420            END-READ.\n 421 \n 422            IF  DISCGRP-STATUS  = '00'  OR '23'\n 423                MOVE 0 TO APPL-RESULT\n 424            ELSE\n 425                MOVE 12 TO APPL-RESULT\n 426            END-IF\n 427 \n 428            IF  APPL-AOK\n 429                CONTINUE\n 430            ELSE\n 431                DISPLAY 'ERROR READING DISCLOSURE GROUP FILE'\n 432                MOVE DISCGRP-STATUS  TO IO-STATUS\n 433                PERFORM 9910-DISPLAY-IO-STATUS\n 434                PERFORM 9999-ABEND-PROGRAM\n 435            END-IF\n 436            IF  DISCGRP-STATUS  = '23'\n 437                MOVE 'DEFAULT' TO FD-DIS-ACCT-GROUP-ID\n 438                PERFORM 1200-A-GET-DEFAULT-INT-RATE\n 439            END-IF\n 440            EXIT.\n\n--- CBACT04C.cbl paragraph 1300-COMPUTE-INTEREST (lines 462-470) ---\n 462        1300-COMPUTE-INTEREST.\n 463 \n 464            COMPUTE WS-MONTHLY-INT\n 465             = ( TRAN-CAT-BAL * DIS-INT-RATE) / 1200\n 466 \n 467            ADD WS-MONTHLY-INT  TO WS-TOTAL-INT\n 468            PERFORM 1300-B-WRITE-TX.\n 469 \n 470            EXIT.\n\n--- CBACT04C.cbl paragraph 1400-COMPUTE-FEES (lines 518-520) ---\n 518        1400-COMPUTE-FEES.\n 519       * To be implemented\n 520            EXIT.\n\n--- CBACT04C.cbl paragraph 1200-A-GET-DEFAULT-INT-RATE (lines 443-460) ---\n 443        1200-A-GET-DEFAULT-INT-RATE.\n 444            READ DISCGRP-FILE INTO DIS-GROUP-RECORD\n 445 \n 446            IF  DISCGRP-STATUS  = '00'\n 447                MOVE 0 TO APPL-RESULT\n 448            ELSE\n 449                MOVE 12 TO APPL-RESULT\n 450            END-IF\n 451 \n 452            IF  APPL-AOK\n 453                CONTINUE\n 454            ELSE\n 455                DISPLAY 'ERROR READING DEFAULT DISCLOSURE GROUP'\n 456                MOVE DISCGRP-STATUS  TO IO-STATUS\n 457                PERFORM 9910-DISPLAY-IO-STATUS\n 458                PERFORM 9999-ABEND-PROGRAM\n 459            END-IF\n 460            EXIT.\n\n--- CBACT04C.cbl paragraph 1300-B-WRITE-TX (lines 473-515) ---\n 473        1300-B-WRITE-TX.\n 474            ADD 1 TO WS-TRANID-SUFFIX\n 475 \n 476            STRING PARM-DATE,\n 477                   WS-TRANID-SUFFIX\n 478              DELIMITED BY SIZE\n 479              INTO TRAN-ID\n 480            END-STRING.\n 481 \n 482            MOVE '01'                 TO TRAN-TYPE-CD\n 483            MOVE '05'                 TO TRAN-CAT-CD\n 484            MOVE 'System'             TO TRAN-SOURCE\n 485            STRING 'Int. for a/c ' ,\n 486                   ACCT-ID\n 487                   DELIMITED BY SIZE\n 488             INTO TRAN-DESC\n 489            END-STRING\n 490            MOVE WS-MONTHLY-INT       TO TRAN-AMT\n 491            MOVE 0                    TO TRAN-MERCHANT-ID\n 492            MOVE SPACES               TO TRAN-MERCHANT-NAME\n 493            MOVE SPACES               TO TRAN-MERCHANT-CITY\n 494            MOVE SPACES               TO TRAN-MERCHANT-ZIP\n 495            MOVE XREF-CARD-NUM        TO TRAN-CARD-NUM\n 496            PERFORM Z-GET-DB2-FORMAT-TIMESTAMP\n 497            MOVE DB2-FORMAT-TS        TO TRAN-ORIG-TS\n 498            MOVE DB2-FORMAT-TS        TO TRAN-PROC-TS\n 499 \n 500            WRITE FD-TRANFILE-REC FROM TRAN-RECORD\n 501            IF  TRANFILE-STATUS   = '00'\n 502                MOVE 0 TO APPL-RESULT\n 503            ELSE\n 504                MOVE 12 TO APPL-RESULT\n 505            END-IF\n 506 \n 507            IF  APPL-AOK\n 508                CONTINUE\n 509            ELSE\n 510                DISPLAY 'ERROR WRITING TRANSACTION RECORD'\n 511                MOVE TRANFILE-STATUS   TO IO-STATUS\n 512                PERFORM 9910-DISPLAY-IO-STATUS\n 513                PERFORM 9999-ABEND-PROGRAM\n 514            END-IF\n 515            EXIT.\n\n--- CBACT04C.cbl paragraph Z-GET-DB2-FORMAT-TIMESTAMP (lines 613-626) ---\n 613        Z-GET-DB2-FORMAT-TIMESTAMP.\n 614            MOVE FUNCTION CURRENT-DATE TO COBOL-TS\n 615            MOVE COB-YYYY TO DB2-YYYY\n 616            MOVE COB-MM   TO DB2-MM\n 617            MOVE COB-DD   TO DB2-DD\n 618            MOVE COB-HH   TO DB2-HH\n 619            MOVE COB-MIN  TO DB2-MIN\n 620            MOVE COB-SS   TO DB2-SS\n 621            MOVE COB-MIL  TO DB2-MIL\n 622            MOVE '0000'   TO DB2-REST\n 623            MOVE '-' TO DB2-STREEP-1 DB2-STREEP-2 DB2-STREEP-3\n 624            MOVE '.' TO DB2-DOT-1 DB2-DOT-2 DB2-DOT-3\n 625       *    DISPLAY 'DB2-TIMESTAMP = ' DB2-FORMAT-TS\n 626            EXIT.\n\nLayouts of data names referenced above (from the deterministic parser):\nACCOUNT-RECORD                     group            record=ACCOUNT-RECORD offset=0 size=300 declared=CVACT01Y.cpy:4\nACCT-CURR-BAL                      S9(10)V9(2)      record=ACCOUNT-RECORD offset=12 size=12 declared=CVACT01Y.cpy:7\nACCT-CURR-CYC-CREDIT               S9(10)V9(2)      record=ACCOUNT-RECORD offset=78 size=12 declared=CVACT01Y.cpy:13\nACCT-CURR-CYC-DEBIT                S9(10)V9(2)      record=ACCOUNT-RECORD offset=90 size=12 declared=CVACT01Y.cpy:14\nACCT-GROUP-ID                      X(10)            record=ACCOUNT-RECORD offset=112 size=10 declared=CVACT01Y.cpy:16\nACCT-ID                            9(11)            record=ACCOUNT-RECORD offset=0 size=11 declared=CVACT01Y.cpy:5\nACCTFILE-STATUS                    group            record=ACCTFILE-STATUS offset=0 size=2 declared=CBACT04C.cbl:113\nAPPL-RESULT                        S9(9) COMP       record=APPL-RESULT offset=0 size=4 declared=CBACT04C.cbl:133\nCARD-XREF-RECORD                   group            record=CARD-XREF-RECORD offset=0 size=50 declared=CVACT03Y.cpy:4\nCOB-DD                             X(2)             record=COBOL-TS offset=6 size=2 declared=CBACT04C.cbl:144\nCOB-HH                             X(2)             record=COBOL-TS offset=8 size=2 declared=CBACT04C.cbl:145\nCOB-MIL                            X(2)             record=COBOL-TS offset=14 size=2 declared=CBACT04C.cbl:148\nCOB-MIN                            X(2)             record=COBOL-TS offset=10 size=2 declared=CBACT04C.cbl:146\nCOB-MM                             X(2)             record=COBOL-TS offset=4 size=2 declared=CBACT04C.cbl:143\nCOB-SS                             X(2)             record=COBOL-TS offset=12 size=2 declared=CBACT04C.cbl:147\nCOB-YYYY                           X(4)             record=COBOL-TS offset=0 size=4 declared=CBACT04C.cbl:142\nCOBOL-TS                           group            record=COBOL-TS offset=0 size=21 declared=CBACT04C.cbl:141\nDB2-DD                             X(2)             record=FILLER offset=8 size=2 declared=CBACT04C.cbl:156\nDB2-DOT-1                          X(1)             record=FILLER offset=13 size=1 declared=CBACT04C.cbl:159\nDB2-DOT-2                          X(1)             record=FILLER offset=16 size=1 declared=CBACT04C.cbl:161\nDB2-DOT-3                          X(1)             record=FILLER offset=19 size=1 declared=CBACT04C.cbl:163\nDB2-FORMAT-TS                      X(26)            record=DB2-FORMAT-TS offset=0 size=26 declared=CBACT04C.cbl:150\nDB2-HH                             X(2)             record=FILLER offset=11 size=2 declared=CBACT04C.cbl:158\nDB2-MIL                            9(2)             record=FILLER offset=20 size=2 declared=CBACT04C.cbl:164\nDB2-MIN                            X(2)             record=FILLER offset=14 size=2 declared=CBACT04C.cbl:160\nDB2-MM                             X(2)             record=FILLER offset=5 size=2 declared=CBACT04C.cbl:154\nDB2-REST                           X(4)             record=FILLER offset=22 size=4 declared=CBACT04C.cbl:165\nDB2-SS                             X(2)             record=FILLER offset=17 size=2 declared=CBACT04C.cbl:162\nDB2-STREEP-1                       X(1)             record=FILLER offset=4 size=1 declared=CBACT04C.cbl:153\nDB2-STREEP-2                       X(1)             record=FILLER offset=7 size=1 declared=CBACT04C.cbl:155\nDB2-STREEP-3                       X(1)             record=FILLER offset=10 size=1 declared=CBACT04C.cbl:157\nDB2-YYYY                           X(4)             record=FILLER offset=0 size=4 declared=CBACT04C.cbl:152\nDIS-GROUP-RECORD                   group            record=DIS-GROUP-RECORD offset=0 size=50 declared=CVTRA02Y.cpy:4\nDIS-INT-RATE                       S9(4)V9(2)       record=DIS-GROUP-RECORD offset=16 size=6 declared=CVTRA02Y.cpy:9\nDISCGRP-STATUS                     group            record=DISCGRP-STATUS offset=0 size=2 declared=CBACT04C.cbl:108\nEND-OF-FILE                        X(1)             record=END-OF-FILE offset=0 size=1 declared=CBACT04C.cbl:137\nFD-ACCT-ID                         9(11)            record=FD-ACCTFILE-REC offset=0 size=11 declared=CBACT04C.cbl:86\nFD-ACCTFILE-REC                    group            record=FD-ACCTFILE-REC offset=0 size=300 declared=CBACT04C.cbl:85\nFD-DIS-ACCT-GROUP-ID               X(10)            record=FD-DISCGRP-REC offset=0 size=10 declared=CBACT04C.cbl:79\nFD-DIS-TRAN-CAT-CD                 9(4)             record=FD-DISCGRP-REC offset=12 size=4 declared=CBACT04C.cbl:81\nFD-DIS-TRAN-TYPE-CD                X(2)             record=FD-DISCGRP-REC offset=10 size=2 declared=CBACT04C.cbl:80\nFD-TRANFILE-REC                    group            record=FD-TRANFILE-REC offset=0 size=350 declared=CBACT04C.cbl:90\nFD-XREF-ACCT-ID                    9(11)            record=FD-XREFFILE-REC offset=25 size=11 declared=CBACT04C.cbl:73\nIO-STATUS                          group            record=IO-STATUS offset=0 size=2 declared=CBACT04C.cbl:122\nPARM-DATE                          X(10)            record=EXTERNAL-PARMS offset=2 size=10 declared=CBACT04C.cbl:178\nTCATBALF-STATUS                    group            record=TCATBALF-STATUS offset=0 size=2 declared=CBACT04C.cbl:98\nTRAN-AMT                           S9(9)V9(2)       record=TRAN-RECORD offset=132 size=11 declared=CVTRA05Y.cpy:10\nTRAN-CARD-NUM                      X(16)            record=TRAN-RECORD offset=262 size=16 declared=CVTRA05Y.cpy:15\nTRAN-CAT-BAL                       S9(9)V9(2)       record=TRAN-CAT-BAL-RECORD offset=17 size=11 declared=CVTRA01Y.cpy:9\nTRAN-CAT-BAL-RECORD                group            record=TRAN-CAT-BAL-RECORD offset=0 size=50 declared=CVTRA01Y.cpy:4\nTRAN-CAT-CD                        9(4)             record=TRAN-RECORD offset=18 size=4 declared=CVTRA05Y.cpy:7\nTRAN-DESC                          X(100)           record=TRAN-RECORD offset=32 size=100 declared=CVTRA05Y.cpy:9\nTRAN-ID                            X(16)            record=TRAN-RECORD offset=0 size=16 declared=CVTRA05Y.cpy:5\nTRAN-MERCHANT-CITY                 X(50)            record=TRAN-RECORD offset=202 size=50 declared=CVTRA05Y.cpy:13\nTRAN-MERCHANT-ID                   9(9)             record=TRAN-RECORD offset=143 size=9 declared=CVTRA05Y.cpy:11\nTRAN-MERCHANT-NAME                 X(50)            record=TRAN-RECORD offset=152 size=50 declared=CVTRA05Y.cpy:12\nTRAN-MERCHANT-ZIP                  X(10)            record=TRAN-RECORD offset=252 size=10 declared=CVTRA05Y.cpy:14\nTRAN-ORIG-TS                       X(26)            record=TRAN-RECORD offset=278 size=26 declared=CVTRA05Y.cpy:16\nTRAN-PROC-TS                       X(26)            record=TRAN-RECORD offset=304 size=26 declared=CVTRA05Y.cpy:17\nTRAN-RECORD                        group            record=TRAN-RECORD offset=0 size=350 declared=CVTRA05Y.cpy:4\nTRAN-SOURCE                        X(10)            record=TRAN-RECORD offset=22 size=10 declared=CVTRA05Y.cpy:8\nTRAN-TYPE-CD                       X(2)             record=TRAN-RECORD offset=16 size=2 declared=CVTRA05Y.cpy:6\nTRANCAT-ACCT-ID                    9(11)            record=TRAN-CAT-BAL-RECORD offset=0 size=11 declared=CVTRA01Y.cpy:6\nTRANCAT-CD                         9(4)             record=TRAN-CAT-BAL-RECORD offset=13 size=4 declared=CVTRA01Y.cpy:8\nTRANCAT-TYPE-CD                    X(2)             record=TRAN-CAT-BAL-RECORD offset=11 size=2 declared=CVTRA01Y.cpy:7\nTRANFILE-STATUS                    group            record=TRANFILE-STATUS offset=0 size=2 declared=CBACT04C.cbl:118\nWS-FIRST-TIME                      X(1)             record=WS-MISC-VARS offset=33 size=1 declared=CBACT04C.cbl:170\nWS-LAST-ACCT-NUM                   X(11)            record=WS-MISC-VARS offset=0 size=11 declared=CBACT04C.cbl:167\nWS-MONTHLY-INT                     S9(9)V9(2)       record=WS-MISC-VARS offset=11 size=11 declared=CBACT04C.cbl:168\nWS-RECORD-COUNT                    9(9)             record=WS-COUNTERS offset=0 size=9 declared=CBACT04C.cbl:172\nWS-TOTAL-INT                       S9(9)V9(2)       record=WS-MISC-VARS offset=22 size=11 declared=CBACT04C.cbl:169\nWS-TRANID-SUFFIX                   9(6)             record=WS-COUNTERS offset=9 size=6 declared=CBACT04C.cbl:173\nXREF-CARD-NUM                      X(16)            record=CARD-XREF-RECORD offset=0 size=16 declared=CVACT03Y.cpy:5\nXREFFILE-STATUS                    group            record=XREFFILE-STATUS offset=0 size=2 declared=CBACT04C.cbl:103\n\nOther paragraphs you can read with get_paragraph: 0000-TCATBALF-OPEN, 0100-XREFFILE-OPEN, 0200-DISCGRP-OPEN, 0300-ACCTFILE-OPEN, 0400-TRANFILE-OPEN, 9000-TCATBALF-CLOSE, 9100-XREFFILE-CLOSE, 9200-DISCGRP-CLOSE, 9300-ACCTFILE-CLOSE, 9400-TRANFILE-CLOSE, 9999-ABEND-PROGRAM, 9910-DISPLAY-IO-STATUS\n\nRule to repair:\n{\n \"title\": \"Category balances are processed in account groups (control break on account ID)\",\n \"paragraph\": \"(main)\",\n \"summary\": \"Category balance records are read one by one in key order. When the account ID changes, the account loaded before is written back with its interest (except on the very first record), the interest total is reset to zero, and the new account and its card cross-reference are read. Every record, including the first of a group, then goes on to rate lookup, and interest is only calculated when the rate is not zero.\",\n \"given\": [\n  {\n   \"text\": \"Category balance records are read one at a time from the indexed category balance file, in key order. The key starts with the account ID, so all categories for one account come in together.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     325,\n     326\n    ]\n   },\n   \"also\": [\n    {\n     \"file\": \"CVTRA01Y.cpy\",\n     \"lines\": [\n      4,\n      9\n     ]\n    }\n   ],\n   \"fields\": [\n    \"TRAN-CAT-BAL-RECORD\",\n    \"TRANCAT-ACCT-ID\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"At program start the last-seen account number is spaces and the first-time flag is 'Y'.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     166,\n     170\n    ]\n   },\n   \"also\": [],\n   \"fields\": [\n    \"WS-LAST-ACCT-NUM\",\n    \"WS-FIRST-TIME\"\n   ],\n   \"literals\": [\n    \"Y\"\n   ]\n  }\n ],\n \"when\": [\n  {\n   \"text\": \"A category balance record is read and its account ID differs from the last-seen account number.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     191,\n     194\n    ]\n   },\n   \"also\": [],\n   \"fields\": [\n    \"END-OF-FILE\",\n    \"TRANCAT-ACCT-ID\",\n    \"WS-LAST-ACCT-NUM\"\n   ],\n   \"literals\": [\n    \"N\"\n   ]\n  }\n ],\n \"then\": [\n  {\n   \"text\": \"If this is not the first account group, the account loaded before is updated with its accumulated interest and rewritten (1050-UPDATE-ACCOUNT). On the first group the first-time flag is just set to 'N'.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     195,\n     199\n    ]\n   },\n   \"also\": [],\n   \"fields\": [\n    \"WS-FIRST-TIME\"\n   ],\n   \"literals\": [\n    \"Y\",\n    \"N\"\n   ]\n  },\n  {\n   \"text\": \"The interest total is reset to 0 and the last-seen account number is set to the new account ID.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     200,\n     201\n    ]\n   },\n   \"also\": [],\n   \"fields\": [\n    \"WS-TOTAL-INT\",\n    \"WS-LAST-ACCT-NUM\",\n    \"TRANCAT-ACCT-ID\"\n   ],\n   \"literals\": [\n    \"0\"\n   ]\n  },\n  {\n   \"text\": \"The account record for the new account ID is read by key from the account file into ACCOUNT-RECORD.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     202,\n     203\n    ]\n   },\n   \"also\": [\n    {\n     \"file\": \"CBACT04C.cbl\",\n     \"lines\": [\n      372,\n      376\n     ]\n    }\n   ],\n   \"fields\": [\n    \"TRANCAT-ACCT-ID\",\n    \"FD-ACCT-ID\",\n    \"ACCOUNT-RECORD\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"The card cross-reference for the account is read through the account-ID alternate key. This supplies the card number that later goes on the interest transactions.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     204,\n     205\n    ]\n   },\n   \"also\": [\n    {\n     \"file\": \"CBACT04C.cbl\",\n     \"lines\": [\n      393,\n      398\n     ]\n    }\n   ],\n   \"fields\": [\n    \"TRANCAT-ACCT-ID\",\n    \"FD-XREF-ACCT-ID\",\n    \"CARD-XREF-RECORD\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"For every category balance record, whether or not the account changed, the rate lookup key is built from the account's group ID and the record's category code and type code, and the interest rate is looked up.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     210,\n     213\n    ]\n   },\n   \"also\": [],\n   \"fields\": [\n    \"ACCT-GROUP-ID\",\n    \"FD-DIS-ACCT-GROUP-ID\",\n    \"TRANCAT-CD\",\n    \"FD-DIS-TRAN-CAT-CD\",\n    \"TRANCAT-TYPE-CD\",\n    \"FD-DIS-TRAN-TYPE-CD\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"Interest is calculated (and the fee step run) only when the interest rate found is not zero. Records with a zero rate add nothing to the account's interest total.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     214,\n     217\n    ]\n   },\n   \"also\": [],\n   \"fields\": [\n    \"DIS-INT-RATE\"\n   ],\n   \"literals\": [\n    \"0\"\n   ]\n  }\n ],\n \"notes\": [\n  \"The program relies on the category balance file arriving in account order. If the same account appeared in two separate runs of records, its account record would be updated twice, each time with only part of the interest.\",\n  \"WS-LAST-ACCT-NUM is PIC X(11) and is compared with the numeric display field TRANCAT-ACCT-ID 9(11). Its starting value of spaces never matches a real account ID, so the first record always triggers a break.\",\n  \"WS-RECORD-COUNT is counted up for each record read, but within this unit it is only kept in working storage.\"\n ]\n}\n\nVerifier failures:\n[\n {\n  \"clause\": \"given[0]\",\n  \"errors\": [],\n  \"judge\": \"The cited lines show a READ of TCATBAL-FILE and a key that starts with TRANCAT-ACCT-ID, but nothing cited shows the file is indexed or read sequentially in key order, so the grouping claim is not established.\"\n },\n {\n  \"clause\": \"then[0]\",\n  \"errors\": [],\n  \"judge\": \"The cited lines show 1050-UPDATE-ACCOUNT is performed when WS-FIRST-TIME is not 'Y' (otherwise the flag is set to 'N'), but they do not show that the paragraph applies accumulated interest or rewrites the account.\"\n },\n {\n  \"clause\": \"then[3]\",\n  \"errors\": [],\n  \"judge\": \"The keyed read on FD-XREF-ACCT-ID is shown, but the cited lines do not show the card number being used later on interest transactions.\"\n }\n]"
+   },
+   {
+    "role": "assistant",
+    "content": [
+     {
+      "type": "thinking",
+      "thinking": "",
+      "signature": "CAQSmgkKEAgTGAI4AUIIdGhpbmtpbmcSDKlCvhjXXyG3cVg8URoMtM4X4eTTtnmmcXdHIjCNxUUU8GuVc9q3hq6gH17Q9qViC3LfISbvk7qwwj34MdadpGOdXbG4bXMHviO5kHcqtwiQaPnwK8dRfX6S/DW7pZ5YYWVAriZsxXwYNh2gpWa1fLkIThj7BvJhf75yqG9b7EsNJS9Q7v6GcQ4hyHvq9WfWHIVUD//rJKbQ/oHdvvgYYeZPPU/6QuR961WewOwH2fierb3P/njkLwTuMzkNAQEb5Y285827e5qYB4KAAH05D/heR7J4vizCAsJB1kJUuZaOPtma+hTViizl8vjh7RkQ7tlqY8i3Pv9k781XHH1bzN9Bbr2t+EXG1qNm8RxdMZSM4SJLtwJginzWGKJaw9t9FayIvBZ6Lu7UVv8lFrIrEy8ETuw04Tgg+rkAx5FevKdp3y2JbbyYrczv778D4N7HDbzj5vki1/uV0aMl5aGjQm8CVGfVBR3rNtxJAcECbb6s5wiI8RODyV220R82ozvEm87FLMeqL+KZIKF5yYNg/UkqWnT1Z9KYfLNI9kQkZ1aeiqi7eqLy3bpGUQbcHzZJ60DhhWXZbZHMQgGOwuuCTddbSqfIP4+3gaQ6AGkBUnggxV1Bg/jcvUG5YH7tEmpAUis2wH/WZAwY99O4iHTd+q4bsreohjoe7QtziKYctC45LL7PKrJJxu83Zwkx7GpbkELvx5VmsKRCwwZqXku2ukWnRmWSAabuM2cJEt2XkttJGDpLjK3OBQWprwyx6f1mzJ5O4t+pVMaCN/lMuGCp8QXRYNoFYKU4lH7J+wlmQhbJr2snBukSb6yMb34W/IGYyiKYWD1fuWdLyBJ3GMMDSMxx9UZI3pBfMBLBVc9RlAFVmGMj0Pmwk8fPJdoGUZvXmFScYnVgpJVgvo8RqiAvUOSGZAQkbVKjPE/A/m5DPox8nSDDeMNah+CWVviIiMwKuNu6g9dY8u1dlYyCkCTKL5M3Qm5z8RiglfTHNObLnmoua26wIqp0t1PmeWgZ4h4/jJ3XN3NbpLELl+Wfd7OeYkZS8ryyUt+zXoa45JnSZaeB/HLvRd49LkfwhDaQyIiCG9CM1DCJM2wdFH++rfXdzKAB/UozavnHP7e5HKn6/rDOUESAPf3NlS96qbW3Uis7g7KyMGM7QaG1DIZxjuhIKLZd1uRURUa2BpaZY/PpYwHHHO59xOg3C82go3M9JY6clTdWMn4A3kD464899xsy4WxUsdly2PydGx1GC1k3hS5ZJ3F61+KXjhLzJ3XXMY2o2tnK5OxVcvv6hzumOSSqGNHDGdTT32szbB8sggWsVtFaUoUuicj/TxuM6kt0Vf9OvWNAGdGfIOgsSPd/rCBPeX9UdNv2CbdqamxvGYfoQM6e57u0tqyEsfbiuXzI2D8t0GvCaqtJPpnz76PUgX+Q2OcFZAvpb/qRurY6W/IusUnSV3DL+4L1SZM40+zVCQ4i+9kDvi7y/wI3EsBe1Bog2vvvDEQRpPIXderNl45bXWOVbG9edVY1+ZcggwzNGRl/rYlf0r5JrRgB"
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_01DGoBY1oLFQaPwFpW2QbH4f",
+      "name": "get_lines",
+      "input": {
+       "file": "CBACT04C.cbl",
+       "first": 28,
+       "last": 40
+      }
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_019GZqJnFXSpi7oDyRpjBSSm",
+      "name": "get_lines",
+      "input": {
+       "file": "CVTRA01Y.cpy",
+       "first": 1,
+       "last": 10
+      }
+     }
+    ]
+   },
+   {
+    "role": "user",
+    "content": [
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_01DGoBY1oLFQaPwFpW2QbH4f",
+      "content": "  28            SELECT TCATBAL-FILE ASSIGN TO TCATBALF\n  29                   ORGANIZATION IS INDEXED\n  30                   ACCESS MODE  IS SEQUENTIAL\n  31                   RECORD KEY   IS FD-TRAN-CAT-KEY\n  32                   FILE STATUS  IS TCATBALF-STATUS.\n  33 \n  34            SELECT XREF-FILE ASSIGN TO   XREFFILE\n  35                   ORGANIZATION IS INDEXED\n  36                   ACCESS MODE  IS RANDOM\n  37                   RECORD KEY   IS FD-XREF-CARD-NUM\n  38                   ALTERNATE RECORD KEY IS FD-XREF-ACCT-ID\n  39                   FILE STATUS  IS XREFFILE-STATUS.\n  40 ",
+      "is_error": false
+     },
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_019GZqJnFXSpi7oDyRpjBSSm",
+      "content": "   1       *****************************************************************\n   2       *    Data-structure for transaction category balance (RECLN = 50)\n   3       *****************************************************************\n   4        01  TRAN-CAT-BAL-RECORD.\n   5            05  TRAN-CAT-KEY.\n   6               10 TRANCAT-ACCT-ID                       PIC 9(11).\n   7               10 TRANCAT-TYPE-CD                       PIC X(02).\n   8               10 TRANCAT-CD                            PIC 9(04).\n   9            05  TRAN-CAT-BAL                            PIC S9(09)V99.\n  10            05  FILLER                                  PIC X(22).",
+      "is_error": false
+     }
+    ]
+   },
+   {
+    "role": "assistant",
+    "content": [
+     {
+      "type": "thinking",
+      "thinking": "",
+      "signature": "CAQS9AYKEAgTGAI4AUIIdGhpbmtpbmcSDL52MtllCO9tDJJfWRoMRPEoPsbb2+/anfD+IjCaQyRIp+yirhvHkzgDlDm/X0fk9O5v1a0Cyy64KVggVdOG0bD0Xme2lm4x3MkKe1MqkQZZXe7d+GoJZ5e5Q9l0dhj/byoCTH0a50/LAaGXU8bCIG94zgB5glD37V1CaYadn69Vkq3x1u+GfSjil8Ocw6iQi/MH/GsJYI8oyFJujFJnTiZ7HT8D50P+dSQSFxU2qhV2HWn2hsWbom7VE25gUqe3QK7EIyg6Vy5iKzhbwelLFF+PGIuiowfoxPDlN07oA3LEg1IjTmnd8rauLDsjCN3GQbHhCsyWD+gHJmtFpl8yNmGn3ImGqWpC47LO9COHpHY8FPWLDPUnnpCJl5WwOYQLaPMQvLLuzyVMyeL2kl3OD8R851SrQGGEqhOvoDSPrTsOToFi1XnH3ZkLY1LIsy/rnyzFjl95Sv7PhAmsqFxL/7iTchLnrKCgEN3NkyQj5POtsOzwGDbdm7X1KnFT4seuNsTFTCssqKN5oTFAMiGb/th73iNbDIGGkey0QOjj7Oems7rPLZT2LVVfLagz+btZd4DaKlr/05G9F0Q8wWz88Ra4v4qmD8fBtewncppjVL8JxNJjXKimcn+iENSPUyq+2xC3D2x9UBxHMslan3PX9aaBTiWAFseMunqGUSLtjHjiQp9U5FU7puDEDiqBWMUlbp2d+E/wMv89/nVSI8Fqh5hC55QmahIRvd8/KxmS3QJuaKSx0MBStp9FMGgwTTeV5x+9K5yI/oWALLQftnT+YOs6at4eyWQkQrH5cqNqvzwPOitze9C3gB5YmvmABn3ltS1ql2rJQhGG4lSB2wajgpEZ8RqA8O4VEeY3tivFVKGIXGEoeXV6l4z0v4oIupROwleMT5D/nLgUftf08XzrjH5fL+YRLCRvPQc9K06WpvehFtReQhUesC17qtwYGLKOzCaKEZw7A29wVU758iTldGGeb+Pr3izCUzdOCVegfOUfVVy5T0xFQ8npIZ6wN9B2/YtQozVsd4t2Y0ZTyENYtk9mA0xhVq4mGGc8E/wnRYjOphQxxetRVQkpCk3FyBYvYvuSUZmo2XIZnTLmkAnMmL2gjEf9U3sR/p1bRWleNuVnJ+Yi5T6IJYUdQ6hlS01NQRgB"
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_01A4G5itRsTfEiUJg2HziKSB",
+      "name": "get_lines",
+      "input": {
+       "file": "CBACT04C.cbl",
+       "first": 60,
+       "last": 70
+      }
+     }
+    ]
+   },
+   {
+    "role": "user",
+    "content": [
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_01A4G5itRsTfEiUJg2HziKSB",
+      "content": "  60        FILE SECTION.\n  61        FD  TCATBAL-FILE.\n  62        01  FD-TRAN-CAT-BAL-RECORD.\n  63            05 FD-TRAN-CAT-KEY.\n  64               10 FD-TRANCAT-ACCT-ID             PIC 9(11).\n  65               10 FD-TRANCAT-TYPE-CD             PIC X(02).\n  66               10 FD-TRANCAT-CD                  PIC 9(04).\n  67            05 FD-FD-TRAN-CAT-DATA               PIC X(33).\n  68 \n  69        FD  XREF-FILE.\n  70        01  FD-XREFFILE-REC.",
+      "is_error": false
+     }
+    ]
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "high",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "rules": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "title": {
+          "type": "string"
+         },
+         "paragraph": {
+          "type": "string",
+          "description": "Main paragraph implementing the rule"
+         },
+         "summary": {
+          "type": "string",
+          "description": "One or two sentences for the catalog"
+         },
+         "given": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "also": {
+             "type": "array",
+             "description": "Extra spans, only when the fact needs a second place (for example the statement in the program plus the field's PIC declaration in a copybook). At most 2; usually empty.",
+             "items": {
+              "type": "object",
+              "properties": {
+               "file": {
+                "type": "string"
+               },
+               "lines": {
+                "type": "array",
+                "items": {
+                 "type": "integer"
+                },
+                "description": "[first, last] line numbers, inclusive"
+               }
+              },
+              "required": [
+               "file",
+               "lines"
+              ],
+              "additionalProperties": false
+             }
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in one of the cited spans"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in one of the cited spans"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "also",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "when": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "also": {
+             "type": "array",
+             "description": "Extra spans, only when the fact needs a second place (for example the statement in the program plus the field's PIC declaration in a copybook). At most 2; usually empty.",
+             "items": {
+              "type": "object",
+              "properties": {
+               "file": {
+                "type": "string"
+               },
+               "lines": {
+                "type": "array",
+                "items": {
+                 "type": "integer"
+                },
+                "description": "[first, last] line numbers, inclusive"
+               }
+              },
+              "required": [
+               "file",
+               "lines"
+              ],
+              "additionalProperties": false
+             }
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in one of the cited spans"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in one of the cited spans"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "also",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "then": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "also": {
+             "type": "array",
+             "description": "Extra spans, only when the fact needs a second place (for example the statement in the program plus the field's PIC declaration in a copybook). At most 2; usually empty.",
+             "items": {
+              "type": "object",
+              "properties": {
+               "file": {
+                "type": "string"
+               },
+               "lines": {
+                "type": "array",
+                "items": {
+                 "type": "integer"
+                },
+                "description": "[first, last] line numbers, inclusive"
+               }
+              },
+              "required": [
+               "file",
+               "lines"
+              ],
+              "additionalProperties": false
+             }
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in one of the cited spans"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in one of the cited spans"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "also",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "notes": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          },
+          "description": "Observations for the human reviewer that no cited line can prove, such as something the code never checks or never resets. Not verified and not given to the port. Usually empty."
+         }
+        },
+        "required": [
+         "title",
+         "paragraph",
+         "summary",
+         "given",
+         "when",
+         "then",
+         "notes"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "rules"
+     ],
+     "additionalProperties": false
+    }
+   }
+  },
+  "tools": [
+   {
+    "name": "get_paragraph",
+    "description": "Numbered source of one paragraph of the program.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "name": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   },
+   {
+    "name": "get_lines",
+    "description": "Numbered source lines [first, last] of the program or a copybook (file e.g. 'CVACT01Y.cpy'; default the program).",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "file": {
+       "type": "string"
+      },
+      "first": {
+       "type": "integer"
+      },
+      "last": {
+       "type": "integer"
+      }
+     },
+     "required": [
+      "file",
+      "first",
+      "last"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   },
+   {
+    "name": "get_field",
+    "description": "Layout of a data item: PIC, offset, size, record, declaring file and line.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "name": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   }
+  ]
+ },
+ "response": {
+  "id": "msg_011Cgpddp98rC2dobVPbKmP3",
+  "container": null,
+  "content": [
+   {
+    "text": "{\"rules\":[{\"title\":\"Category balances are processed in account groups (control break on account ID)\",\"paragraph\":\"(main)\",\"summary\":\"Category balance records are read one by one in key order. When the account ID changes, the account loaded before is written back with its interest (except on the very first record), the interest total is reset to zero, and the new account and its card cross-reference are read. Every record, including the first of a group, then goes on to rate lookup, and interest is only calculated when the rate is not zero.\",\"given\":[{\"text\":\"Category balance records are read one at a time, in key order, from the category balance file, which is indexed and read sequentially. The record key starts with the account ID, so all categories for one account come in together.\",\"file\":\"CBACT04C.cbl\",\"lines\":[28,32],\"also\":[{\"file\":\"CBACT04C.cbl\",\"lines\":[61,66]},{\"file\":\"CBACT04C.cbl\",\"lines\":[325,326]}],\"fields\":[\"TCATBAL-FILE\",\"FD-TRAN-CAT-KEY\",\"FD-TRANCAT-ACCT-ID\",\"TRAN-CAT-BAL-RECORD\"],\"literals\":[]},{\"text\":\"At program start the last-seen account number is spaces and the first-time flag is 'Y'.\",\"file\":\"CBACT04C.cbl\",\"lines\":[166,170],\"also\":[],\"fields\":[\"WS-LAST-ACCT-NUM\",\"WS-FIRST-TIME\"],\"literals\":[\"Y\"]}],\"when\":[{\"text\":\"A category balance record is read and its account ID differs from the last-seen account number.\",\"file\":\"CBACT04C.cbl\",\"lines\":[191,194],\"also\":[],\"fields\":[\"END-OF-FILE\",\"TRANCAT-ACCT-ID\",\"WS-LAST-ACCT-NUM\"],\"literals\":[\"N\"]}],\"then\":[{\"text\":\"If this is not the first account group, 1050-UPDATE-ACCOUNT runs for the account loaded before: it adds the accumulated interest total to the account's current balance, sets the current-cycle credit and debit to 0, and rewrites the account record. On the first group the first-time flag is only set to 'N'.\",\"file\":\"CBACT04C.cbl\",\"lines\":[195,199],\"also\":[{\"file\":\"CBACT04C.cbl\",\"lines\":[350,356]}],\"fields\":[\"WS-FIRST-TIME\",\"WS-TOTAL-INT\",\"ACCT-CURR-BAL\",\"ACCT-CURR-CYC-CREDIT\",\"ACCT-CURR-CYC-DEBIT\",\"FD-ACCTFILE-REC\",\"ACCOUNT-RECORD\"],\"literals\":[\"Y\",\"N\"]},{\"text\":\"The interest total is reset to 0 and the last-seen account number is set to the new account ID.\",\"file\":\"CBACT04C.cbl\",\"lines\":[200,201],\"also\":[],\"fields\":[\"WS-TOTAL-INT\",\"WS-LAST-ACCT-NUM\",\"TRANCAT-ACCT-ID\"],\"literals\":[\"0\"]},{\"text\":\"The account record for the new account ID is read by key from the account file into ACCOUNT-RECORD.\",\"file\":\"CBACT04C.cbl\",\"lines\":[202,203],\"also\":[{\"file\":\"CBACT04C.cbl\",\"lines\":[372,376]}],\"fields\":[\"TRANCAT-ACCT-ID\",\"FD-ACCT-ID\",\"ACCOUNT-RECORD\"],\"literals\":[]},{\"text\":\"The card cross-reference for the account is read through the account-ID alternate key. Its card number is the one later copied into the card number of each interest transaction.\",\"file\":\"CBACT04C.cbl\",\"lines\":[204,205],\"also\":[{\"file\":\"CBACT04C.cbl\",\"lines\":[393,398]},{\"file\":\"CBACT04C.cbl\",\"lines\":[495,495]}],\"fields\":[\"TRANCAT-ACCT-ID\",\"FD-XREF-ACCT-ID\",\"CARD-XREF-RECORD\",\"XREF-CARD-NUM\",\"TRAN-CARD-NUM\"],\"literals\":[]},{\"text\":\"For every category balance record, whether or not the account changed, the rate lookup key is built from the account's group ID and the record's category code and type code, and the interest rate is looked up.\",\"file\":\"CBACT04C.cbl\",\"lines\":[210,213],\"also\":[],\"fields\":[\"ACCT-GROUP-ID\",\"FD-DIS-ACCT-GROUP-ID\",\"TRANCAT-CD\",\"FD-DIS-TRAN-CAT-CD\",\"TRANCAT-TYPE-CD\",\"FD-DIS-TRAN-TYPE-CD\"],\"literals\":[]},{\"text\":\"Interest is calculated (and the fee step run) only when the interest rate found is not zero. Records with a zero rate add nothing to the account's interest total.\",\"file\":\"CBACT04C.cbl\",\"lines\":[214,217],\"also\":[],\"fields\":[\"DIS-INT-RATE\"],\"literals\":[\"0\"]}],\"notes\":[\"The program relies on the category balance file arriving in account order. If the same account appeared in two separate runs of records, its account record would be updated twice, each time with only part of the interest.\",\"WS-LAST-ACCT-NUM is PIC X(11) and is compared with the numeric display field TRANCAT-ACCT-ID 9(11). Its starting value of spaces never matches a real account ID, so the first record always triggers a break.\",\"WS-RECORD-COUNT is counted up for each record read, but within this unit it is only kept in working storage.\"]}]}",
+    "type": "text"
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 18448,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 18448,
+     "model": null,
+     "output_tokens": 1834,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 1834,
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}

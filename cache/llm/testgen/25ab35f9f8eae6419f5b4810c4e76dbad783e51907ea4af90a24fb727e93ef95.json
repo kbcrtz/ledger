@@ -1,0 +1,964 @@
+{
+ "agent": "testgen",
+ "key": "25ab35f9f8eae6419f5b4810c4e76dbad783e51907ea4af90a24fb727e93ef95",
+ "seconds": 25.2,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 64000,
+  "system": "You are the test generator in Ledger. For one verified business rule of a legacy COBOL batch program you write test fixtures: complete, consistent sets of input records that exercise each branch of the rule and its boundaries. Every case is run through both the original COBOL program and a Python port, and their outputs are compared field by field, so a good case makes the rule's behaviour visible in the output files.\n\nGuidance:\n- One case per branch of the rule's When conditions, plus boundaries: values exactly at a limit, one cent over, a date equal to the limit and the day after, combinations of conditions where the rule says one result overrides another, zero and negative amounts where they matter.\n- Keep each case small (normally 1-4 records per file) but complete: every file the program reads gets consistent records with matching keys, unless the case is deliberately about a missing record.\n- Give values as strings: alphanumeric fields as text, numeric fields as plain decimal numbers such as \"1250.75\" or \"-40.00\" (no sign encoding, no padding). Omitted numeric fields default to 0 and omitted alphanumeric fields to spaces. Use the copybook field names exactly.\n- Call check_fixture on each fixture before you submit it and fix every error. Warnings may be intentional (for example a card that is deliberately missing).\n- Write 3 to 6 cases. In \"expectation\", say what the rule implies should happen; it is a note for reviewers, not the pass/fail oracle.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Program: CBACT04C. Input files and their record layouts:\n\nTCATBAL: CVTRA01Y TRAN-CAT-BAL-RECORD (50 bytes)\n  TRANCAT-ACCT-ID              9(11)\n  TRANCAT-TYPE-CD              X(2)\n  TRANCAT-CD                   9(4)\n  TRAN-CAT-BAL                 S9(9)V9(2)\n\nXREF: CVACT03Y CARD-XREF-RECORD (50 bytes)\n  XREF-CARD-NUM                X(16)\n  XREF-CUST-ID                 9(9)\n  XREF-ACCT-ID                 9(11)\n\nACCOUNT: CVACT01Y ACCOUNT-RECORD (300 bytes)\n  ACCT-ID                      9(11)\n  ACCT-ACTIVE-STATUS           X(1)\n  ACCT-CURR-BAL                S9(10)V9(2)\n  ACCT-CREDIT-LIMIT            S9(10)V9(2)\n  ACCT-CASH-CREDIT-LIMIT       S9(10)V9(2)\n  ACCT-OPEN-DATE               X(10)\n  ACCT-EXPIRAION-DATE          X(10)\n  ACCT-REISSUE-DATE            X(10)\n  ACCT-CURR-CYC-CREDIT         S9(10)V9(2)\n  ACCT-CURR-CYC-DEBIT          S9(10)V9(2)\n  ACCT-ADDR-ZIP                X(10)\n  ACCT-GROUP-ID                X(10)\n\nDISCGRP: CVTRA02Y DIS-GROUP-RECORD (50 bytes)\n  DIS-ACCT-GROUP-ID            X(10)\n  DIS-TRAN-TYPE-CD             X(2)\n  DIS-TRAN-CAT-CD              9(4)\n  DIS-INT-RATE                 S9(4)V9(2)\nThe program runs with job PARM '2022071800'. Account, cross-reference and disclosure group files are read by key, so every category balance's account needs ACCOUNT and XREF records.\n\nRule to test:\n{\n \"id\": \"BR-CBACT04C-003\",\n \"title\": \"Interest rate lookup by account group, with fallback to the DEFAULT disclosure group\",\n \"summary\": \"For each category balance, the program looks up the interest rate in the disclosure group file using the account's group ID, transaction type code and transaction category code. If no record matches, it tries again with group ID 'DEFAULT' and the same type and category. Any other read failure stops the program. Interest and fees are calculated only when the rate found is not zero.\",\n \"given\": [\n  {\n   \"text\": \"The disclosure group key is built from three parts in this order: the account's group ID (10 characters), the transaction type code (2 characters) and the transaction category code (4 digits).\",\n   \"fields\": [\n    \"ACCT-GROUP-ID\",\n    \"FD-DIS-ACCT-GROUP-ID\",\n    \"TRANCAT-CD\",\n    \"FD-DIS-TRAN-CAT-CD\",\n    \"TRANCAT-TYPE-CD\",\n    \"FD-DIS-TRAN-TYPE-CD\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"The interest rate on the disclosure group record is a signed number with 4 integer digits and 2 decimal places.\",\n   \"fields\": [\n    \"DIS-INT-RATE\"\n   ],\n   \"literals\": []\n  }\n ],\n \"when\": [\n  {\n   \"text\": \"The program reads the disclosure group file by that key into the disclosure group record.\",\n   \"fields\": [\n    \"DISCGRP-FILE\",\n    \"DIS-GROUP-RECORD\"\n   ],\n   \"literals\": [\n    \"DISCLOSURE GROUP RECORD MISSING\",\n    \"TRY WITH DEFAULT GROUP CODE\"\n   ]\n  }\n ],\n \"then\": [\n  {\n   \"text\": \"If the read status is anything other than '00' (found) or '23' (not found), the program displays 'ERROR READING DISCLOSURE GROUP FILE' and abends.\",\n   \"fields\": [\n    \"DISCGRP-STATUS\",\n    \"APPL-RESULT\",\n    \"APPL-AOK\"\n   ],\n   \"literals\": [\n    \"00\",\n    \"23\",\n    \"ERROR READING DISCLOSURE GROUP FILE\"\n   ]\n  },\n  {\n   \"text\": \"If the record is not found (status '23'), the program replaces the group ID in the key with 'DEFAULT', padded with spaces to 10 characters. The type and category codes stay the same, and the program reads the default record.\",\n   \"fields\": [\n    \"DISCGRP-STATUS\",\n    \"FD-DIS-ACCT-GROUP-ID\",\n    \"DISCGRP-FILE\",\n    \"DIS-GROUP-RECORD\"\n   ],\n   \"literals\": [\n    \"23\",\n    \"DEFAULT\"\n   ]\n  },\n  {\n   \"text\": \"If the DEFAULT record cannot be read (status not '00'), the program displays 'ERROR READING DEFAULT DISCLOSURE GROUP' and abends.\",\n   \"fields\": [\n    \"DISCGRP-STATUS\",\n    \"APPL-RESULT\",\n    \"APPL-AOK\"\n   ],\n   \"literals\": [\n    \"00\",\n    \"ERROR READING DEFAULT DISCLOSURE GROUP\"\n   ]\n  },\n  {\n   \"text\": \"Interest and fees are calculated for the category balance only when the interest rate found is not zero. When the rate is zero, the balance is skipped.\",\n   \"fields\": [\n    \"DIS-INT-RATE\"\n   ],\n   \"literals\": []\n  }\n ]\n}"
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "high",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "cases": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "title": {
+          "type": "string"
+         },
+         "condition": {
+          "type": "string",
+          "description": "which branch or boundary of the rule this case exercises"
+         },
+         "expectation": {
+          "type": "string",
+          "description": "what the rule says should happen (a note, not an oracle)"
+         },
+         "fixture": {
+          "type": "object",
+          "properties": {
+           "TCATBAL": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           },
+           "XREF": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           },
+           "ACCOUNT": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           },
+           "DISCGRP": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "TCATBAL",
+           "XREF",
+           "ACCOUNT",
+           "DISCGRP"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "required": [
+         "title",
+         "condition",
+         "expectation",
+         "fixture"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "cases"
+     ],
+     "additionalProperties": false
+    }
+   }
+  },
+  "tools": [
+   {
+    "name": "check_fixture",
+    "description": "Encode a fixture with the copybook layouts and check field names, PIC fit, key uniqueness and cross-file consistency.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "fixture": {
+       "type": "object",
+       "properties": {
+        "TCATBAL": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "XREF": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "ACCOUNT": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "DISCGRP": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        }
+       },
+       "required": [
+        "TCATBAL",
+        "XREF",
+        "ACCOUNT",
+        "DISCGRP"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "required": [
+      "fixture"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   }
+  ]
+ },
+ "response": {
+  "id": "msg_011CgpduMtH7h9W8DUZt5hRC",
+  "container": null,
+  "content": [
+   {
+    "signature": "CAQS/goKEAgTGAI4AUIIdGhpbmtpbmcSDDr2dGDbKbJ25pAHVBoMItj9w51LOSSfx7FWIjAKi8fu9aqnuaH+FnIGkqCCa+7M+MnU6RGY8LII8N20Q1ijL6cKvLaP5dZjlo+Ym40qmwrOfpakdLP33br8FpeSt0nDBT9n1rWkbVPCXuwlJkZzPCHEcuUdjGzx2e6jOtocWM5rKehfKVGtyZ+stipHXL8Syfp8vDXpScinZdXdXKKuOGq0mgIc0xbr+WXiNYfqv464+mGq4wV42QSXgPQlzMVVb51bHaDsY5FclM0vHyGOPYIUclGUd4zArsDZHjEWm06MZ3xuD40Ymb/w0gWi2XOOsPoHSLFLA6lVkhIjYoCSKgXx/BuNcuWXDTLA4zbhRWaIhoUyEXwXnfU1i5+2OI1M1QMbdi99oaPAYHCL/lvOdNW6REijTNOp7oKix6w15isNO1B3JdW8DZWOHzMDY/9olgdy8Lek89wUpT8nFTmZvlup4NGzvz0pfSoKJ0213JkGn/XpdqMnlRjt4KKfuITLfP2XnqB+sGs+jIHoJiiwQYwAx0b0UrvPcP5rgQJ3wr4+NTHSjAscIS02COQCXpTjovgAcJdmG+M0ykBosUTo9a3Dfewj5S2XoWMzwcIaFhZ2S3dEp/82kBwl3sqC3yRhShfZqwpHF3VZjscvCrgDPql35t+05oAPXDusPOC+Bp1KNHcwksS7UlFkvMu5T9M0GspyD2yMOnqiZ0CkJVvR34/kNwazym5Hn0aTqQOlGB8jblRMGPvEDSnFaRNy3HF59te2qN+aj9eJXszOyyBsmGkClK0Xvd1Cyr2wc961+m577tC9UfDOs2PbFtwIxei3Oteml6JAwzPmSkKmJUGskJAUPK624cNQqQiZ1RDkfK2PTzL0b20jKMl81SayIjNTuypt5zGFEg6f5JUVPrJeawq+WR1VTw91vk9eQTJhGvZlapeJouR4MtcsRZ1AC5tdHjxsdeVLGhv6LIaVtIfptHk6w1d6Pgd0uRL5jyQ2RQAQ404l92JVX63iZxJp9SypEMnDahXyV55Qp6rJEMKlp9XQk8SriftNcJZh8t0d5qeNc9B6w8x90KkZFv7L388aAGsimt+ZRmYHuqA3bjCNCa0M6Ilb2kvuRNPETd6AOA6NY15Dte0ET8iPQmH3fqhV8lHDyW+taS7LPHktLRKbMNia6x4quJrjPttt75Z1YQCKAn0ISQsmoBcbWR0U8QW2qNupV4oGJA84xyI8vDkLyOeQ0cX4OLl5s9nah7+N2IVpOxNOJnTuEtrHDGwyDD4lDqmIIM1mIWutqWR+fXl3Rk20jUaldYUDZY5q4D3RptrGX/o4aYVRL57mY9pLVT3TJo1JPQF2JXg5VkPMvvHwuJialQQc3bKSm3BZF/wPYbTaAGMuSMYHXuZ+ce2yVURLrFHVOv7h/v6wZ26bGKp524vYo6tPxxI/zRxBPJI87ymtVNpqObIt/GBrX9eiuc2rHb24nIZz0B0GHFXF7gWpS7tAVv7Q+TbqIxdks8qlAA85sRZzXvfqT8x6/UpNQj0+5d0bgtPqtWy67V+J8KaLjy3bP1tpLYuB35HmwOifnsLe0xJwFJ4pb1CSc0903SmHii+1xFz4JNHcrdpI0Vgh7eKtcdH2ehKoqaU72+QRHeQ1Vdk2oEfoXrNo6DiaoT46QEZxu0QZ6a5Y4L2A+j9Z4Axuvyx8JZeIR+tsOo9osL/Q+8sCkqOef0tk7ADhYIq5mapWNi4Ajt2/vvAKsCprUr7V06GuGuCKhoT3Hp1Puo/MKX6VnzekDafDSOqoyKOI3WNBv/MsOmZuLbBtViHe64X686XBTVumj/l53n/+FOg2UvdS2xVHk1asAxgB",
+    "thinking": "",
+    "type": "thinking"
+   },
+   {
+    "id": "toolu_012U7mU4r3v47XcWJhdQMzNB",
+    "input": {
+     "fixture": {
+      "TCATBAL": [
+       {
+        "values": [
+         {
+          "field": "TRANCAT-ACCT-ID",
+          "value": "10000000001"
+         },
+         {
+          "field": "TRANCAT-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "TRANCAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "TRAN-CAT-BAL",
+          "value": "1200.00"
+         }
+        ]
+       }
+      ],
+      "XREF": [
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4000000000000001"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "100000001"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "10000000001"
+         }
+        ]
+       }
+      ],
+      "ACCOUNT": [
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "10000000001"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "1500.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "5000.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "1000.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2026-01-01"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "GOLD"
+         }
+        ]
+       }
+      ],
+      "DISCGRP": [
+       {
+        "values": [
+         {
+          "field": "DIS-ACCT-GROUP-ID",
+          "value": "GOLD"
+         },
+         {
+          "field": "DIS-TRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DIS-TRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DIS-INT-RATE",
+          "value": "18.00"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "DIS-ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         },
+         {
+          "field": "DIS-TRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DIS-TRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DIS-INT-RATE",
+          "value": "24.00"
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "name": "check_fixture",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   },
+   {
+    "id": "toolu_01QMxzhqGPuEoGEDKHxEjjwV",
+    "input": {
+     "fixture": {
+      "TCATBAL": [
+       {
+        "values": [
+         {
+          "field": "TRANCAT-ACCT-ID",
+          "value": "10000000002"
+         },
+         {
+          "field": "TRANCAT-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "TRANCAT-CD",
+          "value": "2"
+         },
+         {
+          "field": "TRAN-CAT-BAL",
+          "value": "600.00"
+         }
+        ]
+       }
+      ],
+      "XREF": [
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4000000000000002"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "100000002"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "10000000002"
+         }
+        ]
+       }
+      ],
+      "ACCOUNT": [
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "10000000002"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "800.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "5000.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "1000.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2026-01-01"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "SILVER"
+         }
+        ]
+       }
+      ],
+      "DISCGRP": [
+       {
+        "values": [
+         {
+          "field": "DIS-ACCT-GROUP-ID",
+          "value": "SILVER"
+         },
+         {
+          "field": "DIS-TRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DIS-TRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DIS-INT-RATE",
+          "value": "12.00"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "DIS-ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         },
+         {
+          "field": "DIS-TRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DIS-TRAN-CAT-CD",
+          "value": "2"
+         },
+         {
+          "field": "DIS-INT-RATE",
+          "value": "24.00"
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "name": "check_fixture",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   },
+   {
+    "id": "toolu_01TbPmvEtmd7LL5iocHqqDf9",
+    "input": {
+     "fixture": {
+      "TCATBAL": [
+       {
+        "values": [
+         {
+          "field": "TRANCAT-ACCT-ID",
+          "value": "10000000003"
+         },
+         {
+          "field": "TRANCAT-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "TRANCAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "TRAN-CAT-BAL",
+          "value": "1200.00"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "TRANCAT-ACCT-ID",
+          "value": "10000000003"
+         },
+         {
+          "field": "TRANCAT-TYPE-CD",
+          "value": "02"
+         },
+         {
+          "field": "TRANCAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "TRAN-CAT-BAL",
+          "value": "1200.00"
+         }
+        ]
+       }
+      ],
+      "XREF": [
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4000000000000003"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "100000003"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "10000000003"
+         }
+        ]
+       }
+      ],
+      "ACCOUNT": [
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "10000000003"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "2400.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "5000.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "1000.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2026-01-01"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "PROMO"
+         }
+        ]
+       }
+      ],
+      "DISCGRP": [
+       {
+        "values": [
+         {
+          "field": "DIS-ACCT-GROUP-ID",
+          "value": "PROMO"
+         },
+         {
+          "field": "DIS-TRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DIS-TRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DIS-INT-RATE",
+          "value": "0.00"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "DIS-ACCT-GROUP-ID",
+          "value": "PROMO"
+         },
+         {
+          "field": "DIS-TRAN-TYPE-CD",
+          "value": "02"
+         },
+         {
+          "field": "DIS-TRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DIS-INT-RATE",
+          "value": "0.01"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "DIS-ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         },
+         {
+          "field": "DIS-TRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DIS-TRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DIS-INT-RATE",
+          "value": "24.00"
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "name": "check_fixture",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   },
+   {
+    "id": "toolu_01UhrC7YwCQetzxmui7StzsX",
+    "input": {
+     "fixture": {
+      "TCATBAL": [
+       {
+        "values": [
+         {
+          "field": "TRANCAT-ACCT-ID",
+          "value": "10000000004"
+         },
+         {
+          "field": "TRANCAT-TYPE-CD",
+          "value": "03"
+         },
+         {
+          "field": "TRANCAT-CD",
+          "value": "5"
+         },
+         {
+          "field": "TRAN-CAT-BAL",
+          "value": "500.00"
+         }
+        ]
+       }
+      ],
+      "XREF": [
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4000000000000004"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "100000004"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "10000000004"
+         }
+        ]
+       }
+      ],
+      "ACCOUNT": [
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "10000000004"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "500.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "5000.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "1000.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2026-01-01"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "BRONZE"
+         }
+        ]
+       }
+      ],
+      "DISCGRP": [
+       {
+        "values": [
+         {
+          "field": "DIS-ACCT-GROUP-ID",
+          "value": "BRONZE"
+         },
+         {
+          "field": "DIS-TRAN-TYPE-CD",
+          "value": "03"
+         },
+         {
+          "field": "DIS-TRAN-CAT-CD",
+          "value": "4"
+         },
+         {
+          "field": "DIS-INT-RATE",
+          "value": "15.00"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "DIS-ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         },
+         {
+          "field": "DIS-TRAN-TYPE-CD",
+          "value": "03"
+         },
+         {
+          "field": "DIS-TRAN-CAT-CD",
+          "value": "4"
+         },
+         {
+          "field": "DIS-INT-RATE",
+          "value": "24.00"
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "name": "check_fixture",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 4701,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 4701,
+     "model": null,
+     "output_tokens": 3618,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 3618,
+   "output_tokens_details": {
+    "thinking_tokens": 353
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}

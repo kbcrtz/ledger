@@ -1,0 +1,110 @@
+{
+ "agent": "verifier",
+ "key": "6d5fb7dc467430b7297beb5cd6a2fcfd3bf6d451d2b8075c320016ab265fa38a",
+ "seconds": 16.3,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 32000,
+  "system": "You are the verifier judge in Ledger. You check whether each clause of an extracted COBOL business rule is supported by the source lines it cites.\n\nFor each clause you get its text and the cited lines (marked with >>), with a few surrounding lines for context only. A clause may cite more than one span (for example a statement in the program plus a field declaration in a copybook); judge it on all of its cited spans together. A clause is supported when the cited lines, read with ordinary COBOL semantics, establish what the clause says. Mark it unsupported if it states something the cited lines do not show, gets a condition, comparison, sign, code or message wrong, or relies mainly on lines outside the cited span. Be strict about meaning, not about wording. Give a one-sentence reason either way.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Rule BR-CBACT04C-005: Interest transaction record contents\n\n### given[0]: The transaction sequence counter (an unsigned 6-digit number) goes up by 1 before each interest transaction is built.\nfields=['WS-TRANID-SUFFIX'] literals=['1']\nCBACT04C.cbl:\n   470            EXIT.\n   471 \n   472       *---------------------------------------------------------------*\n   473        1300-B-WRITE-TX.\n>> 474            ADD 1 TO WS-TRANID-SUFFIX\n   475 \n   476            STRING PARM-DATE,\n   477                   WS-TRANID-SUFFIX\n   478              DELIMITED BY SIZE\nCBACT04C.cbl:\n   169            05 WS-TOTAL-INT              PIC S9(09)V99.\n   170            05 WS-FIRST-TIME             PIC X(01) VALUE 'Y'.\n   171        01 WS-COUNTERS.\n   172            05 WS-RECORD-COUNT           PIC 9(09) VALUE 0.\n>> 173            05 WS-TRANID-SUFFIX          PIC 9(06) VALUE 0.\n   174 \n   175        LINKAGE SECTION.\n   176        01  EXTERNAL-PARMS.\n   177            05  PARM-LENGTH         PIC S9(04) COMP.\n\n### when[0]: The transaction ID is the 10-character run date parameter followed by the 6-digit sequence counter (with leading zeros), 16 characters in total.\nfields=['TRAN-ID', 'PARM-DATE', 'WS-TRANID-SUFFIX'] literals=[]\nCBACT04C.cbl:\n   472       *---------------------------------------------------------------*\n   473        1300-B-WRITE-TX.\n   474            ADD 1 TO WS-TRANID-SUFFIX\n   475 \n>> 476            STRING PARM-DATE,\n>> 477                   WS-TRANID-SUFFIX\n>> 478              DELIMITED BY SIZE\n>> 479              INTO TRAN-ID\n>> 480            END-STRING.\n   481 \n   482            MOVE '01'                 TO TRAN-TYPE-CD\n   483            MOVE '05'                 TO TRAN-CAT-CD\n   484            MOVE 'System'             TO TRAN-SOURCE\nCBACT04C.cbl:\n   174 \n   175        LINKAGE SECTION.\n   176        01  EXTERNAL-PARMS.\n   177            05  PARM-LENGTH         PIC S9(04) COMP.\n>> 178            05  PARM-DATE           PIC X(10).\n   179       *****************************************************************\n   180        PROCEDURE DIVISION USING EXTERNAL-PARMS.\n   181            DISPLAY 'START OF EXECUTION OF PROGRAM CBACT04C'.\n   182            PERFORM 0000-TCATBALF-OPEN.\n\n### then[0]: Type code is set to '01' and category code to '05'. The category code is a 4-digit numeric field, so it holds 0005. Source is set to 'System'.\nfields=['TRAN-TYPE-CD', 'TRAN-CAT-CD', 'TRAN-SOURCE'] literals=['01', '05', 'System']\nCBACT04C.cbl:\n   478              DELIMITED BY SIZE\n   479              INTO TRAN-ID\n   480            END-STRING.\n   481 \n>> 482            MOVE '01'                 TO TRAN-TYPE-CD\n>> 483            MOVE '05'                 TO TRAN-CAT-CD\n>> 484            MOVE 'System'             TO TRAN-SOURCE\n   485            STRING 'Int. for a/c ' ,\n   486                   ACCT-ID\n   487                   DELIMITED BY SIZE\n   488             INTO TRAN-DESC\nCVTRA05Y.cpy:\n     3       *****************************************************************\n     4        01  TRAN-RECORD.\n     5            05  TRAN-ID                                 PIC X(16).\n     6            05  TRAN-TYPE-CD                            PIC X(02).\n>>   7            05  TRAN-CAT-CD                             PIC 9(04).\n     8            05  TRAN-SOURCE                             PIC X(10).\n     9            05  TRAN-DESC                               PIC X(100).\n    10            05  TRAN-AMT                                PIC S9(09)V99.\n    11            05  TRAN-MERCHANT-ID                        PIC 9(09).\n\n### then[1]: The description is the text 'Int. for a/c ' followed by the 11-digit account ID.\nfields=['TRAN-DESC', 'ACCT-ID'] literals=['Int. for a/c ']\nCBACT04C.cbl:\n   481 \n   482            MOVE '01'                 TO TRAN-TYPE-CD\n   483            MOVE '05'                 TO TRAN-CAT-CD\n   484            MOVE 'System'             TO TRAN-SOURCE\n>> 485            STRING 'Int. for a/c ' ,\n>> 486                   ACCT-ID\n>> 487                   DELIMITED BY SIZE\n>> 488             INTO TRAN-DESC\n>> 489            END-STRING\n   490            MOVE WS-MONTHLY-INT       TO TRAN-AMT\n   491            MOVE 0                    TO TRAN-MERCHANT-ID\n   492            MOVE SPACES               TO TRAN-MERCHANT-NAME\n   493            MOVE SPACES               TO TRAN-MERCHANT-CITY\nCVACT01Y.cpy:\n     1       *****************************************************************\n     2       *    Data-structure for  account entity (RECLN 300)\n     3       *****************************************************************\n     4        01  ACCOUNT-RECORD.\n>>   5            05  ACCT-ID                           PIC 9(11).\n     6            05  ACCT-ACTIVE-STATUS                PIC X(01).\n     7            05  ACCT-CURR-BAL                     PIC S9(10)V99.\n     8            05  ACCT-CREDIT-LIMIT                 PIC S9(10)V99.\n     9            05  ACCT-CASH-CREDIT-LIMIT            PIC S9(10)V99.\n\n### then[2]: The amount is the computed monthly interest. Merchant ID is set to 0, and merchant name, city and zip are set to spaces.\nfields=['TRAN-AMT', 'WS-MONTHLY-INT', 'TRAN-MERCHANT-ID', 'TRAN-MERCHANT-NAME', 'TRAN-MERCHANT-CITY', 'TRAN-MERCHANT-ZIP'] literals=['0']\nCBACT04C.cbl:\n   486                   ACCT-ID\n   487                   DELIMITED BY SIZE\n   488             INTO TRAN-DESC\n   489            END-STRING\n>> 490            MOVE WS-MONTHLY-INT       TO TRAN-AMT\n>> 491            MOVE 0                    TO TRAN-MERCHANT-ID\n>> 492            MOVE SPACES               TO TRAN-MERCHANT-NAME\n>> 493            MOVE SPACES               TO TRAN-MERCHANT-CITY\n>> 494            MOVE SPACES               TO TRAN-MERCHANT-ZIP\n   495            MOVE XREF-CARD-NUM        TO TRAN-CARD-NUM\n   496            PERFORM Z-GET-DB2-FORMAT-TIMESTAMP\n   497            MOVE DB2-FORMAT-TS        TO TRAN-ORIG-TS\n   498            MOVE DB2-FORMAT-TS        TO TRAN-PROC-TS\n\n### then[3]: The card number is copied from the card cross-reference record found for the account.\nfields=['TRAN-CARD-NUM', 'XREF-CARD-NUM'] literals=[]\nCBACT04C.cbl:\n   491            MOVE 0                    TO TRAN-MERCHANT-ID\n   492            MOVE SPACES               TO TRAN-MERCHANT-NAME\n   493            MOVE SPACES               TO TRAN-MERCHANT-CITY\n   494            MOVE SPACES               TO TRAN-MERCHANT-ZIP\n>> 495            MOVE XREF-CARD-NUM        TO TRAN-CARD-NUM\n   496            PERFORM Z-GET-DB2-FORMAT-TIMESTAMP\n   497            MOVE DB2-FORMAT-TS        TO TRAN-ORIG-TS\n   498            MOVE DB2-FORMAT-TS        TO TRAN-PROC-TS\n   499 \n\n### then[4]: Origination and processing timestamps both get the same current date and time, formatted as YYYY-MM-DD-HH.MM.SS.hh0000 (hundredths of a second followed by '0000').\nfields=['COBOL-TS', 'DB2-FORMAT-TS', 'DB2-REST', 'TRAN-ORIG-TS', 'TRAN-PROC-TS'] literals=['0000', '-', '.']\nCBACT04C.cbl:\n   610            END-IF\n   611            EXIT.\n   612 \n   613        Z-GET-DB2-FORMAT-TIMESTAMP.\n>> 614            MOVE FUNCTION CURRENT-DATE TO COBOL-TS\n>> 615            MOVE COB-YYYY TO DB2-YYYY\n>> 616            MOVE COB-MM   TO DB2-MM\n>> 617            MOVE COB-DD   TO DB2-DD\n>> 618            MOVE COB-HH   TO DB2-HH\n>> 619            MOVE COB-MIN  TO DB2-MIN\n>> 620            MOVE COB-SS   TO DB2-SS\n>> 621            MOVE COB-MIL  TO DB2-MIL\n>> 622            MOVE '0000'   TO DB2-REST\n>> 623            MOVE '-' TO DB2-STREEP-1 DB2-STREEP-2 DB2-STREEP-3\n>> 624            MOVE '.' TO DB2-DOT-1 DB2-DOT-2 DB2-DOT-3\n   625       *    DISPLAY 'DB2-TIMESTAMP = ' DB2-FORMAT-TS\n   626            EXIT.\n   627 \n   628        9999-ABEND-PROGRAM.\nCBACT04C.cbl:\n   493            MOVE SPACES               TO TRAN-MERCHANT-CITY\n   494            MOVE SPACES               TO TRAN-MERCHANT-ZIP\n   495            MOVE XREF-CARD-NUM        TO TRAN-CARD-NUM\n   496            PERFORM Z-GET-DB2-FORMAT-TIMESTAMP\n>> 497            MOVE DB2-FORMAT-TS        TO TRAN-ORIG-TS\n>> 498            MOVE DB2-FORMAT-TS        TO TRAN-PROC-TS\n   499 \n   500            WRITE FD-TRANFILE-REC FROM TRAN-RECORD\n   501            IF  TRANFILE-STATUS   = '00'\n   502                MOVE 0 TO APPL-RESULT\n\n### then[5]: The record is added as a new 350-byte record to the sequential transaction output file.\nfields=['FD-TRANFILE-REC', 'TRAN-RECORD'] literals=[]\nCBACT04C.cbl:\n   496            PERFORM Z-GET-DB2-FORMAT-TIMESTAMP\n   497            MOVE DB2-FORMAT-TS        TO TRAN-ORIG-TS\n   498            MOVE DB2-FORMAT-TS        TO TRAN-PROC-TS\n   499 \n>> 500            WRITE FD-TRANFILE-REC FROM TRAN-RECORD\n   501            IF  TRANFILE-STATUS   = '00'\n   502                MOVE 0 TO APPL-RESULT\n   503            ELSE\n   504                MOVE 12 TO APPL-RESULT"
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "medium",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "verdicts": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "clause": {
+          "type": "string",
+          "description": "clause id as given, e.g. when[0]"
+         },
+         "supported": {
+          "type": "boolean"
+         },
+         "reason": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "clause",
+         "supported",
+         "reason"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "verdicts"
+     ],
+     "additionalProperties": false
+    }
+   }
+  }
+ },
+ "response": {
+  "id": "msg_011CgpddesXkLdvJK5Ffj8xb",
+  "container": null,
+  "content": [
+   {
+    "signature": "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",
+    "thinking": "",
+    "type": "thinking"
+   },
+   {
+    "text": "{\"verdicts\":[{\"clause\":\"given[0]\",\"supported\":true,\"reason\":\"Line 474 adds 1 to WS-TRANID-SUFFIX before the record is built, and line 173 declares it PIC 9(06), an unsigned 6-digit number.\"},{\"clause\":\"when[0]\",\"supported\":false,\"reason\":\"The cited lines show PARM-DATE (PIC X(10)) concatenated with WS-TRANID-SUFFIX into TRAN-ID, but they do not include the 6-digit declaration of the suffix or the 16-character length of TRAN-ID, so those details rest on uncited lines.\"},{\"clause\":\"then[0]\",\"supported\":true,\"reason\":\"Lines 482-484 move '01', '05' and 'System' to the type, category and source fields, and TRAN-CAT-CD is PIC 9(04), so the '05' move stores 0005.\"},{\"clause\":\"then[1]\",\"supported\":true,\"reason\":\"Lines 485-489 STRING 'Int. for a/c ' followed by ACCT-ID into TRAN-DESC, and ACCT-ID is declared PIC 9(11).\"},{\"clause\":\"then[2]\",\"supported\":true,\"reason\":\"Lines 490-494 move WS-MONTHLY-INT to TRAN-AMT, 0 to the merchant ID, and spaces to the merchant name, city and zip.\"},{\"clause\":\"then[3]\",\"supported\":true,\"reason\":\"Line 495 moves XREF-CARD-NUM from the cross-reference record to TRAN-CARD-NUM.\"},{\"clause\":\"then[4]\",\"supported\":true,\"reason\":\"The timestamp routine fills date and time parts from CURRENT-DATE, sets DB2-REST to '0000' and adds three '-' and three '.' separators, and lines 497-498 copy the same DB2-FORMAT-TS to both the origination and processing timestamps.\"},{\"clause\":\"then[5]\",\"supported\":false,\"reason\":\"Line 500 only shows WRITE FD-TRANFILE-REC FROM TRAN-RECORD; the 350-byte length and the sequential organization of the file are not established by the cited lines.\"}]}",
+    "type": "text"
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 4802,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 4802,
+     "model": null,
+     "output_tokens": 1676,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 1676,
+   "output_tokens_details": {
+    "thinking_tokens": 955
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}

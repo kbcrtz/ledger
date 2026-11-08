@@ -5,6 +5,8 @@
    "BR-CBTRN02C-001",
    "BR-CBTRN02C-002",
    "BR-CBTRN02C-003",
+   "BR-CBTRN02C-004",
+   "BR-CBTRN02C-005",
    "BR-CBTRN02C-006",
    "BR-CBTRN02C-007"
   ],
@@ -16,23 +18,28 @@
     "cbtrn02c.lookup_account"
    ],
    "BR-CBTRN02C-003": [
-    "cbtrn02c.check_overlimit"
+    "cbtrn02c.check_credit_limit"
+   ],
+   "BR-CBTRN02C-004": [
+    "cbtrn02c.check_expiration"
    ],
    "BR-CBTRN02C-006": [
-    "cbtrn02c.update_tcatbal"
+    "cbtrn02c.update_category_balance"
    ],
    "BR-CBTRN02C-007": [
-    "cbtrn02c.update_account_and_write_transaction"
+    "cbtrn02c.update_account"
+   ],
+   "BR-CBTRN02C-005": [
+    "cbtrn02c.process_daily_transactions"
    ]
   },
   "gaps": [
-   "Expiration check (reason 103) is referenced but its condition is not specified by any rule; not implemented.",
-   "No rule specifies setting ctx.return_code (e.g. when rejects occur); left at its initial value.",
-   "Width/padding of WS-VALIDATION-FAIL-REASON-DESC is not specified; the description text is passed to write_reject unpadded.",
-   "The 2-character timestamp fraction is assumed to be hundredths of a second (microsecond // 10000) from ctx.now().",
-   "Duplicate TRAN-ID on write_transaction is assumed to be raised as Abend by the ctx shell; the port does not catch it.",
-   "Account rewrite 'record not found' (reason 109) is modelled as the account ID no longer being present in ctx.accounts.",
-   "Transaction count and reject count are kept internally only; no rule specifies displaying or outputting them."
+   "No rule specifies how the TRAN-RECORD written to the transaction file is built; assumed each DALYTRAN-* field is copied to the matching TRAN-* field, including TRAN-PROC-TS (ctx.now() is not used).",
+   "Duplicate-key handling on the transaction write: assumed ctx.write_transaction raises Abend itself; any other exception it raises is converted to Abend.",
+   "Display format of the processed/rejected counts is unspecified; printed as the label immediately followed by the plain integer.",
+   "Expiration-date comparison uses Python string (code point) ordering rather than any specific collating sequence.",
+   "The reason description passed to write_reject is padded/truncated to 76 characters and the reason code is limited to 4 unsigned digits, following the trailer layout in BR-CBTRN02C-005.",
+   "Reason 109 from a failed account rewrite (account key no longer in ctx.accounts) is only recorded in the per-transaction state; no rule says it causes a reject after posting, so it does not."
   ]
  },
  "CBACT04C": {
@@ -40,26 +47,35 @@
   "rules": [
    "BR-CBACT04C-001",
    "BR-CBACT04C-002",
-   "BR-CBACT04C-003"
+   "BR-CBACT04C-003",
+   "BR-CBACT04C-004",
+   "BR-CBACT04C-005"
   ],
   "links": {
-   "BR-CBACT04C-001": [
-    "cbact04c.handle_account_break"
+   "BR-CBACT04C-002": [
+    "cbact04c.update_account"
    ],
    "BR-CBACT04C-003": [
     "cbact04c.lookup_interest_rate"
    ],
-   "BR-CBACT04C-002": [
-    "cbact04c.handle_end_of_file"
+   "BR-CBACT04C-004": [
+    "cbact04c.compute_monthly_interest"
+   ],
+   "BR-CBACT04C-005": [
+    "cbact04c.build_interest_transaction"
+   ],
+   "BR-CBACT04C-001": [
+    "cbact04c.process_category_balance"
    ]
   },
   "gaps": [
-   "The formula for the monthly interest amount (WS-MONTHLY-INT) is not specified by any rule; assumed zero.",
-   "The contents of the interest transaction record are not specified; only TRAN-AMT (the monthly interest) and TRAN-CARD-NUM (XREF-CARD-NUM) are set. All other fields, including TRAN-ID, type/category codes and timestamps, are left at their defaults.",
-   "Fee computation is mentioned in BR-003 but not specified; no fees are computed.",
-   "Behaviour when the account record or the card cross-reference for an account is not found is not specified; assumed abend.",
-   "Use of parm_date, now() and return_code is not specified by any rule; they are not used and return_code stays 0.",
-   "Disclosure read statuses other than found or not-found cannot occur with the dict lookup, so the 'ERROR READING DISCLOSURE GROUP FILE' abend path is never reached."
+   "Account record not found for a category balance's account ID: no rule specifies the behaviour; assumed abend.",
+   "Card cross-reference not found by account ID: no rule specifies the behaviour; assumed abend.",
+   "The 'fee step' is mentioned but never specified; implemented as a no-op.",
+   "Return code handling is not specified; return_code left at 0.",
+   "Disclosure group read errors other than not-found cannot occur with the dict API; only not-found paths are implemented.",
+   "ctx.now() is called once per interest transaction (rule says current time; both timestamps share that value).",
+   "Run date parameter shorter/longer than 10 chars is padded/truncated to 10 (MOVE semantics)."
   ]
  }
 }

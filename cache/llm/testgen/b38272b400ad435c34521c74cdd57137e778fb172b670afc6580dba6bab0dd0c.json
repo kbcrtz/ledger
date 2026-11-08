@@ -1,0 +1,1371 @@
+{
+ "agent": "testgen",
+ "key": "b38272b400ad435c34521c74cdd57137e778fb172b670afc6580dba6bab0dd0c",
+ "seconds": 45.8,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 64000,
+  "system": "You are the test generator in Ledger. For one verified business rule of a legacy COBOL batch program you write test fixtures: complete, consistent sets of input records that exercise each branch of the rule and its boundaries. Every case is run through both the original COBOL program and a Python port, and their outputs are compared field by field, so a good case makes the rule's behaviour visible in the output files.\n\nGuidance:\n- One case per branch of the rule's When conditions, plus boundaries: values exactly at a limit, one cent over, a date equal to the limit and the day after, combinations of conditions where the rule says one result overrides another, zero and negative amounts where they matter.\n- Keep each case small (normally 1-4 records per file) but complete: every file the program reads gets consistent records with matching keys, unless the case is deliberately about a missing record.\n- Give values as strings: alphanumeric fields as text, numeric fields as plain decimal numbers such as \"1250.75\" or \"-40.00\" (no sign encoding, no padding). Omitted numeric fields default to 0 and omitted alphanumeric fields to spaces. Use the copybook field names exactly.\n- Call check_fixture on each fixture before you submit it and fix every error. Warnings may be intentional (for example a card that is deliberately missing).\n- Write 3 to 6 cases. In \"expectation\", say what the rule implies should happen; it is a note for reviewers, not the pass/fail oracle.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Program: CBACT04C. Input files and their record layouts:\n\nTCATBAL: CVTRA01Y TRAN-CAT-BAL-RECORD (50 bytes)\n  TRANCAT-ACCT-ID              9(11)\n  TRANCAT-TYPE-CD              X(2)\n  TRANCAT-CD                   9(4)\n  TRAN-CAT-BAL                 S9(9)V9(2)\n\nXREF: CVACT03Y CARD-XREF-RECORD (50 bytes)\n  XREF-CARD-NUM                X(16)\n  XREF-CUST-ID                 9(9)\n  XREF-ACCT-ID                 9(11)\n\nACCOUNT: CVACT01Y ACCOUNT-RECORD (300 bytes)\n  ACCT-ID                      9(11)\n  ACCT-ACTIVE-STATUS           X(1)\n  ACCT-CURR-BAL                S9(10)V9(2)\n  ACCT-CREDIT-LIMIT            S9(10)V9(2)\n  ACCT-CASH-CREDIT-LIMIT       S9(10)V9(2)\n  ACCT-OPEN-DATE               X(10)\n  ACCT-EXPIRAION-DATE          X(10)\n  ACCT-REISSUE-DATE            X(10)\n  ACCT-CURR-CYC-CREDIT         S9(10)V9(2)\n  ACCT-CURR-CYC-DEBIT          S9(10)V9(2)\n  ACCT-ADDR-ZIP                X(10)\n  ACCT-GROUP-ID                X(10)\n\nDISCGRP: CVTRA02Y DIS-GROUP-RECORD (50 bytes)\n  DIS-ACCT-GROUP-ID            X(10)\n  DIS-TRAN-TYPE-CD             X(2)\n  DIS-TRAN-CAT-CD              9(4)\n  DIS-INT-RATE                 S9(4)V9(2)\nThe program runs with job PARM '2022071800'. Account, cross-reference and disclosure group files are read by key, so every category balance's account needs ACCOUNT and XREF records.\n\nRule to test:\n{\n \"id\": \"BR-CBACT04C-002\",\n \"title\": \"Account balance update with accumulated interest at account break\",\n \"summary\": \"When an account group ends because the next record belongs to a different account, the account's interest total is added to its current balance, the current-cycle credit and debit are set to zero, and the account record is rewritten. Because of how the loop is written, the last account group in the file is never updated.\",\n \"given\": [\n  {\n   \"text\": \"Each calculated monthly interest amount is added to an interest total for the account. The total holds 9 integer digits and 2 decimals, signed.\",\n   \"fields\": [\n    \"WS-MONTHLY-INT\",\n    \"WS-TOTAL-INT\"\n   ],\n   \"literals\": []\n  }\n ],\n \"when\": [\n  {\n   \"text\": \"1050-UPDATE-ACCOUNT runs when a record for a new account arrives and it is not the first account group.\",\n   \"fields\": [\n    \"TRANCAT-ACCT-ID\",\n    \"WS-LAST-ACCT-NUM\",\n    \"WS-FIRST-TIME\"\n   ],\n   \"literals\": [\n    \"Y\"\n   ]\n  }\n ],\n \"then\": [\n  {\n   \"text\": \"The account's interest total is added to its current balance (signed, 10 integer digits and 2 decimals).\",\n   \"fields\": [\n    \"WS-TOTAL-INT\",\n    \"ACCT-CURR-BAL\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"The account's current-cycle credit and current-cycle debit are both set to 0. This happens even when the interest total is zero.\",\n   \"fields\": [\n    \"ACCT-CURR-CYC-CREDIT\",\n    \"ACCT-CURR-CYC-DEBIT\"\n   ],\n   \"literals\": [\n    \"0\"\n   ]\n  },\n  {\n   \"text\": \"The updated account record overwrites the existing account record in the account file.\",\n   \"fields\": [\n    \"FD-ACCTFILE-REC\",\n    \"ACCOUNT-RECORD\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"When the read hits end of file, END-OF-FILE becomes 'Y' inside the iteration. The loop condition is tested before each pass, so the loop ends before the ELSE branch that would update the last account can run. The last account group's interest is therefore not added and that account record is not rewritten.\",\n   \"fields\": [\n    \"END-OF-FILE\"\n   ],\n   \"literals\": [\n    \"Y\",\n    \"N\"\n   ]\n  }\n ]\n}"
+   },
+   {
+    "role": "assistant",
+    "content": [
+     {
+      "type": "thinking",
+      "thinking": "",
+      "signature": "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"
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_01FLHsqxvJLFFL4juRfD8tig",
+      "name": "check_fixture",
+      "input": {
+       "fixture": {
+        "TCATBAL": [
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "10000000001"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "1200.00"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "10000000001"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "02"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "600.00"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "10000000002"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "800.00"
+           }
+          ]
+         }
+        ],
+        "XREF": [
+         {
+          "values": [
+           {
+            "field": "XREF-CARD-NUM",
+            "value": "4000000000000001"
+           },
+           {
+            "field": "XREF-CUST-ID",
+            "value": "100000001"
+           },
+           {
+            "field": "XREF-ACCT-ID",
+            "value": "10000000001"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "XREF-CARD-NUM",
+            "value": "4000000000000002"
+           },
+           {
+            "field": "XREF-CUST-ID",
+            "value": "100000002"
+           },
+           {
+            "field": "XREF-ACCT-ID",
+            "value": "10000000002"
+           }
+          ]
+         }
+        ],
+        "ACCOUNT": [
+         {
+          "values": [
+           {
+            "field": "ACCT-ID",
+            "value": "10000000001"
+           },
+           {
+            "field": "ACCT-ACTIVE-STATUS",
+            "value": "Y"
+           },
+           {
+            "field": "ACCT-CURR-BAL",
+            "value": "1000.00"
+           },
+           {
+            "field": "ACCT-CREDIT-LIMIT",
+            "value": "5000.00"
+           },
+           {
+            "field": "ACCT-CASH-CREDIT-LIMIT",
+            "value": "1000.00"
+           },
+           {
+            "field": "ACCT-OPEN-DATE",
+            "value": "2015-01-10"
+           },
+           {
+            "field": "ACCT-EXPIRAION-DATE",
+            "value": "2026-01-31"
+           },
+           {
+            "field": "ACCT-REISSUE-DATE",
+            "value": "2021-01-10"
+           },
+           {
+            "field": "ACCT-CURR-CYC-CREDIT",
+            "value": "250.00"
+           },
+           {
+            "field": "ACCT-CURR-CYC-DEBIT",
+            "value": "400.00"
+           },
+           {
+            "field": "ACCT-ADDR-ZIP",
+            "value": "10001"
+           },
+           {
+            "field": "ACCT-GROUP-ID",
+            "value": "GRPA"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "ACCT-ID",
+            "value": "10000000002"
+           },
+           {
+            "field": "ACCT-ACTIVE-STATUS",
+            "value": "Y"
+           },
+           {
+            "field": "ACCT-CURR-BAL",
+            "value": "2000.00"
+           },
+           {
+            "field": "ACCT-CREDIT-LIMIT",
+            "value": "8000.00"
+           },
+           {
+            "field": "ACCT-CASH-CREDIT-LIMIT",
+            "value": "2000.00"
+           },
+           {
+            "field": "ACCT-OPEN-DATE",
+            "value": "2016-03-15"
+           },
+           {
+            "field": "ACCT-EXPIRAION-DATE",
+            "value": "2027-03-31"
+           },
+           {
+            "field": "ACCT-REISSUE-DATE",
+            "value": "2022-03-15"
+           },
+           {
+            "field": "ACCT-CURR-CYC-CREDIT",
+            "value": "100.00"
+           },
+           {
+            "field": "ACCT-CURR-CYC-DEBIT",
+            "value": "50.00"
+           },
+           {
+            "field": "ACCT-ADDR-ZIP",
+            "value": "10002"
+           },
+           {
+            "field": "ACCT-GROUP-ID",
+            "value": "GRPA"
+           }
+          ]
+         }
+        ],
+        "DISCGRP": [
+         {
+          "values": [
+           {
+            "field": "DIS-ACCT-GROUP-ID",
+            "value": "GRPA"
+           },
+           {
+            "field": "DIS-TRAN-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "DIS-TRAN-CAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "DIS-INT-RATE",
+            "value": "12.00"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "DIS-ACCT-GROUP-ID",
+            "value": "GRPA"
+           },
+           {
+            "field": "DIS-TRAN-TYPE-CD",
+            "value": "02"
+           },
+           {
+            "field": "DIS-TRAN-CAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "DIS-INT-RATE",
+            "value": "18.00"
+           }
+          ]
+         }
+        ]
+       }
+      }
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_01TmHRM5egSVxa9nGXnw6bim",
+      "name": "check_fixture",
+      "input": {
+       "fixture": {
+        "TCATBAL": [
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "20000000001"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "1500.00"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "20000000002"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "300.00"
+           }
+          ]
+         }
+        ],
+        "XREF": [
+         {
+          "values": [
+           {
+            "field": "XREF-CARD-NUM",
+            "value": "4000000000000011"
+           },
+           {
+            "field": "XREF-CUST-ID",
+            "value": "200000001"
+           },
+           {
+            "field": "XREF-ACCT-ID",
+            "value": "20000000001"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "XREF-CARD-NUM",
+            "value": "4000000000000012"
+           },
+           {
+            "field": "XREF-CUST-ID",
+            "value": "200000002"
+           },
+           {
+            "field": "XREF-ACCT-ID",
+            "value": "20000000002"
+           }
+          ]
+         }
+        ],
+        "ACCOUNT": [
+         {
+          "values": [
+           {
+            "field": "ACCT-ID",
+            "value": "20000000001"
+           },
+           {
+            "field": "ACCT-ACTIVE-STATUS",
+            "value": "Y"
+           },
+           {
+            "field": "ACCT-CURR-BAL",
+            "value": "1500.00"
+           },
+           {
+            "field": "ACCT-CREDIT-LIMIT",
+            "value": "5000.00"
+           },
+           {
+            "field": "ACCT-CASH-CREDIT-LIMIT",
+            "value": "1000.00"
+           },
+           {
+            "field": "ACCT-OPEN-DATE",
+            "value": "2018-05-01"
+           },
+           {
+            "field": "ACCT-EXPIRAION-DATE",
+            "value": "2026-05-31"
+           },
+           {
+            "field": "ACCT-REISSUE-DATE",
+            "value": "2022-05-01"
+           },
+           {
+            "field": "ACCT-CURR-CYC-CREDIT",
+            "value": "75.25"
+           },
+           {
+            "field": "ACCT-CURR-CYC-DEBIT",
+            "value": "310.40"
+           },
+           {
+            "field": "ACCT-ADDR-ZIP",
+            "value": "20001"
+           },
+           {
+            "field": "ACCT-GROUP-ID",
+            "value": "ZERORATE"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "ACCT-ID",
+            "value": "20000000002"
+           },
+           {
+            "field": "ACCT-ACTIVE-STATUS",
+            "value": "Y"
+           },
+           {
+            "field": "ACCT-CURR-BAL",
+            "value": "300.00"
+           },
+           {
+            "field": "ACCT-CREDIT-LIMIT",
+            "value": "3000.00"
+           },
+           {
+            "field": "ACCT-CASH-CREDIT-LIMIT",
+            "value": "500.00"
+           },
+           {
+            "field": "ACCT-OPEN-DATE",
+            "value": "2019-06-01"
+           },
+           {
+            "field": "ACCT-EXPIRAION-DATE",
+            "value": "2027-06-30"
+           },
+           {
+            "field": "ACCT-REISSUE-DATE",
+            "value": "2023-06-01"
+           },
+           {
+            "field": "ACCT-CURR-CYC-CREDIT",
+            "value": "20.00"
+           },
+           {
+            "field": "ACCT-CURR-CYC-DEBIT",
+            "value": "30.00"
+           },
+           {
+            "field": "ACCT-ADDR-ZIP",
+            "value": "20002"
+           },
+           {
+            "field": "ACCT-GROUP-ID",
+            "value": "ZERORATE"
+           }
+          ]
+         }
+        ],
+        "DISCGRP": [
+         {
+          "values": [
+           {
+            "field": "DIS-ACCT-GROUP-ID",
+            "value": "ZERORATE"
+           },
+           {
+            "field": "DIS-TRAN-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "DIS-TRAN-CAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "DIS-INT-RATE",
+            "value": "0"
+           }
+          ]
+         }
+        ]
+       }
+      }
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_015o2sBgtcSAwnJgv4qzR3WW",
+      "name": "check_fixture",
+      "input": {
+       "fixture": {
+        "TCATBAL": [
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "30000000001"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "2400.00"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "30000000001"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "2"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "1200.00"
+           }
+          ]
+         }
+        ],
+        "XREF": [
+         {
+          "values": [
+           {
+            "field": "XREF-CARD-NUM",
+            "value": "4000000000000021"
+           },
+           {
+            "field": "XREF-CUST-ID",
+            "value": "300000001"
+           },
+           {
+            "field": "XREF-ACCT-ID",
+            "value": "30000000001"
+           }
+          ]
+         }
+        ],
+        "ACCOUNT": [
+         {
+          "values": [
+           {
+            "field": "ACCT-ID",
+            "value": "30000000001"
+           },
+           {
+            "field": "ACCT-ACTIVE-STATUS",
+            "value": "Y"
+           },
+           {
+            "field": "ACCT-CURR-BAL",
+            "value": "3600.00"
+           },
+           {
+            "field": "ACCT-CREDIT-LIMIT",
+            "value": "10000.00"
+           },
+           {
+            "field": "ACCT-CASH-CREDIT-LIMIT",
+            "value": "2000.00"
+           },
+           {
+            "field": "ACCT-OPEN-DATE",
+            "value": "2017-02-01"
+           },
+           {
+            "field": "ACCT-EXPIRAION-DATE",
+            "value": "2026-02-28"
+           },
+           {
+            "field": "ACCT-REISSUE-DATE",
+            "value": "2021-02-01"
+           },
+           {
+            "field": "ACCT-CURR-CYC-CREDIT",
+            "value": "500.00"
+           },
+           {
+            "field": "ACCT-CURR-CYC-DEBIT",
+            "value": "900.00"
+           },
+           {
+            "field": "ACCT-ADDR-ZIP",
+            "value": "30001"
+           },
+           {
+            "field": "ACCT-GROUP-ID",
+            "value": "GRPB"
+           }
+          ]
+         }
+        ],
+        "DISCGRP": [
+         {
+          "values": [
+           {
+            "field": "DIS-ACCT-GROUP-ID",
+            "value": "GRPB"
+           },
+           {
+            "field": "DIS-TRAN-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "DIS-TRAN-CAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "DIS-INT-RATE",
+            "value": "12.00"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "DIS-ACCT-GROUP-ID",
+            "value": "GRPB"
+           },
+           {
+            "field": "DIS-TRAN-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "DIS-TRAN-CAT-CD",
+            "value": "2"
+           },
+           {
+            "field": "DIS-INT-RATE",
+            "value": "24.00"
+           }
+          ]
+         }
+        ]
+       }
+      }
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_012PXh57r6WWAabkGywEqAky",
+      "name": "check_fixture",
+      "input": {
+       "fixture": {
+        "TCATBAL": [
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "40000000001"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "-600.00"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "40000000002"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "333.33"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "TRANCAT-ACCT-ID",
+            "value": "40000000003"
+           },
+           {
+            "field": "TRANCAT-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "TRANCAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "TRAN-CAT-BAL",
+            "value": "900.00"
+           }
+          ]
+         }
+        ],
+        "XREF": [
+         {
+          "values": [
+           {
+            "field": "XREF-CARD-NUM",
+            "value": "4000000000000031"
+           },
+           {
+            "field": "XREF-CUST-ID",
+            "value": "400000001"
+           },
+           {
+            "field": "XREF-ACCT-ID",
+            "value": "40000000001"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "XREF-CARD-NUM",
+            "value": "4000000000000032"
+           },
+           {
+            "field": "XREF-CUST-ID",
+            "value": "400000002"
+           },
+           {
+            "field": "XREF-ACCT-ID",
+            "value": "40000000002"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "XREF-CARD-NUM",
+            "value": "4000000000000033"
+           },
+           {
+            "field": "XREF-CUST-ID",
+            "value": "400000003"
+           },
+           {
+            "field": "XREF-ACCT-ID",
+            "value": "40000000003"
+           }
+          ]
+         }
+        ],
+        "ACCOUNT": [
+         {
+          "values": [
+           {
+            "field": "ACCT-ID",
+            "value": "40000000001"
+           },
+           {
+            "field": "ACCT-ACTIVE-STATUS",
+            "value": "Y"
+           },
+           {
+            "field": "ACCT-CURR-BAL",
+            "value": "-100.00"
+           },
+           {
+            "field": "ACCT-CREDIT-LIMIT",
+            "value": "5000.00"
+           },
+           {
+            "field": "ACCT-CASH-CREDIT-LIMIT",
+            "value": "1000.00"
+           },
+           {
+            "field": "ACCT-OPEN-DATE",
+            "value": "2014-04-01"
+           },
+           {
+            "field": "ACCT-EXPIRAION-DATE",
+            "value": "2025-04-30"
+           },
+           {
+            "field": "ACCT-REISSUE-DATE",
+            "value": "2020-04-01"
+           },
+           {
+            "field": "ACCT-CURR-CYC-CREDIT",
+            "value": "600.00"
+           },
+           {
+            "field": "ACCT-CURR-CYC-DEBIT",
+            "value": "0"
+           },
+           {
+            "field": "ACCT-ADDR-ZIP",
+            "value": "40001"
+           },
+           {
+            "field": "ACCT-GROUP-ID",
+            "value": "GRPC"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "ACCT-ID",
+            "value": "40000000002"
+           },
+           {
+            "field": "ACCT-ACTIVE-STATUS",
+            "value": "Y"
+           },
+           {
+            "field": "ACCT-CURR-BAL",
+            "value": "333.33"
+           },
+           {
+            "field": "ACCT-CREDIT-LIMIT",
+            "value": "4000.00"
+           },
+           {
+            "field": "ACCT-CASH-CREDIT-LIMIT",
+            "value": "800.00"
+           },
+           {
+            "field": "ACCT-OPEN-DATE",
+            "value": "2015-07-01"
+           },
+           {
+            "field": "ACCT-EXPIRAION-DATE",
+            "value": "2026-07-31"
+           },
+           {
+            "field": "ACCT-REISSUE-DATE",
+            "value": "2021-07-01"
+           },
+           {
+            "field": "ACCT-CURR-CYC-CREDIT",
+            "value": "0"
+           },
+           {
+            "field": "ACCT-CURR-CYC-DEBIT",
+            "value": "333.33"
+           },
+           {
+            "field": "ACCT-ADDR-ZIP",
+            "value": "40002"
+           },
+           {
+            "field": "ACCT-GROUP-ID",
+            "value": "GRPC"
+           }
+          ]
+         },
+         {
+          "values": [
+           {
+            "field": "ACCT-ID",
+            "value": "40000000003"
+           },
+           {
+            "field": "ACCT-ACTIVE-STATUS",
+            "value": "Y"
+           },
+           {
+            "field": "ACCT-CURR-BAL",
+            "value": "900.00"
+           },
+           {
+            "field": "ACCT-CREDIT-LIMIT",
+            "value": "6000.00"
+           },
+           {
+            "field": "ACCT-CASH-CREDIT-LIMIT",
+            "value": "1200.00"
+           },
+           {
+            "field": "ACCT-OPEN-DATE",
+            "value": "2016-08-01"
+           },
+           {
+            "field": "ACCT-EXPIRAION-DATE",
+            "value": "2027-08-31"
+           },
+           {
+            "field": "ACCT-REISSUE-DATE",
+            "value": "2022-08-01"
+           },
+           {
+            "field": "ACCT-CURR-CYC-CREDIT",
+            "value": "45.00"
+           },
+           {
+            "field": "ACCT-CURR-CYC-DEBIT",
+            "value": "55.00"
+           },
+           {
+            "field": "ACCT-ADDR-ZIP",
+            "value": "40003"
+           },
+           {
+            "field": "ACCT-GROUP-ID",
+            "value": "GRPC"
+           }
+          ]
+         }
+        ],
+        "DISCGRP": [
+         {
+          "values": [
+           {
+            "field": "DIS-ACCT-GROUP-ID",
+            "value": "GRPC"
+           },
+           {
+            "field": "DIS-TRAN-TYPE-CD",
+            "value": "01"
+           },
+           {
+            "field": "DIS-TRAN-CAT-CD",
+            "value": "1"
+           },
+           {
+            "field": "DIS-INT-RATE",
+            "value": "10.00"
+           }
+          ]
+         }
+        ]
+       }
+      }
+     }
+    ]
+   },
+   {
+    "role": "user",
+    "content": [
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_01FLHsqxvJLFFL4juRfD8tig",
+      "content": "{\"errors\": [], \"warnings\": [], \"encoded_preview_first_60_bytes\": {\"TCATBAL\": [\"100000000010100010000012000{                      \", \"100000000010200010000006000{                      \", \"100000000020100010000008000{                      \"], \"XREF\": [\"400000000000000110000000110000000001              \", \"400000000000000210000000210000000002              \"], \"ACCOUNT\": [\"10000000001Y00000010000{00000050000{00000010000{2015-01-1020\", \"10000000002Y00000020000{00000080000{00000020000{2016-03-1520\"], \"DISCGRP\": [\"GRPA      01000100120{                            \", \"GRPA      02000100180{                            \"]}}",
+      "is_error": false
+     },
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_01TmHRM5egSVxa9nGXnw6bim",
+      "content": "{\"errors\": [], \"warnings\": [], \"encoded_preview_first_60_bytes\": {\"TCATBAL\": [\"200000000010100010000015000{                      \", \"200000000020100010000003000{                      \"], \"XREF\": [\"400000000000001120000000120000000001              \", \"400000000000001220000000220000000002              \"], \"ACCOUNT\": [\"20000000001Y00000015000{00000050000{00000010000{2018-05-0120\", \"20000000002Y00000003000{00000030000{00000005000{2019-06-0120\"], \"DISCGRP\": [\"ZERORATE  01000100000{                            \"]}}",
+      "is_error": false
+     },
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_015o2sBgtcSAwnJgv4qzR3WW",
+      "content": "{\"errors\": [], \"warnings\": [], \"encoded_preview_first_60_bytes\": {\"TCATBAL\": [\"300000000010100010000024000{                      \", \"300000000010100020000012000{                      \"], \"XREF\": [\"400000000000002130000000130000000001              \"], \"ACCOUNT\": [\"30000000001Y00000036000{00000100000{00000020000{2017-02-0120\"], \"DISCGRP\": [\"GRPB      01000100120{                            \", \"GRPB      01000200240{                            \"]}}",
+      "is_error": false
+     },
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_012PXh57r6WWAabkGywEqAky",
+      "content": "{\"errors\": [], \"warnings\": [], \"encoded_preview_first_60_bytes\": {\"TCATBAL\": [\"400000000010100010000006000}                      \", \"400000000020100010000003333C                      \", \"400000000030100010000009000{                      \"], \"XREF\": [\"400000000000003140000000140000000001              \", \"400000000000003240000000240000000002              \", \"400000000000003340000000340000000003              \"], \"ACCOUNT\": [\"40000000001Y00000001000}00000050000{00000010000{2014-04-0120\", \"40000000002Y00000003333C00000040000{00000008000{2015-07-0120\", \"40000000003Y00000009000{00000060000{00000012000{2016-08-0120\"], \"DISCGRP\": [\"GRPC      01000100100{                            \"]}}",
+      "is_error": false
+     }
+    ]
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "high",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "cases": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "title": {
+          "type": "string"
+         },
+         "condition": {
+          "type": "string",
+          "description": "which branch or boundary of the rule this case exercises"
+         },
+         "expectation": {
+          "type": "string",
+          "description": "what the rule says should happen (a note, not an oracle)"
+         },
+         "fixture": {
+          "type": "object",
+          "properties": {
+           "TCATBAL": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           },
+           "XREF": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           },
+           "ACCOUNT": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           },
+           "DISCGRP": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "TCATBAL",
+           "XREF",
+           "ACCOUNT",
+           "DISCGRP"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "required": [
+         "title",
+         "condition",
+         "expectation",
+         "fixture"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "cases"
+     ],
+     "additionalProperties": false
+    }
+   }
+  },
+  "tools": [
+   {
+    "name": "check_fixture",
+    "description": "Encode a fixture with the copybook layouts and check field names, PIC fit, key uniqueness and cross-file consistency.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "fixture": {
+       "type": "object",
+       "properties": {
+        "TCATBAL": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "XREF": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "ACCOUNT": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "DISCGRP": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        }
+       },
+       "required": [
+        "TCATBAL",
+        "XREF",
+        "ACCOUNT",
+        "DISCGRP"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "required": [
+      "fixture"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   }
+  ]
+ },
+ "response": {
+  "id": "msg_011CgpdyKsLLRdhZSvr7ZS2A",
+  "container": null,
+  "content": [
+   {
+    "signature": "CAQSpQYKEAgTGAI4AUIIdGhpbmtpbmcSDDw2tIXNA0gjEvVMtxoMoZ30TPPJrLkYbKEGIjDzzCHgaFLQaVvgqQMJJD1ZIaBM5RxjUOrV1J25PNq/l9AheLIcn/bTWOSlq0tksVIqwgUu6jXSuhCRNOELfSibN4BqnVkktt9E6dfHOMfzHnCFpB2xovlM6KXwhFmIxpXlDJf3/9dY7nj70IIB8FxkQfSn6hzi8z5ZydczLBi1ndKa8bD1mAVks51KPEKoB5ETsiQ2AGgZhcu2AKoY4CkW7QB7iQonEiujjq7nTOHzZd9MBCUhwlOtcnZqlSJCEdaBEG74jdRZq3lWX24WZv1iYlqqTRVx/yHZwNajlj/gXcja4t3J8aGSnx6bCF5XUc+cn+kxNkMLhRO1gv6KgQux4+hXSAXr0yUC10SBboWrDKAdhyye1p3ZQQLE+iEBiQsnk2Sr5CvqJx9yDi+f1RXZpPuxbbWKO6mswfBv/tpf9HkTZkOEFo0l829EhgV/RtAq4eHmGqIeecWrV9+JPzYaIy/g9x8ay8oeZ4wP0j2JyOg+sMjOtUJNPH9zgYSi3L8CxQKYbtPsuof3MMKpACjYP9+tyq1MEjRuPcDQvdHdeqTXxnGp3b7ntmiJ77P/2SOKeVB+vLKVkNHTpcVWGeOm/KVS7i09C+ULuIMeojpAFouXxnA7MSOiSvvvsqD14tm+515Xysg6/rigAa0NZbFViQpoDP+4ULmSLEKh9V4te7DxOaXMN4dk/UXqX0/m5wsJQQ288H+O/qecYj6X0SRaDR0mf1+gN/3qUZ9VMZH/WI/HtKQxsEoUMGK5//5Wx4e9lZqV8c+a0ZME3LimG1Zly7mbd51MAD+r3fy20WtNa9nK0TUdBOVI8anMXsmMW78MGWSXk2V/RFtnmR/DrFZYaSmUpqm77zHuxG2LbvYl+jwbaUOrzNfaNal9mTivSlylYPMsZsOQQTamRBT2mljUx6hS4xgyqmYdvduQ4t7qt16uyPB/euDotdzW8X8K/oD7tObtaC9HTnj4ZqOGXuU0Hfc/AnDK9kASKS+tR1ZCosscd+3kGAE=",
+    "thinking": "",
+    "type": "thinking"
+   },
+   {
+    "text": "{\"cases\":[{\"title\":\"Account break adds interest from two categories to the first account; the last account is left unchanged\",\"condition\":\"Account 10000000001 has two category records, then account 10000000002 starts. This is the main branch: 1050-UPDATE-ACCOUNT runs on the change of account and it is not the first group. Account 10000000002 is the last group, so it runs into the end-of-file defect.\",\"expectation\":\"Account 10000000001: interest total = 1200.00*12.00/1200 + 600.00*18.00/1200 = 12.00 + 9.00 = 21.00. ACCT-CURR-BAL goes from 1000.00 to 1021.00, ACCT-CURR-CYC-CREDIT goes from 250.00 to 0 and ACCT-CURR-CYC-DEBIT goes from 400.00 to 0, and the record is rewritten. Account 10000000002 (the last group): its 8.00 of interest is calculated but not added. The record is not rewritten, so it keeps balance 2000.00, cycle credit 100.00 and cycle debit 50.00.\",\"fixture\":{\"TCATBAL\":[{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"10000000001\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"01\"},{\"field\":\"TRANCAT-CD\",\"value\":\"1\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"1200.00\"}]},{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"10000000001\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"02\"},{\"field\":\"TRANCAT-CD\",\"value\":\"1\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"600.00\"}]},{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"10000000002\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"01\"},{\"field\":\"TRANCAT-CD\",\"value\":\"1\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"800.00\"}]}],\"XREF\":[{\"values\":[{\"field\":\"XREF-CARD-NUM\",\"value\":\"4000000000000001\"},{\"field\":\"XREF-CUST-ID\",\"value\":\"100000001\"},{\"field\":\"XREF-ACCT-ID\",\"value\":\"10000000001\"}]},{\"values\":[{\"field\":\"XREF-CARD-NUM\",\"value\":\"4000000000000002\"},{\"field\":\"XREF-CUST-ID\",\"value\":\"100000002\"},{\"field\":\"XREF-ACCT-ID\",\"value\":\"10000000002\"}]}],\"ACCOUNT\":[{\"values\":[{\"field\":\"ACCT-ID\",\"value\":\"10000000001\"},{\"field\":\"ACCT-ACTIVE-STATUS\",\"value\":\"Y\"},{\"field\":\"ACCT-CURR-BAL\",\"value\":\"1000.00\"},{\"field\":\"ACCT-CREDIT-LIMIT\",\"value\":\"5000.00\"},{\"field\":\"ACCT-CASH-CREDIT-LIMIT\",\"value\":\"1000.00\"},{\"field\":\"ACCT-OPEN-DATE\",\"value\":\"2015-01-10\"},{\"field\":\"ACCT-EXPIRAION-DATE\",\"value\":\"2026-01-31\"},{\"field\":\"ACCT-REISSUE-DATE\",\"value\":\"2021-01-10\"},{\"field\":\"ACCT-CURR-CYC-CREDIT\",\"value\":\"250.00\"},{\"field\":\"ACCT-CURR-CYC-DEBIT\",\"value\":\"400.00\"},{\"field\":\"ACCT-ADDR-ZIP\",\"value\":\"10001\"},{\"field\":\"ACCT-GROUP-ID\",\"value\":\"GRPA\"}]},{\"values\":[{\"field\":\"ACCT-ID\",\"value\":\"10000000002\"},{\"field\":\"ACCT-ACTIVE-STATUS\",\"value\":\"Y\"},{\"field\":\"ACCT-CURR-BAL\",\"value\":\"2000.00\"},{\"field\":\"ACCT-CREDIT-LIMIT\",\"value\":\"8000.00\"},{\"field\":\"ACCT-CASH-CREDIT-LIMIT\",\"value\":\"2000.00\"},{\"field\":\"ACCT-OPEN-DATE\",\"value\":\"2016-03-15\"},{\"field\":\"ACCT-EXPIRAION-DATE\",\"value\":\"2027-03-31\"},{\"field\":\"ACCT-REISSUE-DATE\",\"value\":\"2022-03-15\"},{\"field\":\"ACCT-CURR-CYC-CREDIT\",\"value\":\"100.00\"},{\"field\":\"ACCT-CURR-CYC-DEBIT\",\"value\":\"50.00\"},{\"field\":\"ACCT-ADDR-ZIP\",\"value\":\"10002\"},{\"field\":\"ACCT-GROUP-ID\",\"value\":\"GRPA\"}]}],\"DISCGRP\":[{\"values\":[{\"field\":\"DIS-ACCT-GROUP-ID\",\"value\":\"GRPA\"},{\"field\":\"DIS-TRAN-TYPE-CD\",\"value\":\"01\"},{\"field\":\"DIS-TRAN-CAT-CD\",\"value\":\"1\"},{\"field\":\"DIS-INT-RATE\",\"value\":\"12.00\"}]},{\"values\":[{\"field\":\"DIS-ACCT-GROUP-ID\",\"value\":\"GRPA\"},{\"field\":\"DIS-TRAN-TYPE-CD\",\"value\":\"02\"},{\"field\":\"DIS-TRAN-CAT-CD\",\"value\":\"1\"},{\"field\":\"DIS-INT-RATE\",\"value\":\"18.00\"}]}]}},{\"title\":\"Zero interest total still clears the cycle credit and debit\",\"condition\":\"The disclosure rate is 0, so no interest is calculated and WS-TOTAL-INT stays 0. The account break still happens because a second account follows.\",\"expectation\":\"Account 20000000001: the balance stays 1500.00 (1500.00 + 0). ACCT-CURR-CYC-CREDIT goes from 75.25 to 0 and ACCT-CURR-CYC-DEBIT goes from 310.40 to 0, and the record is rewritten. Account 20000000002 is the last group and is not rewritten: it keeps 300.00, credit 20.00 and debit 30.00.\",\"fixture\":{\"TCATBAL\":[{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"20000000001\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"01\"},{\"field\":\"TRANCAT-CD\",\"value\":\"1\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"1500.00\"}]},{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"20000000002\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"01\"},{\"field\":\"TRANCAT-CD\",\"value\":\"1\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"300.00\"}]}],\"XREF\":[{\"values\":[{\"field\":\"XREF-CARD-NUM\",\"value\":\"4000000000000011\"},{\"field\":\"XREF-CUST-ID\",\"value\":\"200000001\"},{\"field\":\"XREF-ACCT-ID\",\"value\":\"20000000001\"}]},{\"values\":[{\"field\":\"XREF-CARD-NUM\",\"value\":\"4000000000000012\"},{\"field\":\"XREF-CUST-ID\",\"value\":\"200000002\"},{\"field\":\"XREF-ACCT-ID\",\"value\":\"20000000002\"}]}],\"ACCOUNT\":[{\"values\":[{\"field\":\"ACCT-ID\",\"value\":\"20000000001\"},{\"field\":\"ACCT-ACTIVE-STATUS\",\"value\":\"Y\"},{\"field\":\"ACCT-CURR-BAL\",\"value\":\"1500.00\"},{\"field\":\"ACCT-CREDIT-LIMIT\",\"value\":\"5000.00\"},{\"field\":\"ACCT-CASH-CREDIT-LIMIT\",\"value\":\"1000.00\"},{\"field\":\"ACCT-OPEN-DATE\",\"value\":\"2018-05-01\"},{\"field\":\"ACCT-EXPIRAION-DATE\",\"value\":\"2026-05-31\"},{\"field\":\"ACCT-REISSUE-DATE\",\"value\":\"2022-05-01\"},{\"field\":\"ACCT-CURR-CYC-CREDIT\",\"value\":\"75.25\"},{\"field\":\"ACCT-CURR-CYC-DEBIT\",\"value\":\"310.40\"},{\"field\":\"ACCT-ADDR-ZIP\",\"value\":\"20001\"},{\"field\":\"ACCT-GROUP-ID\",\"value\":\"ZERORATE\"}]},{\"values\":[{\"field\":\"ACCT-ID\",\"value\":\"20000000002\"},{\"field\":\"ACCT-ACTIVE-STATUS\",\"value\":\"Y\"},{\"field\":\"ACCT-CURR-BAL\",\"value\":\"300.00\"},{\"field\":\"ACCT-CREDIT-LIMIT\",\"value\":\"3000.00\"},{\"field\":\"ACCT-CASH-CREDIT-LIMIT\",\"value\":\"500.00\"},{\"field\":\"ACCT-OPEN-DATE\",\"value\":\"2019-06-01\"},{\"field\":\"ACCT-EXPIRAION-DATE\",\"value\":\"2027-06-30\"},{\"field\":\"ACCT-REISSUE-DATE\",\"value\":\"2023-06-01\"},{\"field\":\"ACCT-CURR-CYC-CREDIT\",\"value\":\"20.00\"},{\"field\":\"ACCT-CURR-CYC-DEBIT\",\"value\":\"30.00\"},{\"field\":\"ACCT-ADDR-ZIP\",\"value\":\"20002\"},{\"field\":\"ACCT-GROUP-ID\",\"value\":\"ZERORATE\"}]}],\"DISCGRP\":[{\"values\":[{\"field\":\"DIS-ACCT-GROUP-ID\",\"value\":\"ZERORATE\"},{\"field\":\"DIS-TRAN-TYPE-CD\",\"value\":\"01\"},{\"field\":\"DIS-TRAN-CAT-CD\",\"value\":\"1\"},{\"field\":\"DIS-INT-RATE\",\"value\":\"0\"}]}]}},{\"title\":\"A file with a single account group never updates that account\",\"condition\":\"Only one account appears in TCATBAL. There is no account break, and the end-of-file stops the loop before the ELSE branch that would update the account can run.\",\"expectation\":\"Interest of 2400.00*12/1200 + 1200.00*24/1200 = 24.00 + 24.00 = 48.00 is calculated, and interest transactions may still be written. The account record is not rewritten: ACCT-CURR-BAL stays 3600.00, cycle credit stays 500.00 and cycle debit stays 900.00.\",\"fixture\":{\"TCATBAL\":[{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"30000000001\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"01\"},{\"field\":\"TRANCAT-CD\",\"value\":\"1\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"2400.00\"}]},{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"30000000001\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"01\"},{\"field\":\"TRANCAT-CD\",\"value\":\"2\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"1200.00\"}]}],\"XREF\":[{\"values\":[{\"field\":\"XREF-CARD-NUM\",\"value\":\"4000000000000021\"},{\"field\":\"XREF-CUST-ID\",\"value\":\"300000001\"},{\"field\":\"XREF-ACCT-ID\",\"value\":\"30000000001\"}]}],\"ACCOUNT\":[{\"values\":[{\"field\":\"ACCT-ID\",\"value\":\"30000000001\"},{\"field\":\"ACCT-ACTIVE-STATUS\",\"value\":\"Y\"},{\"field\":\"ACCT-CURR-BAL\",\"value\":\"3600.00\"},{\"field\":\"ACCT-CREDIT-LIMIT\",\"value\":\"10000.00\"},{\"field\":\"ACCT-CASH-CREDIT-LIMIT\",\"value\":\"2000.00\"},{\"field\":\"ACCT-OPEN-DATE\",\"value\":\"2017-02-01\"},{\"field\":\"ACCT-EXPIRAION-DATE\",\"value\":\"2026-02-28\"},{\"field\":\"ACCT-REISSUE-DATE\",\"value\":\"2021-02-01\"},{\"field\":\"ACCT-CURR-CYC-CREDIT\",\"value\":\"500.00\"},{\"field\":\"ACCT-CURR-CYC-DEBIT\",\"value\":\"900.00\"},{\"field\":\"ACCT-ADDR-ZIP\",\"value\":\"30001\"},{\"field\":\"ACCT-GROUP-ID\",\"value\":\"GRPB\"}]}],\"DISCGRP\":[{\"values\":[{\"field\":\"DIS-ACCT-GROUP-ID\",\"value\":\"GRPB\"},{\"field\":\"DIS-TRAN-TYPE-CD\",\"value\":\"01\"},{\"field\":\"DIS-TRAN-CAT-CD\",\"value\":\"1\"},{\"field\":\"DIS-INT-RATE\",\"value\":\"12.00\"}]},{\"values\":[{\"field\":\"DIS-ACCT-GROUP-ID\",\"value\":\"GRPB\"},{\"field\":\"DIS-TRAN-TYPE-CD\",\"value\":\"01\"},{\"field\":\"DIS-TRAN-CAT-CD\",\"value\":\"2\"},{\"field\":\"DIS-INT-RATE\",\"value\":\"24.00\"}]}]}},{\"title\":\"Three accounts: negative interest, fractional-cent interest and the skipped last account\",\"condition\":\"Three account groups give two account breaks. The first account has a negative category balance, so its interest is negative and is added to a negative current balance. The second has interest with fractions of a cent (333.33*10/1200 = 2.77775). The third is the last group.\",\"expectation\":\"Account 40000000001: interest = -600.00*10/1200 = -5.00. The balance goes from -100.00 to -105.00, cycle credit (600.00) and debit go to 0, and the record is rewritten. Account 40000000002: interest = 2.77775, truncated to 2.77 if the COMPUTE has no ROUNDED. The balance goes from 333.33 to 336.10, cycle debit goes from 333.33 to 0, and the record is rewritten. Account 40000000003 is the last group and is not rewritten: it keeps 900.00, credit 45.00 and debit 55.00.\",\"fixture\":{\"TCATBAL\":[{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"40000000001\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"01\"},{\"field\":\"TRANCAT-CD\",\"value\":\"1\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"-600.00\"}]},{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"40000000002\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"01\"},{\"field\":\"TRANCAT-CD\",\"value\":\"1\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"333.33\"}]},{\"values\":[{\"field\":\"TRANCAT-ACCT-ID\",\"value\":\"40000000003\"},{\"field\":\"TRANCAT-TYPE-CD\",\"value\":\"01\"},{\"field\":\"TRANCAT-CD\",\"value\":\"1\"},{\"field\":\"TRAN-CAT-BAL\",\"value\":\"900.00\"}]}],\"XREF\":[{\"values\":[{\"field\":\"XREF-CARD-NUM\",\"value\":\"4000000000000031\"},{\"field\":\"XREF-CUST-ID\",\"value\":\"400000001\"},{\"field\":\"XREF-ACCT-ID\",\"value\":\"40000000001\"}]},{\"values\":[{\"field\":\"XREF-CARD-NUM\",\"value\":\"4000000000000032\"},{\"field\":\"XREF-CUST-ID\",\"value\":\"400000002\"},{\"field\":\"XREF-ACCT-ID\",\"value\":\"40000000002\"}]},{\"values\":[{\"field\":\"XREF-CARD-NUM\",\"value\":\"4000000000000033\"},{\"field\":\"XREF-CUST-ID\",\"value\":\"400000003\"},{\"field\":\"XREF-ACCT-ID\",\"value\":\"40000000003\"}]}],\"ACCOUNT\":[{\"values\":[{\"field\":\"ACCT-ID\",\"value\":\"40000000001\"},{\"field\":\"ACCT-ACTIVE-STATUS\",\"value\":\"Y\"},{\"field\":\"ACCT-CURR-BAL\",\"value\":\"-100.00\"},{\"field\":\"ACCT-CREDIT-LIMIT\",\"value\":\"5000.00\"},{\"field\":\"ACCT-CASH-CREDIT-LIMIT\",\"value\":\"1000.00\"},{\"field\":\"ACCT-OPEN-DATE\",\"value\":\"2014-04-01\"},{\"field\":\"ACCT-EXPIRAION-DATE\",\"value\":\"2025-04-30\"},{\"field\":\"ACCT-REISSUE-DATE\",\"value\":\"2020-04-01\"},{\"field\":\"ACCT-CURR-CYC-CREDIT\",\"value\":\"600.00\"},{\"field\":\"ACCT-CURR-CYC-DEBIT\",\"value\":\"0\"},{\"field\":\"ACCT-ADDR-ZIP\",\"value\":\"40001\"},{\"field\":\"ACCT-GROUP-ID\",\"value\":\"GRPC\"}]},{\"values\":[{\"field\":\"ACCT-ID\",\"value\":\"40000000002\"},{\"field\":\"ACCT-ACTIVE-STATUS\",\"value\":\"Y\"},{\"field\":\"ACCT-CURR-BAL\",\"value\":\"333.33\"},{\"field\":\"ACCT-CREDIT-LIMIT\",\"value\":\"4000.00\"},{\"field\":\"ACCT-CASH-CREDIT-LIMIT\",\"value\":\"800.00\"},{\"field\":\"ACCT-OPEN-DATE\",\"value\":\"2015-07-01\"},{\"field\":\"ACCT-EXPIRAION-DATE\",\"value\":\"2026-07-31\"},{\"field\":\"ACCT-REISSUE-DATE\",\"value\":\"2021-07-01\"},{\"field\":\"ACCT-CURR-CYC-CREDIT\",\"value\":\"0\"},{\"field\":\"ACCT-CURR-CYC-DEBIT\",\"value\":\"333.33\"},{\"field\":\"ACCT-ADDR-ZIP\",\"value\":\"40002\"},{\"field\":\"ACCT-GROUP-ID\",\"value\":\"GRPC\"}]},{\"values\":[{\"field\":\"ACCT-ID\",\"value\":\"40000000003\"},{\"field\":\"ACCT-ACTIVE-STATUS\",\"value\":\"Y\"},{\"field\":\"ACCT-CURR-BAL\",\"value\":\"900.00\"},{\"field\":\"ACCT-CREDIT-LIMIT\",\"value\":\"6000.00\"},{\"field\":\"ACCT-CASH-CREDIT-LIMIT\",\"value\":\"1200.00\"},{\"field\":\"ACCT-OPEN-DATE\",\"value\":\"2016-08-01\"},{\"field\":\"ACCT-EXPIRAION-DATE\",\"value\":\"2027-08-31\"},{\"field\":\"ACCT-REISSUE-DATE\",\"value\":\"2022-08-01\"},{\"field\":\"ACCT-CURR-CYC-CREDIT\",\"value\":\"45.00\"},{\"field\":\"ACCT-CURR-CYC-DEBIT\",\"value\":\"55.00\"},{\"field\":\"ACCT-ADDR-ZIP\",\"value\":\"40003\"},{\"field\":\"ACCT-GROUP-ID\",\"value\":\"GRPC\"}]}],\"DISCGRP\":[{\"values\":[{\"field\":\"DIS-ACCT-GROUP-ID\",\"value\":\"GRPC\"},{\"field\":\"DIS-TRAN-TYPE-CD\",\"value\":\"01\"},{\"field\":\"DIS-TRAN-CAT-CD\",\"value\":\"1\"},{\"field\":\"DIS-INT-RATE\",\"value\":\"10.00\"}]}]}}]}",
+    "type": "text"
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 13204,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 13204,
+     "model": null,
+     "output_tokens": 6737,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 6737,
+   "output_tokens_details": {
+    "thinking_tokens": 70
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}
