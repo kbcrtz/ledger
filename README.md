@@ -9,8 +9,7 @@ source lines it came from. Each rule is then checked against the unchanged legac
 a Python port written from the rules alone must produce the same outputs. A named reviewer
 can then approve or reject each rule, with a note, in the review UI.
 
-<!-- TODO: add a screenshot of the rule detail page at docs/img/rule-detail.png -->
-![Rule detail](docs/img/rule-detail.png)
+![A rule in the review UI: the COBOL on the left, the plain-English rule with its line citations in the middle, and the Python written from the rule alone on the right](docs/img/rule-detail.png)
 
 ## How it works
 
@@ -81,8 +80,8 @@ replays deterministically. To prove that nothing is called live:
 LEDGER_REPLAY_ONLY=1 .venv/bin/python -m ledger.pipeline all   # fails on any cache miss
 ```
 
-No API key is needed for this. On the committed cache this makes 75 cache hits and 0 API calls, and reproduces
-`rules.json` and `results.json` exactly. Only the Docker runs are live, about 5 seconds in all.
+No API key is needed for this. On the committed cache this makes 74 cache hits and 0 API calls and ends with 12 rules verified.
+It reproduces `rules.json` exactly and `results.json` except for clock timestamps, which the comparison masks. Only the Docker runs are live, about 5 seconds in all.
 
 ## Team
 
@@ -150,14 +149,14 @@ cd frontend && npm run dev                                 # UI at http://localh
 
 The UI has these screens:
 
-- **Rules** (`/`): the catalog. Totals (verified, flagged, approved, diverged), cases
-  matching, the sample-data result per program, and filters by program and status.
-- **Rule detail** (`/rules/BR-…`): Given/When/Then on the left. Click a clause to
-  highlight its lines in the read-only Monaco view of the COBOL; failed clauses show the
-  checker errors and the judge's reason. The legacy-vs-port cases sit below. Expand one to
-  see the differing fields, the output records side by side, the fixture, and the COBOL
-  lines the case executed. You can approve or reject with a name and a note, and there is
-  an audit trail.
+- **Rules** (`/`): the four checks (sourced, rebuilt, tested, signed off), the result on
+  CardDemo's own data, and every rule in one list, filterable by program and by finding.
+- **Rule detail** (`/rules/BR-…`): three columns, the COBOL, the rule's Given/When/Then
+  sentences, and the Python written from it. Click a sentence to highlight its COBOL lines
+  and see why it counts as sourced. The **Tests** tab shows each legacy-vs-port case
+  (differing fields, output records side by side, the fixture, the lines it executed);
+  **How it was made** shows what the AI saw, its lookups and the verifier's verdicts. You
+  can approve or reject with a name and a note, and there is an audit trail.
 - **Change impact** (`/rules/BR-…/impact`): edit clauses and see the linked lines, data
   names, port functions, tests and other rules go stale. Re-verify regenerates only that
   rule's port code (cached) and re-runs every case of the program, plus sample data,
