@@ -11,14 +11,14 @@ const GLYPH: Record<string, string> = {
   ring: "M8 8m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0",
 };
 const STYLE: Record<string, { pill: string; glyph: string }> = {
-  verified: { pill: "bg-verified text-white", glyph: "check" },
-  traced: { pill: "bg-accent text-white", glyph: "check" },
-  flagged: { pill: "bg-flagged text-white", glyph: "dot" },
-  rejected: { pill: "bg-rejected text-white", glyph: "x" },
-  approved: { pill: "bg-approved text-white", glyph: "check" },
-  diverged: { pill: "bg-diverged text-white", glyph: "neq" },
-  stale: { pill: "bg-stale text-white", glyph: "ring" },
-  extracted: { pill: "bg-stale text-white", glyph: "ring" },
+  verified: { pill: "bg-verified-fill text-white", glyph: "check" },
+  traced: { pill: "bg-accent-fill text-white", glyph: "check" },
+  flagged: { pill: "bg-flagged-fill text-white", glyph: "dot" },
+  rejected: { pill: "bg-rejected-fill text-white", glyph: "x" },
+  approved: { pill: "bg-approved-fill text-white", glyph: "check" },
+  diverged: { pill: "bg-accent-fill text-white", glyph: "neq" },
+  stale: { pill: "bg-stale-fill text-white", glyph: "ring" },
+  extracted: { pill: "bg-stale-fill text-white", glyph: "ring" },
 };
 
 export function StatusMark({ status, large = false }: { status: string; large?: boolean }) {

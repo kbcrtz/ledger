@@ -29,25 +29,28 @@ function registerCobol(monaco: Monaco) {
       ],
     },
   });
-  // GitHub light syntax colors.
+  // GitHub dark syntax colors on Ledger's box surface.
   monaco.editor.defineTheme("ledger-paper", {
-    base: "vs",
+    base: "vs-dark",
     inherit: true,
     rules: [
-      { token: "comment", foreground: "6e7781", fontStyle: "italic" },
-      { token: "keyword", foreground: "cf222e" },
-      { token: "string", foreground: "0a3069" },
-      { token: "number", foreground: "0550ae" },
-      { token: "identifier", foreground: "1f2328" },
+      { token: "comment", foreground: "8b949e", fontStyle: "italic" },
+      { token: "keyword", foreground: "ff7b72" },
+      { token: "string", foreground: "a5d6ff" },
+      { token: "number", foreground: "79c0ff" },
+      { token: "identifier", foreground: "e6edf3" },
     ],
     colors: {
-      "editor.background": "#ffffff",
-      "editorLineNumber.foreground": "#8c959f",
-      "editorLineNumber.activeForeground": "#1f2328",
+      "editor.background": "#1d1918",
+      "editor.foreground": "#e6edf3",
+      "editorLineNumber.foreground": "#6e7681",
+      "editorLineNumber.activeForeground": "#f5f4f4",
       "editor.lineHighlightBackground": "#00000000",
       "editor.lineHighlightBorder": "#00000000",
-      "editorGutter.background": "#ffffff",
-      "editorRuler.foreground": "#eeece8",
+      "editorGutter.background": "#1d1918",
+      "editorRuler.foreground": "#2a2624",
+      "scrollbarSlider.background": "#42403e80",
+      "scrollbarSlider.hoverBackground": "#5a5654",
     },
   });
 }
@@ -108,11 +111,11 @@ export default function SourceView({
       height={height}
       language={language}
       value={src}
-      theme={language === "cobol" ? "ledger-paper" : "vs"}
+      theme={language === "cobol" ? "ledger-paper" : "vs-dark"}
       beforeMount={registerCobol}
       onMount={(ed, monaco) => { editorRef.current = ed; monacoRef.current = monaco; decorate(); }}
       options={{
-        readOnly: true, domReadOnly: true, minimap: { enabled: false }, fontFamily: "var(--font-plex-mono), monospace",
+        readOnly: true, domReadOnly: true, minimap: { enabled: false }, fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
         fontSize: 13, lineHeight: 20, scrollBeyondLastLine: false, renderLineHighlight: "none", wordWrap: "off",
         lineDecorationsWidth: 16, glyphMargin: false, folding: false, rulers: language === "cobol" ? [6, 7, 72] : [],
         overviewRulerLanes: 0, scrollbar: { verticalScrollbarSize: 10 },

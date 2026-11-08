@@ -43,19 +43,21 @@ export default function Home() {
   const findings = FINDINGS.filter((f) => byId[f.rule]);
 
   return (
-    <div className="mx-auto max-w-[1280px] px-6 pt-10 pb-16">
-      <section aria-label="What Ledger does" className="max-w-[860px]">
-        <h1 className="text-[40px] leading-[1.08] font-semibold tracking-[-0.025em]">
+    <>
+    <section aria-label="What Ledger does" className="dot-grid border-b border-rule">
+      <div className="mx-auto max-w-[1280px] px-6 pt-16 pb-14">
+        <h1 className="text-[48px] leading-[1.04] font-semibold tracking-[-0.035em] max-w-[18ch] sm:max-w-none">
           <span className="block text-[#8e8784]">What the old code actually does,</span>
           <span className="block">written down and checked against it.</span>
         </h1>
-        <p className="mt-4 text-[16px] leading-relaxed text-ink-soft max-w-[66ch]">
+        <p className="mt-5 text-[16.5px] leading-relaxed text-ink-soft max-w-[64ch]">
           Ledger read two of AWS CardDemo&apos;s COBOL batch programs and wrote their business rules in plain English.
           Every rule then goes through four checks, in order, and the last one is a person&apos;s call.
         </p>
-      </section>
-
-      <div className="mt-10 grid lg:grid-cols-[minmax(0,1fr)_300px] gap-8 items-start">
+      </div>
+    </section>
+    <div className="mx-auto max-w-[1280px] px-6 pt-10 pb-16">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_300px] gap-8 items-start">
         <div className="grid gap-6 min-w-0">
           <ChecksBox title={`${n} rules`} checks={[
             { name: "Sourced", state: sourced === n ? "pass" : "pending", result: `${sourced} of ${plural(n, "rule")}`,
@@ -165,6 +167,7 @@ export default function Home() {
         </aside>
       </div>
     </div>
+    </>
   );
 }
 
@@ -176,7 +179,7 @@ function CoverageBar({ cov }: { cov: Summary["coverage"] }) {
   const parts = [
     { label: "Run by a test", n: t.ran, color: "bg-verified" },
     { label: "Cited, not run", n: citedOnly, color: "bg-accent-bright" },
-    { label: "Not cited or run", n: t.neither, color: "bg-[#d6d3d1]" },
+    { label: "Not cited or run", n: t.neither, color: "bg-[#42403e]" },
   ];
   return (
     <section className="border-t border-rule pt-5">

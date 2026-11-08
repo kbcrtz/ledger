@@ -1,52 +1,60 @@
 @import "tailwindcss";
 
-/* Ledger tokens. Structure borrows GitHub's (boxes, header bars, tabs, checks);
-   palette and type borrow 8090's (warm "linen" neutrals, azure accent, grotesk). */
+/* Ledger tokens, dark. Structure borrows GitHub's (boxes, header bars, tabs, checks);
+   palette borrows 8090's dark "linen" surfaces and azure accent, with GitHub-dark state colors. */
 @theme {
   /* surfaces */
-  --color-paper: #f9f8f5;        /* page */
-  --color-canvas: #ffffff;       /* boxes */
-  --color-sheet: #f4f2ee;        /* box headers, hover rows */
-  --color-night: #151211;        /* top bar, log */
+  --color-paper: #151211;        /* page (8090 linen-900) */
+  --color-canvas: #1d1918;       /* boxes (linen-100) */
+  --color-sheet: #24201e;        /* box headers, hover rows */
+  --color-night: #0f0d0c;        /* top bar, log */
   --color-night-2: #1d1918;
   --color-night-line: #2f2b29;
   --color-night-ink: #f5f4f4;
-  --color-night-soft: #b4afad;
+  --color-night-soft: #a6a09b;
 
   /* text and lines */
-  --color-ink: #1d1918;
-  --color-ink-soft: #6b6562;
-  --color-rule: #e0ddd8;
-  --color-rule-strong: #c9c5bf;
+  --color-ink: #f5f4f4;
+  --color-ink-soft: #a6a09b;
+  --color-ink-faint: #706c6a;
+  --color-rule: #2f2b29;
+  --color-rule-strong: #42403e;
 
   /* accent (8090 azure) */
-  --color-accent: #275e94;
-  --color-accent-strong: #17324f;
-  --color-accent-bright: #4b88c9;
-  --color-accent-wash: #e8f2fd;
+  --color-accent: #82bbf5;        /* links and accent text */
+  --color-accent-strong: #b3d6ff;
+  --color-accent-bright: #4b88c9; /* underlines, focus */
+  --color-accent-fill: #275e94;   /* buttons, pills */
+  --color-accent-wash: rgba(75, 136, 201, .16);
 
-  /* states (GitHub Primer light) */
-  --color-verified: #1a7f37;
-  --color-verified-wash: #dafbe1;
-  --color-traced: #275e94;
-  --color-flagged: #9a6700;
-  --color-flagged-wash: #fff8c5;
-  --color-rejected: #d1242f;
-  --color-rejected-wash: #ffebe9;
-  --color-approved: #8250df;
-  --color-approved-wash: #fbefff;
-  --color-diverged: #275e94;
-  --color-stale: #6e7781;
-  --color-extracted: #6e7781;
+  /* states (GitHub dark) */
+  --color-verified: #3fb950;
+  --color-verified-fill: #238636;
+  --color-verified-wash: rgba(46, 160, 67, .15);
+  --color-traced: #82bbf5;
+  --color-flagged: #d29922;
+  --color-flagged-fill: #9e6a03;
+  --color-flagged-wash: rgba(187, 128, 9, .15);
+  --color-rejected: #f85149;
+  --color-rejected-fill: #b62324;
+  --color-rejected-wash: rgba(248, 81, 73, .12);
+  --color-approved: #a371f7;
+  --color-approved-fill: #8957e5;
+  --color-approved-wash: rgba(163, 113, 247, .15);
+  --color-diverged: #82bbf5;
+  --color-stale: #8b949e;
+  --color-stale-fill: #484f58;
+  --color-extracted: #8b949e;
 
-  /* code highlights (GitHub line highlight) */
-  --color-marker: #fff8c5;
-  --color-marker-strong: #d4a72c;
+  /* code highlights (GitHub dark line highlight) */
+  --color-marker: rgba(187, 128, 9, .18);
+  --color-marker-strong: #d29922;
 
-  --font-sans: var(--font-instrument), -apple-system, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  --font-sans: var(--font-geist), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+:root { color-scheme: dark; }
 html, body {
   background: var(--color-paper);
   color: var(--color-ink);
@@ -57,46 +65,55 @@ body {
   line-height: 1.5;
   font-feature-settings: "tnum" 1;
 }
+/* 8090's faint dot grid behind the page */
+.dot-grid {
+  background-image: radial-gradient(rgba(245, 244, 244, .07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
 :focus-visible {
   outline: 2px solid var(--color-accent-bright);
   outline-offset: 2px;
   border-radius: 4px;
 }
 a { color: inherit; }
+::selection { background: rgba(75, 136, 201, .35); }
 
 /* Box: GitHub's bordered container with an optional header bar. */
 .box { background: var(--color-canvas); border: 1px solid var(--color-rule); border-radius: 8px; }
 .box-header { background: var(--color-sheet); border-bottom: 1px solid var(--color-rule); border-radius: 8px 8px 0 0; padding: 10px 16px; }
 .box-row + .box-row { border-top: 1px solid var(--color-rule); }
 
-/* Buttons */
+/* Buttons (8090: white solid primary, outlined secondary; GitHub: green for approve) */
 .btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 6px; font-size: 14px; font-weight: 500;
-  border: 1px solid var(--color-rule-strong); background: var(--color-canvas); color: var(--color-ink); }
-.btn:hover { background: var(--color-sheet); }
-.btn:disabled { opacity: .45; cursor: not-allowed; }
-.btn-primary { background: var(--color-verified); border-color: rgba(31, 35, 40, .15); color: #fff; }
-.btn-primary:hover { background: #1a6e31; }
-.btn-accent { background: var(--color-accent); border-color: var(--color-accent-strong); color: #fff; }
-.btn-accent:hover { background: var(--color-accent-strong); }
+  border: 1px solid var(--color-rule-strong); background: transparent; color: var(--color-ink); }
+.btn:hover { background: var(--color-sheet); border-color: #5a5654; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-light { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+.btn-light:hover { background: #dad9d9; border-color: #dad9d9; }
+.btn-primary { background: var(--color-verified-fill); border-color: rgba(240, 246, 252, .1); color: #fff; }
+.btn-primary:hover { background: #2ea043; }
+.btn-accent { background: var(--color-accent-fill); border-color: var(--color-accent-bright); color: #fff; }
+.btn-accent:hover { background: #2f6fae; }
 .btn-danger { color: var(--color-rejected); }
-.btn-danger:hover { background: var(--color-rejected); color: #fff; border-color: var(--color-rejected); }
+.btn-danger:hover { background: var(--color-rejected-fill); color: #fff; border-color: var(--color-rejected-fill); }
 
 /* Form fields */
-.field { width: 100%; border: 1px solid var(--color-rule-strong); border-radius: 6px; background: var(--color-canvas); padding: 5px 10px; font-size: 14px; color: var(--color-ink); }
+.field { width: 100%; border: 1px solid var(--color-rule-strong); border-radius: 6px; background: var(--color-paper); padding: 5px 10px; font-size: 14px; color: var(--color-ink); }
+.field::placeholder { color: var(--color-ink-faint); }
 .field:focus { outline: none; border-color: var(--color-accent-bright); box-shadow: 0 0 0 3px var(--color-accent-wash); }
 
 /* Counter pill next to tab labels */
-.counter { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 999px; background: #ebe8e3; font-size: 12px; font-weight: 500; line-height: 18px; text-align: center; color: var(--color-ink); }
+.counter { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--color-rule); font-size: 12px; font-weight: 500; line-height: 18px; text-align: center; color: var(--color-ink); }
 
 .link { color: var(--color-accent); }
-.link:hover { text-decoration: underline; text-underline-offset: 2px; }
+.link:hover { color: var(--color-accent-strong); text-decoration: underline; text-underline-offset: 2px; }
 
 /* Monaco decorations */
-.ledger-cited { background: rgba(255, 248, 197, .9); }
-.ledger-active { background: #fff1a8; }
+.ledger-cited { background: rgba(187, 128, 9, .16); }
+.ledger-active { background: rgba(187, 128, 9, .34); }
 .ledger-active-gutter { background: var(--color-marker-strong); width: 3px !important; margin-left: 4px; }
-.ledger-cited-gutter { background: var(--color-marker-strong); width: 3px !important; margin-left: 4px; opacity: .55; }
-.ledger-exec-gutter { background: var(--color-verified); width: 3px !important; margin-left: 10px; opacity: .6; }
+.ledger-cited-gutter { background: var(--color-marker-strong); width: 3px !important; margin-left: 4px; opacity: .5; }
+.ledger-exec-gutter { background: var(--color-verified); width: 3px !important; margin-left: 10px; opacity: .7; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }

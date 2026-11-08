@@ -33,12 +33,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <span className="text-[15px] text-night-ink">aws-carddemo</span>
           <span className="hidden md:inline text-[12px] text-night-soft border border-night-line rounded-full px-2 py-[1px] ml-1">COBOL batch, 2 programs</span>
           <button onClick={() => setLogOpen((v) => !v)}
-            className="ml-auto h-8 px-3 rounded-md border border-night-line text-[13.5px] text-night-ink hover:bg-night-2">
+            className="ml-auto btn !h-8 !text-[13.5px]">
             {logOpen ? "Hide pipeline log" : "Pipeline log"}
           </button>
         </div>
       </header>
-      <nav className="border-b border-rule bg-canvas" aria-label="Sections">
+      <nav className="border-b border-night-line bg-night" aria-label="Sections">
         <div className="mx-auto max-w-[1280px] px-6 flex gap-1 text-[14px]">
           {tabs.map((t) => (
             <Link key={t.href} href={t.href} aria-current={t.active ? "page" : undefined}
