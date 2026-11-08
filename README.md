@@ -22,25 +22,24 @@ The spec is in `docs/SPEC.md`.
 |---|---|
 | Legacy harness, sample data | CBTRN02C: 300 transactions, **38 rejects, all reason 102**, rc 4, 251 traced lines. CBACT04C, run on the posted files: account 50's **$18.77** interest transaction is written, but its balance and cycle totals never change |
 | Rules extracted | 12 (CBTRN02C 7, CBACT04C 5), the spec's hard cap |
-| Verifier | 8 traced, 4 flagged after one retry: BR-CBTRN02C-004 (103 overwrites 102), -005 (routing and return code), BR-CBACT04C-004 (interest formula), -005 (interest transaction record) |
-| Generated cases | 41 cases for the 8 traced rules. **19 of 41 match legacy** |
-| Rule status after the harness | **2 verified** (BR-CBTRN02C-006 category balance update 6/6, -007 account update and transaction write 5/5), 10 flagged |
-| CBTRN02C sample data | All 38 rejects, 262 transactions, 50 accounts and 100 category balances match field by field. **One difference: return code, legacy 4 vs port 0** |
-| CBACT04C sample data | 347 differing fields: the port computes no interest |
-| Coverage (`-ftraceall`) | CBTRN02C: 231 of 339 statements executed by some case, 104 neither cited nor executed (all on file-status or abend paths). CBACT04C: 206 of 294 executed, 77 neither |
+| Verifier | **12 of 12 traced**. 31 clauses cite extra spans (`also`); retries kept 47 unchanged passing clauses; 20 unprovable observations sit in reviewer notes |
+| Generated cases | **58 of 58 match legacy** |
+| Rule status after the harness | **12 verified** |
+| CBTRN02C sample data | Matches field for field: 38 rejects, 262 transactions, 50 accounts, 100 category balances, rc 4 |
+| CBACT04C sample data | Matches field for field: 50 interest transactions (timestamps masked), 50 accounts, rc 0 |
+| Coverage (`-ftraceall`) | CBTRN02C: 233 of 339 statements executed by some case, 104 neither cited nor executed. CBACT04C: 206 of 294 executed, 80 neither |
 
-The mismatches are real, and they explain themselves. Rules that fail verification never
-reach the port. So the port has no return-code logic (BR-CBTRN02C-005 was flagged), and every
-reject case differs from legacy only in `rc`. The port also has no interest formula
-(BR-CBACT04C-004 and -005 were flagged), so every CBACT04C case with a non-zero rate differs.
-The modernizer recorded each of these as a `# GAP:` in the generated code and in the pipeline
-log. The extractor found the spec's findings on its own:
+History: the first run verified only 2 of 12 rules. Each clause could cite only one span,
+so true facts that needed a program line plus a copybook declaration failed the judge, and
+retries re-judged clauses that had already passed. The fixes are in the git log (multi-span
+citations, retries that re-check only changed clauses, absence claims moved to notes).
+
+The extractor found these on its own:
 
 - 103 overwriting 102 (BR-CBTRN02C-004)
-- the limit check ignoring the current balance, with `WS-TEMP-BAL` high-order truncation
-  (BR-CBTRN02C-003; T-014 exercises the truncation and matches)
-- reason 109 set after posting and never acted on (BR-CBTRN02C-007)
-- the last-account bug (BR-CBACT04C-002, traced)
+- `WS-TEMP-BAL` high-order truncation in the limit check (BR-CBTRN02C-003)
+- reason 109 set after posting and never acted on (BR-CBTRN02C-007, in a reviewer note)
+- the last-account bug (BR-CBACT04C-002 then[3])
 
 It did not spell out the payments-make-the-limit-check-stricter finding.
 
@@ -197,7 +196,9 @@ override the model.
 - **Extractor prompt revision (disclosed).** After the first trial run on one unit, the
   verifier rejected clauses that bundled a record-layout fact into a statement about
   logic. I added one instruction: one checkable fact per clause, with layout facts citing
-  their declaration. The verifier was not changed. Even with this, 4 of 12 rules stay flagged.
+  their declaration. Later revisions (see git log): clauses may cite up to two extra spans
+  under `also`; rules are capped at 8 clauses; claims that something never happens go to
+  unverified `notes`, which the port and test generator never see.
 - **Verifier details.** The deterministic check requires:
   - every listed field (as a whole token) and literal to appear in the cited
     non-comment lines;
@@ -243,12 +244,11 @@ override the model.
 
 ## Known gaps
 
-- Only 2 of 12 rules are verified. The causes are upstream (flagged rules missing from the
-  port), not harness noise. A reviewer can read the four flagged rules in the UI and
-  approve, reject or correct them, then re-run `port`, `testgen` and `verify`.
-- Because CBACT04C's interest rules are flagged, the change-impact demo on BR-CBACT04C-002
-  runs on a port with no interest math. Its 13 mismatches all existed before the edit, and
-  the UI says so ("already differed before the edit").
+- No human has approved or rejected any rule yet; "verified" means the citations and the
+  legacy-vs-port tests passed, not that a reviewer signed off.
+- The scripted change-impact edit (`demo/change_impact_edit.json`, BR-CBACT04C-002 then[3])
+  regenerates the port with the last-account update. Re-verify then shows 21 expected
+  mismatches; on the sample data the only difference is account 50's balance and cycle totals.
 - Re-verify after an edit doesn't change `data/rules.json`. The edit, results and
   divergence approval live in `data/review/<rule>.json`, and the UI overlays them.
 - A clause-text edit is the only kind of edit supported (no adding or removing clauses, no
