@@ -51,6 +51,14 @@ export function outcomeText(o: string) {
   return `return code ${m[1]}`;
 }
 
+export function differ(n: number, what = "field") {
+  return `${plural(n, what)} ${n === 1 ? "differs" : "differ"}`;
+}
+
+export function lineRange(file: string, lines: number[]) {
+  return lines.length === 2 && lines[1] !== lines[0] ? `${file} lines ${lines[0]}–${lines[1]}` : `${file} line ${lines[0]}`;
+}
+
 export function plural(n: number, one: string, many = `${one}s`) {
   return `${n} ${n === 1 ? one : many}`;
 }

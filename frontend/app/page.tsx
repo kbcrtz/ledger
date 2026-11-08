@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { get, RuleSummary } from "@/lib/api";
 import { StatusMark } from "@/components/Status";
 import ProofChain, { stateOf } from "@/components/ProofChain";
-import { FINDINGS, PROGRAM_BLURB, PROGRAM_NAME, fileName, outcomeText, plural } from "@/lib/labels";
+import { FINDINGS, PROGRAM_BLURB, PROGRAM_NAME, differ, fileName, outcomeText, plural } from "@/lib/labels";
 
 type Summary = {
   totals: Record<string, number>;
@@ -77,7 +77,7 @@ export default function Home() {
               <li key={p} className="text-[15px] leading-relaxed">
                 <div className="font-medium">{PROGRAM_NAME[p]}</div>
                 <div className={s.match ? "text-verified" : "text-flagged"}>
-                  {s.match ? "✓ Identical results from the original and the rebuild" : `${plural(s.difference_count, "field")} differ between the original and the rebuild`}
+                  {s.match ? "✓ Identical results from the original and the rebuild" : `${differ(s.difference_count)} between the original and the rebuild`}
                 </div>
                 <div className="text-ink-soft text-[14px]">
                   {Object.entries(s.files).map(([f, v]) => `${v.legacy_records} ${fileName(f)}`).join(", ")}; {outcomeText(s.outcome.legacy)}

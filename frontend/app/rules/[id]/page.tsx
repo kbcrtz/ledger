@@ -6,7 +6,7 @@ import SourceView from "@/components/SourceView";
 import { StatusMark, Tick } from "@/components/Status";
 import DiffTable from "@/components/DiffTable";
 import ProofChain, { stateOf } from "@/components/ProofChain";
-import { PROGRAM_NAME, fileName, outcomeText, plural } from "@/lib/labels";
+import { PROGRAM_NAME, differ, fileName, lineRange, outcomeText, plural } from "@/lib/labels";
 
 const PARTS: Part[] = ["given", "when", "then"];
 const PART_LABEL: Record<Part, string> = { given: "Given", when: "When", then: "Then" };
@@ -108,7 +108,7 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
                           <span className="font-serif text-[16px] leading-[1.55] block">{c.text}</span>
                           <span className="text-[12.5px] text-ink-soft mt-1 flex flex-wrap gap-x-3">
                             {[c.source, ...(c.also ?? [])].map((s, k) => (
-                              <span key={k}>{s.file} {s.lines[1] !== s.lines[0] ? `lines ${s.lines[0]}–${s.lines[1]}` : `line ${s.lines[0]}`}</span>
+                              <span key={k}>{lineRange(s.file, s.lines)}</span>
                             ))}
                           </span>
                         </span>
@@ -176,7 +176,7 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
             <div className="flex gap-3 items-baseline flex-wrap">
               <span className="font-medium">CardDemo&apos;s own data, whole program</span>
               <span className={rule.sample.match ? "text-verified" : "text-flagged"}>
-                {rule.sample.match ? "✓ Identical results" : `${plural(rule.sample.difference_count, "field")} differ`}
+                {rule.sample.match ? "✓ Identical results" : differ(rule.sample.difference_count)}
               </span>
               <span className="text-ink-soft">{Object.entries(rule.sample.files).map(([f, v]) => `${v.legacy_records} ${fileName(f)}`).join(", ")}</span>
             </div>
@@ -216,7 +216,7 @@ function CaseRow({ c, open, onToggle, onShowLines }: { c: CaseResult; open: bool
         <span className="text-[13.5px] font-medium">{c.id}</span>
         <span className="text-[14.5px]">{c.title}<span className="block text-[12.5px] text-ink-soft">{c.condition}</span></span>
         <span className={`text-[13px] ${c.match ? "text-verified" : "text-rejected"}`}>
-          {c.match ? "Same result" : `${plural(c.difference_count, "field")} differ`}
+          {c.match ? "Same result" : differ(c.difference_count)}
         </span>
       </button>
       {open && (
