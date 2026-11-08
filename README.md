@@ -1,27 +1,59 @@
 # Ledger
 
-Ledger reads two AWS CardDemo batch COBOL programs, **CBTRN02C** (daily transaction
-posting) and **CBACT04C** (interest calculation), and extracts their business rules as
-plain-English Given/When/Then scenarios. Every clause cites exact source lines.
+Ledger reads legacy COBOL, writes its business rules in plain English, and proves them, by citing every line and by rebuilding the program from the rules alone and diffing it against the original.
 
-The pipeline then does the following:
+## Why it matters
 
-1. Checks every citation, first deterministically and then with an LLM judge.
-2. Writes a Python port from the traced rules only. The port never sees the COBOL.
-3. Generates branch and boundary fixtures.
-4. Runs the **unchanged** COBOL under GnuCOBOL 3.1.2 in Docker and the port on the same
-   inputs, and diffs the outputs field by field.
+Ledger extracts business rules from the legacy code, and every clause cites the exact
+source lines it came from. Each rule is then checked against the unchanged legacy program:
+a Python port written from the rules alone must produce the same outputs. A named reviewer
+can then approve or reject each rule, with a note, in the review UI.
+
+<!-- TODO: add a screenshot of the rule detail page at docs/img/rule-detail.png -->
+![Rule detail](docs/img/rule-detail.png)
+
+## How it works
+
+Ledger runs on two AWS CardDemo batch COBOL programs: **CBTRN02C** (daily transaction
+posting) and **CBACT04C** (interest calculation).
+
+1. **Parse** (code). A deterministic parser reads divisions, paragraphs, the PERFORM graph
+   and PIC layouts.
+2. **Extract** (AI). The extractor writes the business rules as plain-English
+   Given/When/Then scenarios. Every clause cites exact source lines.
+3. **Check citations** (code, then AI). Every citation is checked, first deterministically
+   and then with an LLM judge.
+4. **Blind Python port** (AI). The modernizer writes a Python port from the traced rules
+   only. The port never sees the COBOL.
+5. **Generate tests** (AI). The test generator writes branch and boundary fixtures.
+6. **Run COBOL and port side by side** (code). The **unchanged** COBOL runs under GnuCOBOL
+   3.1.2 in Docker, and the port runs on the same inputs. The outputs are diffed field by
+   field.
+7. **Coverage** (code). A `-ftraceall` build reports statements that no rule cites and no
+   case executes.
+
+AI drafts. Code or a person checks everything the AI produces.
 
 A review UI shows the result. Its pitch: nothing unsourced, nothing unverified.
 
-The spec is in `docs/SPEC.md`.
+The full build spec is in [`docs/SPEC.md`](docs/SPEC.md), for anyone who wants it.
 
-## Current results (committed run, replayable from `cache/llm/`)
+## Results
+
+| | First run → current run |
+|---|---|
+| Rules verified | 2 of 12 → **12 of 12** |
+| Generated cases matching legacy | 19 of 41 → **58 of 58** |
+| CardDemo sample data | Current run: **matches field for field on both programs** |
+
+First-run figures are from commit `675ecfe`. See [History](#history) for what changed.
+
+### Detailed results (committed run, replayable from `cache/llm/`)
 
 | | |
 |---|---|
 | Legacy harness, sample data | CBTRN02C: 300 transactions, **38 rejects, all reason 102**, rc 4, 251 traced lines. CBACT04C, run on the posted files: account 50's **$18.77** interest transaction is written, but its balance and cycle totals never change |
-| Rules extracted | 12 (CBTRN02C 7, CBACT04C 5), the spec's hard cap |
+| Rules extracted | 12 (CBTRN02C 7, CBACT04C 5), a 12-rule cap we set for the build |
 | Verifier | **12 of 12 traced**. 31 clauses cite extra spans (`also`); retries kept 47 unchanged passing clauses; 20 unprovable observations sit in reviewer notes |
 | Generated cases | **58 of 58 match legacy** |
 | Rule status after the harness | **12 verified** |
@@ -29,10 +61,7 @@ The spec is in `docs/SPEC.md`.
 | CBACT04C sample data | Matches field for field: 50 interest transactions (timestamps masked), 50 accounts, rc 0 |
 | Coverage (`-ftraceall`) | CBTRN02C: 233 of 339 statements executed by some case, 104 neither cited nor executed. CBACT04C: 206 of 294 executed, 80 neither |
 
-History: the first run verified only 2 of 12 rules. Each clause could cite only one span,
-so true facts that needed a program line plus a copybook declaration failed the judge, and
-retries re-judged clauses that had already passed. The fixes are in the git log (multi-span
-citations, retries that re-check only changed clauses, absence claims moved to notes).
+## What it found on its own
 
 The extractor found these on its own:
 
@@ -42,6 +71,22 @@ The extractor found these on its own:
 - the last-account bug (BR-CBACT04C-002 then[3])
 
 It did not spell out the payments-make-the-limit-check-stricter finding.
+
+## Reproducible without an API key
+
+Every Claude call is cached in `cache/llm/<agent>/<sha256 of the request>.json`. Re-running
+replays deterministically. To prove that nothing is called live:
+
+```bash
+LEDGER_REPLAY_ONLY=1 .venv/bin/python -m ledger.pipeline all   # fails on any cache miss
+```
+
+No API key is needed for this. On the committed cache this makes 75 cache hits and 0 API calls, and reproduces
+`rules.json` and `results.json` exactly. Only the Docker runs are live, about 5 seconds in all.
+
+## Team
+
+- Kobe Cortez, GitHub: <!-- TODO: GitHub handle --> <!-- TODO: role -->
 
 ## Setup
 
@@ -83,17 +128,10 @@ Each stage can also run on its own:
 .venv/bin/python -m ledger.pipeline coverage     # -ftraceall report      -> data/coverage.json
 ```
 
-Every Claude call is cached in `cache/llm/<agent>/<sha256 of the request>.json`. Re-running
-replays deterministically. To prove that nothing is called live:
+To replay from the cache with no API calls, see
+[Reproducible without an API key](#reproducible-without-an-api-key).
 
-```bash
-LEDGER_REPLAY_ONLY=1 .venv/bin/python -m ledger.pipeline all   # fails on any cache miss
-```
-
-No API key is needed for this. On the committed cache this makes 75 cache hits and 0 API calls, and reproduces
-`rules.json` and `results.json` exactly. Only the Docker runs are live, about 5 seconds in all.
-
-Tests (codec, citation checker, and the spec's harness acceptance checks; the latter needs Docker):
+Tests (codec, citation checker, and the harness acceptance checks we set for the build; the latter needs Docker):
 
 ```bash
 .venv/bin/python -m pytest -q tests
@@ -127,7 +165,7 @@ The UI has these screens:
 - **Pipeline log**: a side panel with agent steps, verifier rejections, retries, gaps and
   mismatches.
 
-### Demo script: the scripted change-impact edit
+## Demo script: the scripted change-impact edit
 
 `demo/change_impact_edit.json` holds the edit to BR-CBACT04C-002 (the last account gets its
 interest). Its regenerated port and verifier results are already in the cache. You can type
@@ -172,11 +210,11 @@ generator's deterministic `check_fixture`. Requests opt into server-side refusal
 (`fallbacks: "default"`, beta `server-side-fallback-2026-07-01`). Set `LEDGER_MODEL` to
 override the model.
 
-## Decisions where the spec was open
+## Design decisions
 
 - **Sample data for CBACT04C.** The raw `tcatbal.txt` has all-zero balances. So the
   CBACT04C "sample data" run uses the TCATBAL and ACCOUNT files that CBTRN02C posted,
-  mirroring the real job order (POSTTRAN, then INTCALC). This reproduces the spec's
+  mirroring the real job order (POSTTRAN, then INTCALC). This reproduces the expected
   $18.77 for account 50.
 - **Loader input format.** The loader reads fixed-width records with no newlines. Python
   strips CR/LF from the ASCII sample files and pads short records (cardxref lines are 36
@@ -190,12 +228,12 @@ override the model.
   frozen with `COB_CURRENT_DATE=2022/07/18 12:00:00`.
 - **Output order.** Indexed outputs are dumped in key order. CBACT04C's sequential
   TRANSACT file is compared in write order.
-- **Rule allotment.** The spec caps the build at 12 rules, so extraction runs over six
+- **Rule allotment.** We capped the build at 12 rules, so extraction runs over six
   fixed units whose `max_rules` sum to 12 (`ledger/units.py`). The focus notes say only
   which part of the program a unit covers, never what the code does.
 - **Extractor prompt revision (disclosed).** After the first trial run on one unit, the
   verifier rejected clauses that bundled a record-layout fact into a statement about
-  logic. I added one instruction: one checkable fact per clause, with layout facts citing
+  logic. We added one instruction: one checkable fact per clause, with layout facts citing
   their declaration. Later revisions (see git log): clauses may cite up to two extra spans
   under `also`; rules are capped at 8 clauses; claims that something never happens go to
   unverified `notes`, which the port and test generator never see.
@@ -235,8 +273,9 @@ override the model.
   modernizer prompt includes only the changed clauses (not the editor's name), so a
   scripted edit replays from cache.
 - **Coverage.** Executable lines are lines that start a COBOL statement. That is what
-  `-ftraceall` reports; ELSE, END-IF and continuation lines don't count. The spec's "251
-  lines" is the raw trace count including paragraph entries; 226 of those are statement lines.
+  `-ftraceall` reports; ELSE, END-IF and continuation lines don't count. The 251 traced
+  lines for the CBTRN02C sample data (see Detailed results) are the raw trace count
+  including paragraph entries; 226 of those are statement lines.
 - **Monaco.** `@monaco-editor/react` loads the editor from its default CDN (jsDelivr), so
   the UI needs network access the first time.
 - **No mock data.** The UI was built against real pipeline output, so `fixtures/mock/` is
@@ -253,4 +292,11 @@ override the model.
   divergence approval live in `data/review/<rule>.json`, and the UI overlays them.
 - A clause-text edit is the only kind of edit supported (no adding or removing clauses, no
   re-citing lines).
-- Stretch items not built: the cross-program view and the drift report.
+- Stretch goals we did not build: the cross-program view and the drift report.
+
+## History
+
+The first run verified only 2 of 12 rules. Each clause could cite only one span,
+so true facts that needed a program line plus a copybook declaration failed the judge, and
+retries re-judged clauses that had already passed. The fixes are in the git log (multi-span
+citations, retries that re-check only changed clauses, absence claims moved to notes).
