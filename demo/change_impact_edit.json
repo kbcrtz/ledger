@@ -1,0 +1,16 @@
+{
+ "by": "Demo reviewer",
+ "note": "Interest must post to every account, including the last one in the file.",
+ "clauses": [
+  {
+   "part": "then",
+   "index": 2,
+   "text": "After the last category balance record has been read, the account update (1050-UPDATE-ACCOUNT) is performed once more for the last account group."
+  },
+  {
+   "part": "then",
+   "index": 3,
+   "text": "As a result, the last account group is updated like every other account: its WS-TOTAL-INT is added to ACCT-CURR-BAL, its cycle credit and debit are set to zero, and its account record is rewritten. If the file is empty, no account is updated at all."
+  }
+ ]
+}

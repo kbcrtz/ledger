@@ -32,9 +32,9 @@ def decode_number(raw: str, digits: int, scale: int, signed: bool):
             neg = True
     if not s.isdigit():
         return Invalid(raw)
-    v = Decimal(int(s)).scaleb(-scale) if scale else Decimal(int(s))
-    if scale:
-        v = v.quantize(Decimal(1).scaleb(-scale))
+    if not scale:
+        return -int(s) if neg else int(s)
+    v = Decimal(int(s)).scaleb(-scale).quantize(Decimal(1).scaleb(-scale))
     return -v if neg else v
 
 

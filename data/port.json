@@ -1,0 +1,65 @@
+{
+ "CBTRN02C": {
+  "module": "port.generated.cbtrn02c",
+  "rules": [
+   "BR-CBTRN02C-001",
+   "BR-CBTRN02C-002",
+   "BR-CBTRN02C-003",
+   "BR-CBTRN02C-006",
+   "BR-CBTRN02C-007"
+  ],
+  "links": {
+   "BR-CBTRN02C-001": [
+    "cbtrn02c.lookup_card_xref"
+   ],
+   "BR-CBTRN02C-002": [
+    "cbtrn02c.lookup_account"
+   ],
+   "BR-CBTRN02C-003": [
+    "cbtrn02c.check_overlimit"
+   ],
+   "BR-CBTRN02C-006": [
+    "cbtrn02c.update_tcatbal"
+   ],
+   "BR-CBTRN02C-007": [
+    "cbtrn02c.update_account_and_write_transaction"
+   ]
+  },
+  "gaps": [
+   "Expiration check (reason 103) is referenced but its condition is not specified by any rule; not implemented.",
+   "No rule specifies setting ctx.return_code (e.g. when rejects occur); left at its initial value.",
+   "Width/padding of WS-VALIDATION-FAIL-REASON-DESC is not specified; the description text is passed to write_reject unpadded.",
+   "The 2-character timestamp fraction is assumed to be hundredths of a second (microsecond // 10000) from ctx.now().",
+   "Duplicate TRAN-ID on write_transaction is assumed to be raised as Abend by the ctx shell; the port does not catch it.",
+   "Account rewrite 'record not found' (reason 109) is modelled as the account ID no longer being present in ctx.accounts.",
+   "Transaction count and reject count are kept internally only; no rule specifies displaying or outputting them."
+  ]
+ },
+ "CBACT04C": {
+  "module": "port.generated.cbact04c",
+  "rules": [
+   "BR-CBACT04C-001",
+   "BR-CBACT04C-002",
+   "BR-CBACT04C-003"
+  ],
+  "links": {
+   "BR-CBACT04C-001": [
+    "cbact04c.handle_account_break"
+   ],
+   "BR-CBACT04C-003": [
+    "cbact04c.lookup_interest_rate"
+   ],
+   "BR-CBACT04C-002": [
+    "cbact04c.handle_end_of_file"
+   ]
+  },
+  "gaps": [
+   "The formula for the monthly interest amount (WS-MONTHLY-INT) is not specified by any rule; assumed zero.",
+   "The contents of the interest transaction record are not specified; only TRAN-AMT (the monthly interest) and TRAN-CARD-NUM (XREF-CARD-NUM) are set. All other fields, including TRAN-ID, type/category codes and timestamps, are left at their defaults.",
+   "Fee computation is mentioned in BR-003 but not specified; no fees are computed.",
+   "Behaviour when the account record or the card cross-reference for an account is not found is not specified; assumed abend.",
+   "Use of parm_date, now() and return_code is not specified by any rule; they are not used and return_code stays 0.",
+   "Disclosure read statuses other than found or not-found cannot occur with the dict lookup, so the 'ERROR READING DISCLOSURE GROUP FILE' abend path is never reached."
+  ]
+ }
+}

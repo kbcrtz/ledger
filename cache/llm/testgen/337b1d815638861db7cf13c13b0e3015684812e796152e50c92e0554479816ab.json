@@ -1,0 +1,1333 @@
+{
+ "agent": "testgen",
+ "key": "337b1d815638861db7cf13c13b0e3015684812e796152e50c92e0554479816ab",
+ "seconds": 50.5,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 64000,
+  "system": "You are the test generator in Ledger. For one verified business rule of a legacy COBOL batch program you write test fixtures: complete, consistent sets of input records that exercise each branch of the rule and its boundaries. Every case is run through both the original COBOL program and a Python port, and their outputs are compared field by field, so a good case makes the rule's behaviour visible in the output files.\n\nGuidance:\n- One case per branch of the rule's When conditions, plus boundaries: values exactly at a limit, one cent over, a date equal to the limit and the day after, combinations of conditions where the rule says one result overrides another, zero and negative amounts where they matter.\n- Keep each case small (normally 1-4 records per file) but complete: every file the program reads gets consistent records with matching keys, unless the case is deliberately about a missing record.\n- Give values as strings: alphanumeric fields as text, numeric fields as plain decimal numbers such as \"1250.75\" or \"-40.00\" (no sign encoding, no padding). Omitted numeric fields default to 0 and omitted alphanumeric fields to spaces. Use the copybook field names exactly.\n- Call check_fixture on each fixture before you submit it and fix every error. Warnings may be intentional (for example a card that is deliberately missing).\n- Write 3 to 6 cases. In \"expectation\", say what the rule implies should happen; it is a note for reviewers, not the pass/fail oracle.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Program: CBTRN02C. Input files and their record layouts:\n\nDALYTRAN: CVTRA06Y DALYTRAN-RECORD (350 bytes)\n  DALYTRAN-ID                  X(16)\n  DALYTRAN-TYPE-CD             X(2)\n  DALYTRAN-CAT-CD              9(4)\n  DALYTRAN-SOURCE              X(10)\n  DALYTRAN-DESC                X(100)\n  DALYTRAN-AMT                 S9(9)V9(2)\n  DALYTRAN-MERCHANT-ID         9(9)\n  DALYTRAN-MERCHANT-NAME       X(50)\n  DALYTRAN-MERCHANT-CITY       X(50)\n  DALYTRAN-MERCHANT-ZIP        X(10)\n  DALYTRAN-CARD-NUM            X(16)\n  DALYTRAN-ORIG-TS             X(26)\n  DALYTRAN-PROC-TS             X(26)\n\nXREF: CVACT03Y CARD-XREF-RECORD (50 bytes)\n  XREF-CARD-NUM                X(16)\n  XREF-CUST-ID                 9(9)\n  XREF-ACCT-ID                 9(11)\n\nACCOUNT: CVACT01Y ACCOUNT-RECORD (300 bytes)\n  ACCT-ID                      9(11)\n  ACCT-ACTIVE-STATUS           X(1)\n  ACCT-CURR-BAL                S9(10)V9(2)\n  ACCT-CREDIT-LIMIT            S9(10)V9(2)\n  ACCT-CASH-CREDIT-LIMIT       S9(10)V9(2)\n  ACCT-OPEN-DATE               X(10)\n  ACCT-EXPIRAION-DATE          X(10)\n  ACCT-REISSUE-DATE            X(10)\n  ACCT-CURR-CYC-CREDIT         S9(10)V9(2)\n  ACCT-CURR-CYC-DEBIT          S9(10)V9(2)\n  ACCT-ADDR-ZIP                X(10)\n  ACCT-GROUP-ID                X(10)\n\nTCATBAL: CVTRA01Y TRAN-CAT-BAL-RECORD (50 bytes)\n  TRANCAT-ACCT-ID              9(11)\n  TRANCAT-TYPE-CD              X(2)\n  TRANCAT-CD                   9(4)\n  TRAN-CAT-BAL                 S9(9)V9(2)\n\nRule to test:\n{\n \"id\": \"BR-CBTRN02C-002\",\n \"title\": \"Reject transaction whose cross-referenced account does not exist\",\n \"summary\": \"Once the card is found, the program looks up the account ID from the card cross-reference record in the account file. If no account record exists, the transaction gets reason 101 'ACCOUNT RECORD NOT FOUND' and is rejected. The over-limit and expiration checks do not run.\",\n \"given\": [\n  {\n   \"text\": \"The card cross-reference lookup succeeded, so the fail reason is still 0.\",\n   \"fields\": [\n    \"WS-VALIDATION-FAIL-REASON\"\n   ],\n   \"literals\": [\n    \"0\"\n   ]\n  },\n  {\n   \"text\": \"The account file is read using the account ID from the cross-reference record as the key.\",\n   \"fields\": [\n    \"XREF-ACCT-ID\",\n    \"FD-ACCT-ID\",\n    \"ACCOUNT-RECORD\"\n   ],\n   \"literals\": []\n  }\n ],\n \"when\": [\n  {\n   \"text\": \"No account record exists for that account ID (INVALID KEY on the read).\",\n   \"fields\": [\n    \"ACCOUNT-RECORD\"\n   ],\n   \"literals\": []\n  }\n ],\n \"then\": [\n  {\n   \"text\": \"The fail reason is set to 101.\",\n   \"fields\": [\n    \"WS-VALIDATION-FAIL-REASON\"\n   ],\n   \"literals\": [\n    \"101\"\n   ]\n  },\n  {\n   \"text\": \"The reason description is set to 'ACCOUNT RECORD NOT FOUND'.\",\n   \"fields\": [\n    \"WS-VALIDATION-FAIL-REASON-DESC\"\n   ],\n   \"literals\": [\n    \"ACCOUNT RECORD NOT FOUND\"\n   ]\n  },\n  {\n   \"text\": \"The credit-limit check (reason 102) and the expiration check (reason 103) are skipped. They only run in the NOT INVALID KEY branch, when the account record is found.\",\n   \"fields\": [\n    \"ACCT-CREDIT-LIMIT\",\n    \"WS-TEMP-BAL\",\n    \"ACCT-EXPIRAION-DATE\"\n   ],\n   \"literals\": [\n    \"102\",\n    \"103\"\n   ]\n  },\n  {\n   \"text\": \"The transaction is not posted. The reject count goes up by 1 and a reject record is written.\",\n   \"fields\": [\n    \"WS-VALIDATION-FAIL-REASON\",\n    \"WS-REJECT-COUNT\"\n   ],\n   \"literals\": [\n    \"0\",\n    \"1\"\n   ]\n  }\n ]\n}"
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "high",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "cases": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "title": {
+          "type": "string"
+         },
+         "condition": {
+          "type": "string",
+          "description": "which branch or boundary of the rule this case exercises"
+         },
+         "expectation": {
+          "type": "string",
+          "description": "what the rule says should happen (a note, not an oracle)"
+         },
+         "fixture": {
+          "type": "object",
+          "properties": {
+           "DALYTRAN": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           },
+           "XREF": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           },
+           "ACCOUNT": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           },
+           "TCATBAL": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "values": {
+               "type": "array",
+               "items": {
+                "type": "object",
+                "properties": {
+                 "field": {
+                  "type": "string"
+                 },
+                 "value": {
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "field",
+                 "value"
+                ],
+                "additionalProperties": false
+               }
+              }
+             },
+             "required": [
+              "values"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "DALYTRAN",
+           "XREF",
+           "ACCOUNT",
+           "TCATBAL"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "required": [
+         "title",
+         "condition",
+         "expectation",
+         "fixture"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "cases"
+     ],
+     "additionalProperties": false
+    }
+   }
+  },
+  "tools": [
+   {
+    "name": "check_fixture",
+    "description": "Encode a fixture with the copybook layouts and check field names, PIC fit, key uniqueness and cross-file consistency.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "fixture": {
+       "type": "object",
+       "properties": {
+        "DALYTRAN": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "XREF": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "ACCOUNT": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "TCATBAL": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "values": {
+            "type": "array",
+            "items": {
+             "type": "object",
+             "properties": {
+              "field": {
+               "type": "string"
+              },
+              "value": {
+               "type": "string"
+              }
+             },
+             "required": [
+              "field",
+              "value"
+             ],
+             "additionalProperties": false
+            }
+           }
+          },
+          "required": [
+           "values"
+          ],
+          "additionalProperties": false
+         }
+        }
+       },
+       "required": [
+        "DALYTRAN",
+        "XREF",
+        "ACCOUNT",
+        "TCATBAL"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "required": [
+      "fixture"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   }
+  ]
+ },
+ "response": {
+  "id": "msg_011CgpbasNJDJzpVPAwYVbPo",
+  "container": null,
+  "content": [
+   {
+    "signature": "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",
+    "thinking": "",
+    "type": "thinking"
+   },
+   {
+    "id": "toolu_01QV2tQUuuWvrussc9YNE9A2",
+    "input": {
+     "fixture": {
+      "DALYTRAN": [
+       {
+        "values": [
+         {
+          "field": "DALYTRAN-ID",
+          "value": "TRN0000000000001"
+         },
+         {
+          "field": "DALYTRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DALYTRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DALYTRAN-SOURCE",
+          "value": "POS TERM"
+         },
+         {
+          "field": "DALYTRAN-DESC",
+          "value": "Purchase at grocery"
+         },
+         {
+          "field": "DALYTRAN-AMT",
+          "value": "50.00"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ID",
+          "value": "100000001"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-NAME",
+          "value": "Corner Grocery"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-CITY",
+          "value": "Springfield"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "DALYTRAN-CARD-NUM",
+          "value": "4111111111110001"
+         },
+         {
+          "field": "DALYTRAN-ORIG-TS",
+          "value": "2024-03-15 10:30:00.000000"
+         },
+         {
+          "field": "DALYTRAN-PROC-TS",
+          "value": "2024-03-15 10:30:05.000000"
+         }
+        ]
+       }
+      ],
+      "XREF": [
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4111111111110001"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "1"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "90000000001"
+         }
+        ]
+       }
+      ],
+      "ACCOUNT": [
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "10000000001"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "100.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "5000.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "1000.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2027-12-31"
+         },
+         {
+          "field": "ACCT-REISSUE-DATE",
+          "value": "2023-01-01"
+         },
+         {
+          "field": "ACCT-CURR-CYC-CREDIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CURR-CYC-DEBIT",
+          "value": "100.00"
+         },
+         {
+          "field": "ACCT-ADDR-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         }
+        ]
+       }
+      ],
+      "TCATBAL": []
+     }
+    },
+    "name": "check_fixture",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   },
+   {
+    "id": "toolu_01FwnUhVAnGdiDYSEiBv5nCo",
+    "input": {
+     "fixture": {
+      "DALYTRAN": [
+       {
+        "values": [
+         {
+          "field": "DALYTRAN-ID",
+          "value": "TRN0000000000002"
+         },
+         {
+          "field": "DALYTRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DALYTRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DALYTRAN-SOURCE",
+          "value": "POS TERM"
+         },
+         {
+          "field": "DALYTRAN-DESC",
+          "value": "Huge purchase far in future"
+         },
+         {
+          "field": "DALYTRAN-AMT",
+          "value": "999999999.99"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ID",
+          "value": "100000002"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-NAME",
+          "value": "Luxury Store"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-CITY",
+          "value": "Springfield"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "DALYTRAN-CARD-NUM",
+          "value": "4111111111110002"
+         },
+         {
+          "field": "DALYTRAN-ORIG-TS",
+          "value": "2099-12-31 23:59:59.000000"
+         },
+         {
+          "field": "DALYTRAN-PROC-TS",
+          "value": "2099-12-31 23:59:59.000000"
+         }
+        ]
+       }
+      ],
+      "XREF": [
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4111111111110002"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "2"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "10000000002"
+         }
+        ]
+       }
+      ],
+      "ACCOUNT": [
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "10000000001"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "100.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "50.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2015-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-REISSUE-DATE",
+          "value": "2018-01-01"
+         },
+         {
+          "field": "ACCT-CURR-CYC-CREDIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CURR-CYC-DEBIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-ADDR-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "10000000003"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "100.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "50.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2015-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-REISSUE-DATE",
+          "value": "2018-01-01"
+         },
+         {
+          "field": "ACCT-CURR-CYC-CREDIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CURR-CYC-DEBIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-ADDR-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         }
+        ]
+       }
+      ],
+      "TCATBAL": []
+     }
+    },
+    "name": "check_fixture",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   },
+   {
+    "id": "toolu_01K4hP7bdWKmuMeQ6DQCxPMs",
+    "input": {
+     "fixture": {
+      "DALYTRAN": [
+       {
+        "values": [
+         {
+          "field": "DALYTRAN-ID",
+          "value": "TRN0000000000003"
+         },
+         {
+          "field": "DALYTRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DALYTRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DALYTRAN-SOURCE",
+          "value": "POS TERM"
+         },
+         {
+          "field": "DALYTRAN-DESC",
+          "value": "Valid purchase"
+         },
+         {
+          "field": "DALYTRAN-AMT",
+          "value": "25.50"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ID",
+          "value": "100000003"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-NAME",
+          "value": "Book Shop"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-CITY",
+          "value": "Springfield"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "DALYTRAN-CARD-NUM",
+          "value": "4111111111110003"
+         },
+         {
+          "field": "DALYTRAN-ORIG-TS",
+          "value": "2024-03-15 09:00:00.000000"
+         },
+         {
+          "field": "DALYTRAN-PROC-TS",
+          "value": "2024-03-15 09:00:05.000000"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "DALYTRAN-ID",
+          "value": "TRN0000000000004"
+         },
+         {
+          "field": "DALYTRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DALYTRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DALYTRAN-SOURCE",
+          "value": "POS TERM"
+         },
+         {
+          "field": "DALYTRAN-DESC",
+          "value": "Purchase on orphan card"
+         },
+         {
+          "field": "DALYTRAN-AMT",
+          "value": "25.50"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ID",
+          "value": "100000003"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-NAME",
+          "value": "Book Shop"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-CITY",
+          "value": "Springfield"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "DALYTRAN-CARD-NUM",
+          "value": "4111111111110004"
+         },
+         {
+          "field": "DALYTRAN-ORIG-TS",
+          "value": "2024-03-15 09:10:00.000000"
+         },
+         {
+          "field": "DALYTRAN-PROC-TS",
+          "value": "2024-03-15 09:10:05.000000"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "DALYTRAN-ID",
+          "value": "TRN0000000000005"
+         },
+         {
+          "field": "DALYTRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DALYTRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DALYTRAN-SOURCE",
+          "value": "POS TERM"
+         },
+         {
+          "field": "DALYTRAN-DESC",
+          "value": "Second valid purchase"
+         },
+         {
+          "field": "DALYTRAN-AMT",
+          "value": "10.00"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ID",
+          "value": "100000003"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-NAME",
+          "value": "Book Shop"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-CITY",
+          "value": "Springfield"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "DALYTRAN-CARD-NUM",
+          "value": "4111111111110003"
+         },
+         {
+          "field": "DALYTRAN-ORIG-TS",
+          "value": "2024-03-15 09:20:00.000000"
+         },
+         {
+          "field": "DALYTRAN-PROC-TS",
+          "value": "2024-03-15 09:20:05.000000"
+         }
+        ]
+       }
+      ],
+      "XREF": [
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4111111111110003"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "3"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "20000000001"
+         }
+        ]
+       },
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4111111111110004"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "4"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "20000000002"
+         }
+        ]
+       }
+      ],
+      "ACCOUNT": [
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "20000000001"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "200.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "5000.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "1000.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2027-12-31"
+         },
+         {
+          "field": "ACCT-REISSUE-DATE",
+          "value": "2023-01-01"
+         },
+         {
+          "field": "ACCT-CURR-CYC-CREDIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CURR-CYC-DEBIT",
+          "value": "200.00"
+         },
+         {
+          "field": "ACCT-ADDR-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         }
+        ]
+       }
+      ],
+      "TCATBAL": [
+       {
+        "values": [
+         {
+          "field": "TRANCAT-ACCT-ID",
+          "value": "20000000001"
+         },
+         {
+          "field": "TRANCAT-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "TRANCAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "TRAN-CAT-BAL",
+          "value": "200.00"
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "name": "check_fixture",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   },
+   {
+    "id": "toolu_01FFJiSMCysXzMLctLDLLLDn",
+    "input": {
+     "fixture": {
+      "DALYTRAN": [
+       {
+        "values": [
+         {
+          "field": "DALYTRAN-ID",
+          "value": "TRN0000000000006"
+         },
+         {
+          "field": "DALYTRAN-TYPE-CD",
+          "value": "01"
+         },
+         {
+          "field": "DALYTRAN-CAT-CD",
+          "value": "1"
+         },
+         {
+          "field": "DALYTRAN-SOURCE",
+          "value": "POS TERM"
+         },
+         {
+          "field": "DALYTRAN-DESC",
+          "value": "Unknown card purchase"
+         },
+         {
+          "field": "DALYTRAN-AMT",
+          "value": "75.00"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ID",
+          "value": "100000004"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-NAME",
+          "value": "Gas Station"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-CITY",
+          "value": "Springfield"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "DALYTRAN-CARD-NUM",
+          "value": "4111111111119999"
+         },
+         {
+          "field": "DALYTRAN-ORIG-TS",
+          "value": "2024-03-15 11:00:00.000000"
+         },
+         {
+          "field": "DALYTRAN-PROC-TS",
+          "value": "2024-03-15 11:00:05.000000"
+         }
+        ]
+       }
+      ],
+      "XREF": [
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4111111111110006"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "6"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "30000000001"
+         }
+        ]
+       }
+      ],
+      "ACCOUNT": [
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "30000000001"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "5000.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "1000.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2027-12-31"
+         },
+         {
+          "field": "ACCT-REISSUE-DATE",
+          "value": "2023-01-01"
+         },
+         {
+          "field": "ACCT-CURR-CYC-CREDIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CURR-CYC-DEBIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-ADDR-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         }
+        ]
+       }
+      ],
+      "TCATBAL": []
+     }
+    },
+    "name": "check_fixture",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   },
+   {
+    "id": "toolu_015YVZz1zkbhA5cbYoCWarmu",
+    "input": {
+     "fixture": {
+      "DALYTRAN": [
+       {
+        "values": [
+         {
+          "field": "DALYTRAN-ID",
+          "value": "TRN0000000000007"
+         },
+         {
+          "field": "DALYTRAN-TYPE-CD",
+          "value": "02"
+         },
+         {
+          "field": "DALYTRAN-CAT-CD",
+          "value": "2"
+         },
+         {
+          "field": "DALYTRAN-SOURCE",
+          "value": "OPERATOR"
+         },
+         {
+          "field": "DALYTRAN-DESC",
+          "value": "Refund to orphan account"
+         },
+         {
+          "field": "DALYTRAN-AMT",
+          "value": "-40.00"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ID",
+          "value": "100000005"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-NAME",
+          "value": "Shoe Store"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-CITY",
+          "value": "Springfield"
+         },
+         {
+          "field": "DALYTRAN-MERCHANT-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "DALYTRAN-CARD-NUM",
+          "value": "4111111111110007"
+         },
+         {
+          "field": "DALYTRAN-ORIG-TS",
+          "value": "2024-03-15 12:00:00.000000"
+         },
+         {
+          "field": "DALYTRAN-PROC-TS",
+          "value": "2024-03-15 12:00:05.000000"
+         }
+        ]
+       }
+      ],
+      "XREF": [
+       {
+        "values": [
+         {
+          "field": "XREF-CARD-NUM",
+          "value": "4111111111110007"
+         },
+         {
+          "field": "XREF-CUST-ID",
+          "value": "7"
+         },
+         {
+          "field": "XREF-ACCT-ID",
+          "value": "0"
+         }
+        ]
+       }
+      ],
+      "ACCOUNT": [
+       {
+        "values": [
+         {
+          "field": "ACCT-ID",
+          "value": "1"
+         },
+         {
+          "field": "ACCT-ACTIVE-STATUS",
+          "value": "Y"
+         },
+         {
+          "field": "ACCT-CURR-BAL",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CREDIT-LIMIT",
+          "value": "5000.00"
+         },
+         {
+          "field": "ACCT-CASH-CREDIT-LIMIT",
+          "value": "1000.00"
+         },
+         {
+          "field": "ACCT-OPEN-DATE",
+          "value": "2020-01-01"
+         },
+         {
+          "field": "ACCT-EXPIRAION-DATE",
+          "value": "2027-12-31"
+         },
+         {
+          "field": "ACCT-REISSUE-DATE",
+          "value": "2023-01-01"
+         },
+         {
+          "field": "ACCT-CURR-CYC-CREDIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-CURR-CYC-DEBIT",
+          "value": "0.00"
+         },
+         {
+          "field": "ACCT-ADDR-ZIP",
+          "value": "62701"
+         },
+         {
+          "field": "ACCT-GROUP-ID",
+          "value": "DEFAULT"
+         }
+        ]
+       }
+      ],
+      "TCATBAL": [
+       {
+        "values": [
+         {
+          "field": "TRANCAT-ACCT-ID",
+          "value": "0"
+         },
+         {
+          "field": "TRANCAT-TYPE-CD",
+          "value": "02"
+         },
+         {
+          "field": "TRANCAT-CD",
+          "value": "2"
+         },
+         {
+          "field": "TRAN-CAT-BAL",
+          "value": "10.00"
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "name": "check_fixture",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 4508,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 4508,
+     "model": null,
+     "output_tokens": 6937,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 6937,
+   "output_tokens_details": {
+    "thinking_tokens": 687
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}

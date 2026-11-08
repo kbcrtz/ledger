@@ -1,0 +1,6414 @@
+[
+ {
+  "id": "BR-CBTRN02C-001",
+  "title": "Reject transaction whose card number is not in the card cross-reference file",
+  "program": "CBTRN02C",
+  "paragraph": "1500-A-LOOKUP-XREF",
+  "summary": "Each daily transaction's card number is looked up in the card cross-reference file. If the card isn't found, the transaction gets reason 100 'INVALID CARD NUMBER FOUND', the account lookup is skipped and the transaction goes to the reject file instead of being posted.",
+  "unit": "CBTRN02C-validate",
+  "scenario": {
+   "given": [
+    {
+     "text": "Before each transaction is validated, the fail reason is set to 0 and the reason description is set to spaces.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       208,
+       209
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "The transaction's card number is used as the key for reading the card cross-reference file.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       382,
+       383
+      ]
+     },
+     "fields": [
+      "DALYTRAN-CARD-NUM",
+      "FD-XREF-CARD-NUM",
+      "CARD-XREF-RECORD"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "No cross-reference record exists for the card number (INVALID KEY on the read).",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       383,
+       384
+      ]
+     },
+     "fields": [
+      "CARD-XREF-RECORD"
+     ],
+     "literals": []
+    }
+   ],
+   "then": [
+    {
+     "text": "The fail reason is set to 100.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       385,
+       385
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON"
+     ],
+     "literals": [
+      "100"
+     ]
+    },
+    {
+     "text": "The reason description is set to 'INVALID CARD NUMBER FOUND'.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       386,
+       387
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": [
+      "INVALID CARD NUMBER FOUND"
+     ]
+    },
+    {
+     "text": "The account lookup and the account checks are skipped because the fail reason is no longer 0.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       371,
+       376
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "The transaction is not posted. The reject count goes up by 1 and a reject record is written.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       211,
+       216
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-REJECT-COUNT"
+     ],
+     "literals": [
+      "0",
+      "1"
+     ]
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "traced",
+    "why": "all clauses verified (attempt 2)",
+    "by": "verifier"
+   },
+   {
+    "status": "flagged",
+    "why": "4 of 5 case(s) differ from legacy",
+    "by": "harness"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 208-209 move 0 to WS-VALIDATION-FAIL-REASON and SPACES to WS-VALIDATION-FAIL-REASON-DESC before PERFORM 1500-VALIDATE-TRAN."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Lines 382-383 show the card number moved to FD-XREF-CARD-NUM before the keyed read, but nothing cited establishes that the field is 16 characters long."
+       },
+       "passed": false
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 383-384 show the READ of XREF-FILE with an INVALID KEY branch, which fires when no record exists for the key."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 385, inside the INVALID KEY branch, moves 100 to WS-VALIDATION-FAIL-REASON."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 386-387 move 'INVALID CARD NUMBER FOUND' to WS-VALIDATION-FAIL-REASON-DESC in the INVALID KEY branch."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 371-376 perform 1500-B-LOOKUP-ACCT only if WS-VALIDATION-FAIL-REASON = 0 and otherwise CONTINUE, so the account lookup is skipped."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-216 post only when the fail reason is 0; otherwise they add 1 to WS-REJECT-COUNT and perform 2500-WRITE-REJECT-REC."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "given[1]",
+       "errors": [],
+       "judge": "Lines 382-383 show the card number moved to FD-XREF-CARD-NUM before the keyed read, but nothing cited establishes that the field is 16 characters long."
+      }
+     ]
+    },
+    {
+     "passed": true,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 208-209 move 0 to WS-VALIDATION-FAIL-REASON and spaces to WS-VALIDATION-FAIL-REASON-DESC, and line 210 then performs validation."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 382 moves DALYTRAN-CARD-NUM to the key field FD-XREF-CARD-NUM, and line 383 reads XREF-FILE INTO CARD-XREF-RECORD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 383-384 show the READ of XREF-FILE with an INVALID KEY branch, which fires when no record exists for the key."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 385, inside the INVALID KEY branch, moves 100 to WS-VALIDATION-FAIL-REASON."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 386-387 move 'INVALID CARD NUMBER FOUND' to WS-VALIDATION-FAIL-REASON-DESC."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 371-376 perform 1500-B-LOOKUP-ACCT only when WS-VALIDATION-FAIL-REASON = 0 and otherwise CONTINUE, so the account lookup and the checks it contains are skipped."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-216 post only when the fail reason is 0; otherwise they add 1 to WS-REJECT-COUNT and perform 2500-WRITE-REJECT-REC."
+       },
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   ]
+  },
+  "port_function": "cbtrn02c.lookup_card_xref",
+  "tests": [
+   "T-001",
+   "T-002",
+   "T-003",
+   "T-004",
+   "T-005"
+  ],
+  "port_functions": [
+   "cbtrn02c.lookup_card_xref"
+  ],
+  "verified_against": {
+   "cited_sha": "e4a33fe52e8477e6",
+   "port_sha": "01e004b4a90d4375"
+  }
+ },
+ {
+  "id": "BR-CBTRN02C-002",
+  "title": "Reject transaction whose cross-referenced account does not exist",
+  "program": "CBTRN02C",
+  "paragraph": "1500-B-LOOKUP-ACCT",
+  "summary": "Once the card is found, the program looks up the account ID from the card cross-reference record in the account file. If no account record exists, the transaction gets reason 101 'ACCOUNT RECORD NOT FOUND' and is rejected. The over-limit and expiration checks do not run.",
+  "unit": "CBTRN02C-validate",
+  "scenario": {
+   "given": [
+    {
+     "text": "The card cross-reference lookup succeeded, so the fail reason is still 0.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       372,
+       373
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "The account file is read using the account ID from the cross-reference record as the key.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       394,
+       395
+      ]
+     },
+     "fields": [
+      "XREF-ACCT-ID",
+      "FD-ACCT-ID",
+      "ACCOUNT-RECORD"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "No account record exists for that account ID (INVALID KEY on the read).",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       395,
+       396
+      ]
+     },
+     "fields": [
+      "ACCOUNT-RECORD"
+     ],
+     "literals": []
+    }
+   ],
+   "then": [
+    {
+     "text": "The fail reason is set to 101.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       397,
+       397
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON"
+     ],
+     "literals": [
+      "101"
+     ]
+    },
+    {
+     "text": "The reason description is set to 'ACCOUNT RECORD NOT FOUND'.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       398,
+       399
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": [
+      "ACCOUNT RECORD NOT FOUND"
+     ]
+    },
+    {
+     "text": "The credit-limit check (reason 102) and the expiration check (reason 103) are skipped. They only run in the NOT INVALID KEY branch, when the account record is found.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       400,
+       420
+      ]
+     },
+     "fields": [
+      "ACCT-CREDIT-LIMIT",
+      "WS-TEMP-BAL",
+      "ACCT-EXPIRAION-DATE"
+     ],
+     "literals": [
+      "102",
+      "103"
+     ]
+    },
+    {
+     "text": "The transaction is not posted. The reject count goes up by 1 and a reject record is written.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       211,
+       216
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-REJECT-COUNT"
+     ],
+     "literals": [
+      "0",
+      "1"
+     ]
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "traced",
+    "why": "all clauses verified (attempt 2)",
+    "by": "verifier"
+   },
+   {
+    "status": "flagged",
+    "why": "5 of 5 case(s) differ from legacy",
+    "by": "harness"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 372-373 run 1500-B-LOOKUP-ACCT only when WS-VALIDATION-FAIL-REASON = 0 after the xref lookup, which matches the clause."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 394 moves XREF-ACCT-ID into the key FD-ACCT-ID, and line 395 reads ACCOUNT-FILE into ACCOUNT-RECORD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 395-396 show the READ with an INVALID KEY branch, which is taken when no record exists for the key."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 397, inside the INVALID KEY branch, moves 101 to WS-VALIDATION-FAIL-REASON."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 398-399 move 'ACCOUNT RECORD NOT FOUND' to WS-VALIDATION-FAIL-REASON-DESC."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": false,
+        "errors": [
+         "clause lists no fields or literals, so its citation cannot be checked"
+        ]
+       },
+       "judge": null,
+       "passed": false
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-216 show that a nonzero fail reason skips 2000-POST-TRANSACTION, adds 1 to WS-REJECT-COUNT and performs 2500-WRITE-REJECT-REC."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "then[2]",
+       "errors": [
+        "clause lists no fields or literals, so its citation cannot be checked"
+       ],
+       "judge": null
+      }
+     ]
+    },
+    {
+     "passed": true,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 372-373 perform the account lookup only when WS-VALIDATION-FAIL-REASON = 0 after the xref lookup."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 394 moves XREF-ACCT-ID to FD-ACCT-ID and line 395 reads ACCOUNT-FILE into ACCOUNT-RECORD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 395-396 show the read with an INVALID KEY branch, which is taken when no record matches the key."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 397 moves 101 to WS-VALIDATION-FAIL-REASON inside the INVALID KEY branch."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 398-399 move 'ACCOUNT RECORD NOT FOUND' to WS-VALIDATION-FAIL-REASON-DESC."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 400-420 put both the 102 over-limit check and the 103 expiration check inside the NOT INVALID KEY branch, so neither runs when the key is invalid."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-216 post the transaction only when the fail reason is 0; otherwise they add 1 to WS-REJECT-COUNT and perform 2500-WRITE-REJECT-REC, and reason 101 is non-zero."
+       },
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   ]
+  },
+  "port_function": "cbtrn02c.lookup_account",
+  "tests": [
+   "T-006",
+   "T-007",
+   "T-008",
+   "T-009",
+   "T-010"
+  ],
+  "port_functions": [
+   "cbtrn02c.lookup_account"
+  ],
+  "verified_against": {
+   "cited_sha": "92a806da874bf789",
+   "port_sha": "01e004b4a90d4375"
+  }
+ },
+ {
+  "id": "BR-CBTRN02C-003",
+  "title": "Reject over-limit transaction based on current-cycle credit minus debit plus transaction amount",
+  "program": "CBTRN02C",
+  "paragraph": "1500-B-LOOKUP-ACCT",
+  "summary": "For a found account, the program calculates current-cycle credit minus current-cycle debit plus the transaction amount. If the credit limit is less than the result, it sets reason 102 'OVERLIMIT TRANSACTION' and the transaction is rejected. The account's current balance is not used, and the result is held in a field with fewer integer digits than the account fields.",
+  "unit": "CBTRN02C-validate",
+  "scenario": {
+   "given": [
+    {
+     "text": "The account record was found for the cross-referenced account ID.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       395,
+       400
+      ]
+     },
+     "fields": [
+      "ACCOUNT-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The credit limit, current-cycle credit and current-cycle debit are each signed amounts with 10 integer digits and 2 decimals.",
+     "source": {
+      "file": "CVACT01Y.cpy",
+      "lines": [
+       8,
+       14
+      ]
+     },
+     "fields": [
+      "ACCT-CREDIT-LIMIT",
+      "ACCT-CURR-CYC-CREDIT",
+      "ACCT-CURR-CYC-DEBIT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The working balance holds only 9 integer digits and 2 decimals. Integer digits above the 9th are dropped when the result is stored (no ON SIZE ERROR is coded).",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       187,
+       187
+      ]
+     },
+     "fields": [
+      "WS-TEMP-BAL"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "The working balance is calculated as current-cycle credit minus current-cycle debit plus the transaction amount.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       403,
+       405
+      ]
+     },
+     "fields": [
+      "WS-TEMP-BAL",
+      "ACCT-CURR-CYC-CREDIT",
+      "ACCT-CURR-CYC-DEBIT",
+      "DALYTRAN-AMT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The account credit limit is less than the working balance. If the limit is equal to or greater than the balance, this check passes.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       407,
+       409
+      ]
+     },
+     "fields": [
+      "ACCT-CREDIT-LIMIT",
+      "WS-TEMP-BAL"
+     ],
+     "literals": []
+    }
+   ],
+   "then": [
+    {
+     "text": "The fail reason is set to 102.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       410,
+       410
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON"
+     ],
+     "literals": [
+      "102"
+     ]
+    },
+    {
+     "text": "The reason description is set to 'OVERLIMIT TRANSACTION'.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       411,
+       412
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": [
+      "OVERLIMIT TRANSACTION"
+     ]
+    },
+    {
+     "text": "Because the fail reason is no longer 0, the transaction is not posted. The reject count goes up by 1 and a reject record is written.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       211,
+       216
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-REJECT-COUNT"
+     ],
+     "literals": [
+      "0",
+      "1"
+     ]
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "traced",
+    "why": "all clauses verified (attempt 2)",
+    "by": "verifier"
+   },
+   {
+    "status": "flagged",
+    "why": "1 of 5 case(s) differ from legacy",
+    "by": "harness"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 395-400 read ACCOUNT-FILE into ACCOUNT-RECORD, and the NOT INVALID KEY branch (record found) is where the check runs."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "The copybook lines confirm the S9(10)V99 pictures, but they cannot show that the check omits ACCT-CURR-BAL; that depends on the COMPUTE at lines 403-405, which is not cited."
+       },
+       "passed": false
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 187 defines WS-TEMP-BAL as PIC S9(09)V99, and standard COBOL truncates high-order integer digits on store when no SIZE ERROR handling is present."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 403-405 compute WS-TEMP-BAL = ACCT-CURR-CYC-CREDIT - ACCT-CURR-CYC-DEBIT + DALYTRAN-AMT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 407-409 CONTINUE when ACCT-CREDIT-LIMIT >= WS-TEMP-BAL, so the ELSE (failure) path runs only when the limit is less than the balance."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 410 moves 102 to WS-VALIDATION-FAIL-REASON."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 411-412 move 'OVERLIMIT TRANSACTION' to WS-VALIDATION-FAIL-REASON-DESC."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Lines 211-216 show that any nonzero reason skips posting, increments WS-REJECT-COUNT and writes a reject record, so an overwritten expiration reason would still be rejected, and the 'unless' caveat misstates the outcome and is not shown by the cited lines."
+       },
+       "passed": false
+      }
+     ],
+     "failures": [
+      {
+       "clause": "given[1]",
+       "errors": [],
+       "judge": "The copybook lines confirm the S9(10)V99 pictures, but they cannot show that the check omits ACCT-CURR-BAL; that depends on the COMPUTE at lines 403-405, which is not cited."
+      },
+      {
+       "clause": "then[2]",
+       "errors": [],
+       "judge": "Lines 211-216 show that any nonzero reason skips posting, increments WS-REJECT-COUNT and writes a reject record, so an overwritten expiration reason would still be rejected, and the 'unless' caveat misstates the outcome and is not shown by the cited lines."
+      }
+     ]
+    },
+    {
+     "passed": true,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 395-400 show the READ of ACCOUNT-FILE into ACCOUNT-RECORD, with the NOT INVALID KEY branch covering the found case."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 8, 13 and 14 define ACCT-CREDIT-LIMIT, ACCT-CURR-CYC-CREDIT and ACCT-CURR-CYC-DEBIT as PIC S9(10)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 187 defines WS-TEMP-BAL as PIC S9(09)V99, and dropping high-order digits on store is standard COBOL behavior; the absence of ON SIZE ERROR is not visible in the cited line itself."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 403-405 compute WS-TEMP-BAL = ACCT-CURR-CYC-CREDIT - ACCT-CURR-CYC-DEBIT + DALYTRAN-AMT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 407-409 continue when ACCT-CREDIT-LIMIT >= WS-TEMP-BAL and take the ELSE branch otherwise, i.e. when the limit is less than the balance."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 410 moves 102 to WS-VALIDATION-FAIL-REASON in the ELSE branch."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 411-412 move 'OVERLIMIT TRANSACTION' to WS-VALIDATION-FAIL-REASON-DESC."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-216 post only when the fail reason is 0; otherwise they add 1 to WS-REJECT-COUNT and perform 2500-WRITE-REJECT-REC."
+       },
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   ]
+  },
+  "port_function": "cbtrn02c.check_overlimit",
+  "tests": [
+   "T-011",
+   "T-012",
+   "T-013",
+   "T-014",
+   "T-015"
+  ],
+  "port_functions": [
+   "cbtrn02c.check_overlimit"
+  ],
+  "verified_against": {
+   "cited_sha": "f8a4f002a237a747",
+   "port_sha": "01e004b4a90d4375"
+  }
+ },
+ {
+  "id": "BR-CBTRN02C-004",
+  "title": "Reject transaction received after account expiration (overwrites an over-limit reason)",
+  "program": "CBTRN02C",
+  "paragraph": "1500-B-LOOKUP-ACCT",
+  "summary": "For a found account, the first 10 characters of the transaction's original timestamp are compared as text with the account expiration date. If the expiration date is earlier, the program sets reason 103 'TRANSACTION RECEIVED AFTER ACCT EXPIRATION'. This check always runs after the over-limit check, so it replaces reason 102 when both fail.",
+  "unit": "CBTRN02C-validate",
+  "scenario": {
+   "given": [
+    {
+     "text": "The account record was found, and the over-limit check has already run, whatever its result.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       407,
+       414
+      ]
+     },
+     "fields": [
+      "ACCT-CREDIT-LIMIT",
+      "WS-TEMP-BAL",
+      "ACCT-EXPIRAION-DATE"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The account expiration date is a 10-character text field.",
+     "source": {
+      "file": "CVACT01Y.cpy",
+      "lines": [
+       11,
+       11
+      ]
+     },
+     "fields": [
+      "ACCT-EXPIRAION-DATE"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The transaction's original timestamp is a 26-character text field.",
+     "source": {
+      "file": "CVTRA06Y.cpy",
+      "lines": [
+       16,
+       16
+      ]
+     },
+     "fields": [
+      "DALYTRAN-ORIG-TS"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "The expiration date is less than the first 10 characters of the original timestamp in a plain character comparison. If it is equal to or greater, this check passes.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       414,
+       416
+      ]
+     },
+     "fields": [
+      "ACCT-EXPIRAION-DATE",
+      "DALYTRAN-ORIG-TS"
+     ],
+     "literals": []
+    }
+   ],
+   "then": [
+    {
+     "text": "The fail reason is set to 103. This replaces 102 if the over-limit check also failed.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       417,
+       417
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON"
+     ],
+     "literals": [
+      "103"
+     ]
+    },
+    {
+     "text": "The reason description is set to 'TRANSACTION RECEIVED AFTER ACCT EXPIRATION'. This replaces 'OVERLIMIT TRANSACTION' if it was set.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       418,
+       419
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": [
+      "TRANSACTION RECEIVED AFTER ACCT EXPIRATION"
+     ]
+    },
+    {
+     "text": "The transaction is not posted. The reject count goes up by 1 and a reject record is written.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       211,
+       216
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-REJECT-COUNT"
+     ],
+     "literals": [
+      "0",
+      "1"
+     ]
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "flagged",
+    "why": "1 clause(s) failed verification after one retry",
+    "by": "verifier"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 407-414 show the over-limit IF/ELSE ends before the expiration IF begins, so the expiration check always runs after the over-limit check whatever its result; record-found is implied by the enclosing read branch."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 11 defines ACCT-EXPIRAION-DATE as PIC X(10), a 10-character alphanumeric field."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 16 shows DALYTRAN-ORIG-TS is PIC X(26), but the claim that only its first 10 characters are compared comes from the (1:10) reference on CBTRN02C line 414, which is not cited for this clause."
+       },
+       "passed": false
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 6 only shows that ACCT-ACTIVE-STATUS exists; the cited line cannot establish that validation never checks it."
+       },
+       "passed": false
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 414 continues when the expiration date is >= ORIG-TS(1:10), and the ELSE branch at line 416 handles the less-than case; both sides are alphanumeric, so this is a character comparison."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 417 moves 103 to WS-VALIDATION-FAIL-REASON in the ELSE branch, which unconditionally overwrites any earlier value such as 102."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 418-419 move 'TRANSACTION RECEIVED AFTER ACCT EXPIRATION' to WS-VALIDATION-FAIL-REASON-DESC, which overwrites any earlier description."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-216 post only when the fail reason is 0; otherwise they add 1 to WS-REJECT-COUNT and perform 2500-WRITE-REJECT-REC."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "given[2]",
+       "errors": [],
+       "judge": "Line 16 shows DALYTRAN-ORIG-TS is PIC X(26), but the claim that only its first 10 characters are compared comes from the (1:10) reference on CBTRN02C line 414, which is not cited for this clause."
+      },
+      {
+       "clause": "given[3]",
+       "errors": [],
+       "judge": "Line 6 only shows that ACCT-ACTIVE-STATUS exists; the cited line cannot establish that validation never checks it."
+      }
+     ]
+    },
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Lines 407-414 show the over-limit IF/ELSE finishing before the expiration IF regardless of outcome, but nothing cited shows the account record was found; that depends on the surrounding READ logic, which is not cited."
+       },
+       "passed": false
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 11 defines ACCT-EXPIRAION-DATE as PIC X(10), a 10-character alphanumeric field."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 16 defines DALYTRAN-ORIG-TS as PIC X(26), a 26-character alphanumeric field."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 414 compares the alphanumeric expiration date with ORIG-TS(1:10); >= means CONTINUE (pass), so the ELSE branch runs only when the date is less."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 417 moves 103 to WS-VALIDATION-FAIL-REASON, and under ordinary MOVE semantics this overwrites any earlier 102."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 418-419 move 'TRANSACTION RECEIVED AFTER ACCT EXPIRATION' to the description field, overwriting any earlier value."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-216 show that a nonzero fail reason (103) skips posting, adds 1 to WS-REJECT-COUNT and performs 2500-WRITE-REJECT-REC."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "given[0]",
+       "errors": [],
+       "judge": "Lines 407-414 show the over-limit IF/ELSE finishing before the expiration IF regardless of outcome, but nothing cited shows the account record was found; that depends on the surrounding READ logic, which is not cited."
+      }
+     ]
+    }
+   ]
+  },
+  "port_function": null,
+  "tests": [],
+  "port_functions": []
+ },
+ {
+  "id": "BR-CBTRN02C-005",
+  "title": "Route each daily transaction to posting or to the reject file, and set return code 4 when any are rejected",
+  "program": "CBTRN02C",
+  "paragraph": "(main)",
+  "summary": "Each daily transaction record is counted and validated, starting with reason code 0 and a blank description. If the reason code is still 0 afterwards, the transaction is posted. Otherwise the reject count goes up and a 430-byte reject record is written: the original 350-byte input record followed by an 80-byte trailer holding the 4-digit reason code and its 76-character description. At the end of the run the program sets return code 4 if at least one transaction was rejected.",
+  "unit": "CBTRN02C-main",
+  "scenario": {
+   "given": [
+    {
+     "text": "Records are read one at a time from the daily transaction file until end of file. Each record that is read adds 1 to the processed-transaction count.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       202,
+       206
+      ]
+     },
+     "fields": [
+      "END-OF-FILE",
+      "WS-TRANSACTION-COUNT"
+     ],
+     "literals": [
+      "Y",
+      "N"
+     ]
+    },
+    {
+     "text": "Before each transaction is validated, the failure reason code is set to 0 and the failure description is set to spaces, so nothing from the previous transaction carries over.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       208,
+       210
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "The validation trailer is 80 bytes: a 4-digit unsigned numeric reason code followed by a 76-character description.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       180,
+       182
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-TRAILER",
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": []
+    },
+    {
+     "text": "A reject record is 430 bytes: 350 bytes of transaction data followed by an 80-byte validation trailer.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       176,
+       178
+      ]
+     },
+     "fields": [
+      "REJECT-RECORD",
+      "REJECT-TRAN-DATA",
+      "VALIDATION-TRAILER"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "After validation, the program checks whether the failure reason code is still 0.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       211,
+       211
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON"
+     ],
+     "literals": [
+      "0"
+     ]
+    }
+   ],
+   "then": [
+    {
+     "text": "If the reason code is 0, the transaction is posted.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       211,
+       212
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "If the reason code is not 0, the reject count goes up by 1 and a reject record is written. The transaction is not posted.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       213,
+       215
+      ]
+     },
+     "fields": [
+      "WS-REJECT-COUNT"
+     ],
+     "literals": [
+      "1"
+     ]
+    },
+    {
+     "text": "The reject record's transaction data is the complete input daily transaction record, copied unchanged.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       447,
+       447
+      ]
+     },
+     "fields": [
+      "DALYTRAN-RECORD",
+      "REJECT-TRAN-DATA"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The reject record's trailer is the current reason code and description from validation.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       448,
+       448
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-TRAILER",
+      "VALIDATION-TRAILER"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The reject record is written as one record to the daily rejects file.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       451,
+       451
+      ]
+     },
+     "fields": [
+      "FD-REJS-RECORD",
+      "REJECT-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "If the account rewrite during posting fails because the record key is not found, reason code 109 and the description ACCOUNT RECORD NOT FOUND are set.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       554,
+       559
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": [
+      "109",
+      "ACCOUNT RECORD NOT FOUND"
+     ]
+    },
+    {
+     "text": "Surprising behaviour: the main loop checks the reason code only before posting and never after it. A reason code set during posting (such as 109) therefore produces no reject record and does not increase the reject count.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       211,
+       216
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-REJECT-COUNT"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "At the end of the run, the program displays the processed-transaction count and the reject count.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       227,
+       228
+      ]
+     },
+     "fields": [
+      "WS-TRANSACTION-COUNT",
+      "WS-REJECT-COUNT"
+     ],
+     "literals": [
+      "TRANSACTIONS PROCESSED :",
+      "TRANSACTIONS REJECTED  :"
+     ]
+    },
+    {
+     "text": "If at least one transaction was rejected, the return code is set to 4. Otherwise the program does not change the return code.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       229,
+       231
+      ]
+     },
+     "fields": [
+      "WS-REJECT-COUNT"
+     ],
+     "literals": [
+      "4"
+     ]
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "flagged",
+    "why": "2 clause(s) failed verification after one retry",
+    "by": "verifier"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 202-206 loop until END-OF-FILE = 'Y', read the next record, and add 1 to WS-TRANSACTION-COUNT only when a record was actually read (END-OF-FILE still 'N')."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 208-210 move 0 to the reason code and SPACES to the description immediately before PERFORM 1500-VALIDATE-TRAN."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 180-182 define WS-VALIDATION-TRAILER as an unsigned PIC 9(04) reason code followed by a PIC X(76) description, 80 bytes in total."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 176-178 define REJECT-RECORD as PIC X(350) transaction data plus a PIC X(80) trailer, 430 bytes in total."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 211 tests IF WS-VALIDATION-FAIL-REASON = 0 right after validation."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-212 perform 2000-POST-TRANSACTION when the reason code equals 0."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "The ELSE branch at lines 213-215 adds 1 to WS-REJECT-COUNT and performs 2500-WRITE-REJECT-REC, and because it is an ELSE the posting branch is not taken."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 447 moves the whole DALYTRAN-RECORD into REJECT-TRAN-DATA."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 448 moves WS-VALIDATION-TRAILER, which holds the current reason code and description, into VALIDATION-TRAILER."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 451 writes FD-REJS-RECORD FROM REJECT-RECORD as a single WRITE to the rejects file."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "The cited lines 554-559 only show that 109 and 'ACCOUNT RECORD NOT FOUND' are set on INVALID KEY, while the claims that the main loop never rechecks the code, writes no reject and clears the code depend on uncited lines 208 and 211-216."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[6]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 227-228 display the processed-transaction count and the reject count with the cited literals."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[7]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 229-231 move 4 to RETURN-CODE only when WS-REJECT-COUNT > 0, and there is no ELSE that changes it."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "then[5]",
+       "errors": [],
+       "judge": "The cited lines 554-559 only show that 109 and 'ACCOUNT RECORD NOT FOUND' are set on INVALID KEY, while the claims that the main loop never rechecks the code, writes no reject and clears the code depend on uncited lines 208 and 211-216."
+      }
+     ]
+    },
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 202-206 loop until END-OF-FILE = 'Y', read the next record, and add 1 to WS-TRANSACTION-COUNT only when END-OF-FILE is still 'N'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 208-210 move 0 to the reason code and SPACES to the description immediately before PERFORM 1500-VALIDATE-TRAN."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 180-182 define the trailer as PIC 9(04) (unsigned numeric) followed by PIC X(76), which totals 80 bytes."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 176-178 define REJECT-RECORD as PIC X(350) followed by PIC X(80), which totals 430 bytes."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 211 tests IF WS-VALIDATION-FAIL-REASON = 0 right after validation."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-212 perform 2000-POST-TRANSACTION when the reason code equals 0."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "The ELSE branch on lines 213-215 adds 1 to WS-REJECT-COUNT and performs 2500-WRITE-REJECT-REC without performing posting."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 447 moves DALYTRAN-RECORD to REJECT-TRAN-DATA, but the cited lines do not show DALYTRAN-RECORD's length, so a complete, unchanged copy without truncation or padding is not established."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 448 moves WS-VALIDATION-TRAILER (reason code plus description) into VALIDATION-TRAILER."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 451 writes a single FD-REJS-RECORD from REJECT-RECORD to the rejects file."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 554-559 set reason code 109 and the description 'ACCOUNT RECORD NOT FOUND' on INVALID KEY of the account REWRITE."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[6]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "The cited loop shows the check happens only before posting, but the claim that a posting-time code such as 109 produces no reject depends on the contents of 2000-POST-TRANSACTION, which are not in the cited span."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[7]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 227-228 display 'TRANSACTIONS PROCESSED :' with WS-TRANSACTION-COUNT and 'TRANSACTIONS REJECTED  :' with WS-REJECT-COUNT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[8]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 229-231 move 4 to RETURN-CODE only if WS-REJECT-COUNT > 0, and there is no else branch."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "then[2]",
+       "errors": [],
+       "judge": "Line 447 moves DALYTRAN-RECORD to REJECT-TRAN-DATA, but the cited lines do not show DALYTRAN-RECORD's length, so a complete, unchanged copy without truncation or padding is not established."
+      },
+      {
+       "clause": "then[6]",
+       "errors": [],
+       "judge": "The cited loop shows the check happens only before posting, but the claim that a posting-time code such as 109 produces no reject depends on the contents of 2000-POST-TRANSACTION, which are not in the cited span."
+      }
+     ]
+    }
+   ]
+  },
+  "port_function": null,
+  "tests": [],
+  "port_functions": []
+ },
+ {
+  "id": "BR-CBTRN02C-006",
+  "title": "Posting updates or creates the transaction category balance record",
+  "program": "CBTRN02C",
+  "paragraph": "2700-UPDATE-TCATBAL",
+  "summary": "Each validated daily transaction is added to a category balance record keyed by account ID, transaction type code and category code. If no record exists for that key, a new one is created with the transaction amount as its balance. If one exists, the amount is added to its balance and the record is rewritten.",
+  "unit": "CBTRN02C-post",
+  "scenario": {
+   "given": [
+    {
+     "text": "The daily transaction passed validation (no failure reason was set), so it is posted.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       211,
+       212
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The category balance key is the account ID from the card cross-reference, plus the transaction's type code and category code.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       469,
+       471
+      ]
+     },
+     "fields": [
+      "XREF-ACCT-ID",
+      "FD-TRANCAT-ACCT-ID",
+      "DALYTRAN-TYPE-CD",
+      "FD-TRANCAT-TYPE-CD",
+      "DALYTRAN-CAT-CD",
+      "FD-TRANCAT-CD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The category balance is a signed amount with 9 integer digits and 2 decimal places.",
+     "source": {
+      "file": "CVTRA01Y.cpy",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     "fields": [
+      "TRAN-CAT-BAL"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "The program reads the category balance file by that key. If no record is found, it sets the create flag to Y; otherwise the flag stays N.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       473,
+       479
+      ]
+     },
+     "fields": [
+      "WS-CREATE-TRANCAT-REC",
+      "TCATBAL-FILE",
+      "TRAN-CAT-BAL-RECORD"
+     ],
+     "literals": [
+      "N",
+      "Y"
+     ]
+    }
+   ],
+   "then": [
+    {
+     "text": "If the create flag is Y, a new record is built. Otherwise the existing record is updated.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       495,
+       499
+      ]
+     },
+     "fields": [
+      "WS-CREATE-TRANCAT-REC"
+     ],
+     "literals": [
+      "Y"
+     ]
+    },
+    {
+     "text": "Create case: the record is initialized so the balance starts at zero.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       504,
+       504
+      ]
+     },
+     "fields": [
+      "TRAN-CAT-BAL-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "Create case: the account ID, type code and category code are copied into the new record's key fields.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       505,
+       507
+      ]
+     },
+     "fields": [
+      "XREF-ACCT-ID",
+      "TRANCAT-ACCT-ID",
+      "DALYTRAN-TYPE-CD",
+      "TRANCAT-TYPE-CD",
+      "DALYTRAN-CAT-CD",
+      "TRANCAT-CD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "Create case: the transaction amount, with its sign, is added to the zero balance and the new record is written to the category balance file.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       508,
+       510
+      ]
+     },
+     "fields": [
+      "DALYTRAN-AMT",
+      "TRAN-CAT-BAL",
+      "FD-TRAN-CAT-BAL-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "Update case: the transaction amount, with its sign, is added to the existing balance and the record is rewritten in place.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       527,
+       528
+      ]
+     },
+     "fields": [
+      "DALYTRAN-AMT",
+      "TRAN-CAT-BAL",
+      "FD-TRAN-CAT-BAL-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "Update case: the ADD to the balance has no ON SIZE ERROR clause. If the sum has more than 9 integer digits, the high-order digits are silently dropped.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       527,
+       527
+      ]
+     },
+     "fields": [
+      "DALYTRAN-AMT",
+      "TRAN-CAT-BAL"
+     ],
+     "literals": []
+    }
+   ]
+  },
+  "status": "verified",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "traced",
+    "why": "all clauses verified (attempt 2)",
+    "by": "verifier"
+   },
+   {
+    "status": "verified",
+    "why": "all 6 case(s) match legacy",
+    "by": "harness"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-212 perform 2000-POST-TRANSACTION only when WS-VALIDATION-FAIL-REASON = 0, meaning no failure reason was set."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 469-471 build the key from XREF-ACCT-ID, DALYTRAN-TYPE-CD and DALYTRAN-CAT-CD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 9 shows TRAN-CAT-BAL as PIC S9(09)V99, but the claim that the ADD lacks size-error handling and truncates depends on the ADD statements, which are not among the cited lines."
+       },
+       "passed": false
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 473-479 set the flag to 'N', read TCATBAL-FILE, and move 'Y' to the flag on INVALID KEY (record not found)."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 495-499 perform the create paragraph when the flag is 'Y' and the update paragraph otherwise."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 504 INITIALIZEs TRAN-CAT-BAL-RECORD, which sets the numeric balance field to zero."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 505-507 move the account ID, type code and category code into the TRANCAT key fields."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 508 adds the signed DALYTRAN-AMT to the initialized balance, and line 510 WRITEs the new record."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 527 adds DALYTRAN-AMT to the existing balance, and line 528 REWRITEs the record."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "given[2]",
+       "errors": [],
+       "judge": "Line 9 shows TRAN-CAT-BAL as PIC S9(09)V99, but the claim that the ADD lacks size-error handling and truncates depends on the ADD statements, which are not among the cited lines."
+      }
+     ]
+    },
+    {
+     "passed": true,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-212 perform 2000-POST-TRANSACTION only when WS-VALIDATION-FAIL-REASON = 0."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 469-471 move XREF-ACCT-ID, DALYTRAN-TYPE-CD and DALYTRAN-CAT-CD into the FD-TRANCAT key fields."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 9 defines TRAN-CAT-BAL as PIC S9(09)V99, a signed field with 9 integer and 2 decimal digits."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 473 sets the flag to 'N', and the READ's INVALID KEY branch on lines 474-478 sets it to 'Y' when no record is found."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 495-499 perform 2700-A-CREATE-TCATBAL-REC when the flag is 'Y' and 2700-B-UPDATE-TCATBAL-REC otherwise."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "The INITIALIZE on line 504 sets the numeric TRAN-CAT-BAL to zero."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 505-507 move the account ID, type code and category code into the TRANCAT key fields."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 508 adds DALYTRAN-AMT to the initialized balance, and line 510 writes the new record."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 527 adds DALYTRAN-AMT to the existing TRAN-CAT-BAL, and line 528 rewrites the record."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "The ADD on line 527 has no ON SIZE ERROR phrase, so an overflow of the S9(09)V99 field truncates high-order digits without signaling."
+       },
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   ]
+  },
+  "port_function": "cbtrn02c.update_tcatbal",
+  "tests": [
+   "T-016",
+   "T-017",
+   "T-018",
+   "T-019",
+   "T-020",
+   "T-021"
+  ],
+  "port_functions": [
+   "cbtrn02c.update_tcatbal"
+  ],
+  "verified_against": {
+   "cited_sha": "e448ec342f285967",
+   "port_sha": "01e004b4a90d4375"
+  }
+ },
+ {
+  "id": "BR-CBTRN02C-007",
+  "title": "Posting updates the account balances and writes the transaction record",
+  "program": "CBTRN02C",
+  "paragraph": "2000-POST-TRANSACTION",
+  "summary": "After the category balance update, the transaction amount is added to the account's current balance. It is also added to the cycle credit total if the amount is zero or more, or to the cycle debit total if it is negative. The account record is then rewritten. Next, a transaction record is written: it copies the daily transaction's fields and adds a processing timestamp. If the account rewrite fails, reason 109 is set, but the transaction is still written and is not counted as rejected.",
+  "unit": "CBTRN02C-post",
+  "scenario": {
+   "given": [
+    {
+     "text": "The account record being updated is the one read during validation, using the account ID from the card cross-reference.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       394,
+       395
+      ]
+     },
+     "fields": [
+      "XREF-ACCT-ID",
+      "FD-ACCT-ID",
+      "ACCOUNT-FILE",
+      "ACCOUNT-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The account's current balance is a signed amount with 10 integer digits and 2 decimal places.",
+     "source": {
+      "file": "CVACT01Y.cpy",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     "fields": [
+      "ACCT-CURR-BAL"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The cycle credit and cycle debit totals are signed amounts with 10 integer digits and 2 decimal places.",
+     "source": {
+      "file": "CVACT01Y.cpy",
+      "lines": [
+       13,
+       14
+      ]
+     },
+     "fields": [
+      "ACCT-CURR-CYC-CREDIT",
+      "ACCT-CURR-CYC-DEBIT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The steps always run in this order, with no condition between them: category balance update, account update, then the transaction write.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       440,
+       442
+      ]
+     },
+     "fields": [
+      "2700-UPDATE-TCATBAL",
+      "2800-UPDATE-ACCOUNT-REC",
+      "2900-WRITE-TRANSACTION-FILE"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "A validated transaction is posted, and its amount is checked to see whether it is zero or more, or negative.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       548,
+       548
+      ]
+     },
+     "fields": [
+      "DALYTRAN-AMT"
+     ],
+     "literals": []
+    }
+   ],
+   "then": [
+    {
+     "text": "The transaction amount, with its sign, is always added to the account's current balance.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       547,
+       547
+      ]
+     },
+     "fields": [
+      "DALYTRAN-AMT",
+      "ACCT-CURR-BAL"
+     ],
+     "literals": []
+    },
+    {
+     "text": "If the amount is zero or positive, it is added to the cycle credit total. If it is negative, it is added as a negative value to the cycle debit total, so that total goes down.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       548,
+       552
+      ]
+     },
+     "fields": [
+      "DALYTRAN-AMT",
+      "ACCT-CURR-CYC-CREDIT",
+      "ACCT-CURR-CYC-DEBIT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The updated account record is rewritten to the account file.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       554,
+       554
+      ]
+     },
+     "fields": [
+      "FD-ACCTFILE-REC",
+      "ACCOUNT-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "If the rewrite finds no record, reason code 109 and the text ACCOUNT RECORD NOT FOUND are set.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       555,
+       558
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": [
+      "109",
+      "ACCOUNT RECORD NOT FOUND"
+     ]
+    },
+    {
+     "text": "The reason code is only checked before posting, to decide between posting and rejecting. A code of 109 set during posting therefore does not add to the reject count and does not write a reject record.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       211,
+       216
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-REJECT-COUNT"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "Before the next daily transaction is validated, the reason code is reset to 0 and the reason text to spaces.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       208,
+       209
+      ]
+     },
+     "fields": [
+      "WS-VALIDATION-FAIL-REASON",
+      "WS-VALIDATION-FAIL-REASON-DESC"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "The transaction record copies these fields from the daily transaction: ID, type code, category code, source, description, amount, merchant ID, merchant name, merchant city, merchant ZIP, card number and original timestamp.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       425,
+       436
+      ]
+     },
+     "fields": [
+      "DALYTRAN-ID",
+      "TRAN-ID",
+      "DALYTRAN-TYPE-CD",
+      "TRAN-TYPE-CD",
+      "DALYTRAN-CAT-CD",
+      "TRAN-CAT-CD",
+      "DALYTRAN-SOURCE",
+      "TRAN-SOURCE",
+      "DALYTRAN-DESC",
+      "TRAN-DESC",
+      "DALYTRAN-AMT",
+      "TRAN-AMT",
+      "DALYTRAN-MERCHANT-ID",
+      "TRAN-MERCHANT-ID",
+      "DALYTRAN-MERCHANT-NAME",
+      "TRAN-MERCHANT-NAME",
+      "DALYTRAN-MERCHANT-CITY",
+      "TRAN-MERCHANT-CITY",
+      "DALYTRAN-MERCHANT-ZIP",
+      "TRAN-MERCHANT-ZIP",
+      "DALYTRAN-CARD-NUM",
+      "TRAN-CARD-NUM",
+      "DALYTRAN-ORIG-TS",
+      "TRAN-ORIG-TS"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The transaction record's processing timestamp is set to the formatted timestamp built just before it is moved in.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       437,
+       438
+      ]
+     },
+     "fields": [
+      "DB2-FORMAT-TS",
+      "TRAN-PROC-TS"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The timestamp is built from the current system date and time.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       693,
+       693
+      ]
+     },
+     "fields": [
+      "COBOL-TS"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The current date and time are split into year (4 characters) followed by month, day, hour, minute, second and fraction (2 characters each).",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       150,
+       157
+      ]
+     },
+     "fields": [
+      "COBOL-TS",
+      "COB-YYYY",
+      "COB-MM",
+      "COB-DD",
+      "COB-HH",
+      "COB-MIN",
+      "COB-SS",
+      "COB-MIL"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The 26-character timestamp is laid out as: year (4), separator, month (2), separator, day (2), separator, hour (2), separator, minute (2), separator, second (2), separator, fraction (2), then a 4-character tail.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       159,
+       174
+      ]
+     },
+     "fields": [
+      "DB2-FORMAT-TS",
+      "DB2-YYYY",
+      "DB2-STREEP-1",
+      "DB2-MM",
+      "DB2-STREEP-2",
+      "DB2-DD",
+      "DB2-STREEP-3",
+      "DB2-HH",
+      "DB2-DOT-1",
+      "DB2-MIN",
+      "DB2-DOT-2",
+      "DB2-SS",
+      "DB2-DOT-3",
+      "DB2-MIL",
+      "DB2-REST"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The date and time parts are copied in, the tail is set to 0000, the three date separators are set to '-' and the three time separators to '.'. The result is YYYY-MM-DD-HH.MM.SS.ff0000.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       694,
+       703
+      ]
+     },
+     "fields": [
+      "COB-YYYY",
+      "DB2-YYYY",
+      "COB-MM",
+      "DB2-MM",
+      "COB-DD",
+      "DB2-DD",
+      "COB-HH",
+      "DB2-HH",
+      "COB-MIN",
+      "DB2-MIN",
+      "COB-SS",
+      "DB2-SS",
+      "COB-MIL",
+      "DB2-MIL",
+      "DB2-REST",
+      "DB2-STREEP-1",
+      "DB2-STREEP-2",
+      "DB2-STREEP-3",
+      "DB2-DOT-1",
+      "DB2-DOT-2",
+      "DB2-DOT-3"
+     ],
+     "literals": [
+      "0000",
+      "-",
+      "."
+     ]
+    },
+    {
+     "text": "The completed transaction record is written as a new record to the transaction file.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       564,
+       564
+      ]
+     },
+     "fields": [
+      "FD-TRANFILE-REC",
+      "TRAN-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The transaction file is an indexed file keyed on FD-TRANS-ID.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       34,
+       37
+      ]
+     },
+     "fields": [
+      "TRANSACT-FILE",
+      "FD-TRANS-ID"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The key FD-TRANS-ID is the first 16 characters of the written transaction record.",
+     "source": {
+      "file": "CBTRN02C.cbl",
+      "lines": [
+       72,
+       73
+      ]
+     },
+     "fields": [
+      "FD-TRANFILE-REC",
+      "FD-TRANS-ID"
+     ],
+     "literals": []
+    }
+   ]
+  },
+  "status": "verified",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "traced",
+    "why": "all clauses verified (attempt 2)",
+    "by": "verifier"
+   },
+   {
+    "status": "verified",
+    "why": "all 5 case(s) match legacy",
+    "by": "harness"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 394-395 move XREF-ACCT-ID to FD-ACCT-ID and read ACCOUNT-FILE into ACCOUNT-RECORD in the 1500-B-LOOKUP-ACCT validation paragraph."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 7 defines ACCT-CURR-BAL as PIC S9(10)V99, a signed amount with 10 integer and 2 decimal digits."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 13-14 define ACCT-CURR-CYC-CREDIT and ACCT-CURR-CYC-DEBIT as PIC S9(10)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": false,
+        "errors": [
+         "clause lists no fields or literals, so its citation cannot be checked"
+        ]
+       },
+       "judge": null,
+       "passed": false
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 548 tests IF DALYTRAN-AMT >= 0, splitting zero-or-positive amounts from negative ones in the account update."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 547 unconditionally adds the signed DALYTRAN-AMT to ACCT-CURR-BAL before the IF."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 548-552 add a non-negative amount to the cycle credit and otherwise add the negative amount to the cycle debit, which lowers that total."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 554 rewrites FD-ACCTFILE-REC from ACCOUNT-RECORD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "The cited lines show only that 109 and the message are set on INVALID KEY; the claims that the transaction is still written and not counted as rejected depend on uncited lines such as 440-442 and the main loop."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 208-209 move 0 and SPACES to the reason fields in the loop, and the context shows this happens just before 1500-VALIDATE-TRAN."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 425-436 move each of the listed DALYTRAN fields to the corresponding TRAN fields."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[6]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Lines 437-438 only perform the timestamp routine and move DB2-FORMAT-TS; that it uses the current system date and time is shown only at uncited line 693."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[7]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "The cited moves do not show how the DB2-FORMAT-TS subfields are laid out, nor that COB-MIL holds hundredths, so the exact format string cannot be established from these lines."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[8]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 564 shows the WRITE of the transaction record, but nothing cited shows that the transaction file is keyed by transaction ID."
+       },
+       "passed": false
+      }
+     ],
+     "failures": [
+      {
+       "clause": "given[3]",
+       "errors": [
+        "clause lists no fields or literals, so its citation cannot be checked"
+       ],
+       "judge": null
+      },
+      {
+       "clause": "then[3]",
+       "errors": [],
+       "judge": "The cited lines show only that 109 and the message are set on INVALID KEY; the claims that the transaction is still written and not counted as rejected depend on uncited lines such as 440-442 and the main loop."
+      },
+      {
+       "clause": "then[6]",
+       "errors": [],
+       "judge": "Lines 437-438 only perform the timestamp routine and move DB2-FORMAT-TS; that it uses the current system date and time is shown only at uncited line 693."
+      },
+      {
+       "clause": "then[7]",
+       "errors": [],
+       "judge": "The cited moves do not show how the DB2-FORMAT-TS subfields are laid out, nor that COB-MIL holds hundredths, so the exact format string cannot be established from these lines."
+      },
+      {
+       "clause": "then[8]",
+       "errors": [],
+       "judge": "Line 564 shows the WRITE of the transaction record, but nothing cited shows that the transaction file is keyed by transaction ID."
+      }
+     ]
+    },
+    {
+     "passed": true,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 394-395 move XREF-ACCT-ID into FD-ACCT-ID and read ACCOUNT-FILE into ACCOUNT-RECORD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "ACCT-CURR-BAL is declared PIC S9(10)V99, a signed amount with 10 integer and 2 decimal digits."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Both ACCT-CURR-CYC-CREDIT and ACCT-CURR-CYC-DEBIT are declared PIC S9(10)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 440-442 perform 2700, 2800 and 2900 one after another with no intervening condition."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 548 tests IF DALYTRAN-AMT >= 0, which separates zero-or-positive amounts from negative ones."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 547 unconditionally adds DALYTRAN-AMT to ACCT-CURR-BAL."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 548-552 add a non-negative amount to the cycle credit total and otherwise add the negative amount to the cycle debit total, which lowers it."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 554 rewrites FD-ACCTFILE-REC from ACCOUNT-RECORD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "The INVALID KEY branch of the REWRITE moves 109 and 'ACCOUNT RECORD NOT FOUND' to the reason fields."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 211-216 test the reason code before 2000-POST-TRANSACTION runs, so a code set during posting cannot reach the reject branch for that transaction."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 208-209 reset the reason code to 0 and the description to SPACES before 1500-VALIDATE-TRAN is performed."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[6]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 425-436 move exactly the listed daily-transaction fields into the corresponding TRAN fields."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[7]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 437 performs the timestamp routine and line 438 then moves DB2-FORMAT-TS to TRAN-PROC-TS."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[8]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 693 moves FUNCTION CURRENT-DATE into COBOL-TS."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[9]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "COBOL-TS is laid out as COB-YYYY X(4) followed by MM, DD, HH, MIN, SS and MIL at X(2) each."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[10]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "The REDEFINES lays out year 4, separator, month, day, hour, minute, second and fraction at 2 each with separators between them, then a 4-character tail, totalling 26."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[11]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 694-703 copy the date and time parts, move '0000' to the tail, '-' to the three STREEP fields and '.' to the three DOT fields."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[12]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 564 writes FD-TRANFILE-REC from TRAN-RECORD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[13]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "The SELECT declares TRANSACT-FILE as ORGANIZATION IS INDEXED with RECORD KEY IS FD-TRANS-ID."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[14]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "FD-TRANS-ID is the first field of FD-TRANFILE-REC and is declared PIC X(16)."
+       },
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   ]
+  },
+  "port_function": "cbtrn02c.update_account_and_write_transaction",
+  "tests": [
+   "T-022",
+   "T-023",
+   "T-024",
+   "T-025",
+   "T-026"
+  ],
+  "port_functions": [
+   "cbtrn02c.update_account_and_write_transaction"
+  ],
+  "verified_against": {
+   "cited_sha": "8427ca13a30f96b5",
+   "port_sha": "01e004b4a90d4375"
+  }
+ },
+ {
+  "id": "BR-CBACT04C-001",
+  "title": "Account balance update when the account number changes",
+  "program": "CBACT04C",
+  "paragraph": "(main)",
+  "summary": "Category balance records are processed in key order and grouped by consecutive account ID. When a record's account ID differs from the previous one, and this is not the first record, the previous account is updated before the new account is loaded. The update adds the group's total interest to the current balance, sets the cycle credit and debit to zero and rewrites the account record.",
+  "unit": "CBACT04C-main",
+  "scenario": {
+   "given": [
+    {
+     "text": "At program start, the first-record flag WS-FIRST-TIME is 'Y'.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       170,
+       170
+      ]
+     },
+     "fields": [
+      "WS-FIRST-TIME"
+     ],
+     "literals": [
+      "Y"
+     ]
+    },
+    {
+     "text": "At program start, the last-seen account number WS-LAST-ACCT-NUM is spaces, so the first record always looks like a new account.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       167,
+       167
+      ]
+     },
+     "fields": [
+      "WS-LAST-ACCT-NUM"
+     ],
+     "literals": []
+    },
+    {
+     "text": "TCATBAL-FILE is an indexed file read with sequential access, so category balance records arrive in order of the record key FD-TRAN-CAT-KEY.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       28,
+       31
+      ]
+     },
+     "fields": [
+      "TCATBAL-FILE",
+      "FD-TRAN-CAT-KEY"
+     ],
+     "literals": []
+    },
+    {
+     "text": "Each category balance record is read, one at a time, into TRAN-CAT-BAL-RECORD.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       326,
+       326
+      ]
+     },
+     "fields": [
+      "TCATBAL-FILE",
+      "TRAN-CAT-BAL-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "Interest is computed for a category balance record, and added to the group total, only when the looked-up rate DIS-INT-RATE is not zero.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       213,
+       217
+      ]
+     },
+     "fields": [
+      "DIS-INT-RATE"
+     ],
+     "literals": []
+    },
+    {
+     "text": "Each computed monthly interest amount is added to the running account total WS-TOTAL-INT.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       467,
+       467
+      ]
+     },
+     "fields": [
+      "WS-MONTHLY-INT",
+      "WS-TOTAL-INT"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "A category balance record is read whose TRANCAT-ACCT-ID differs from WS-LAST-ACCT-NUM, and WS-FIRST-TIME is not 'Y'.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       194,
+       196
+      ]
+     },
+     "fields": [
+      "TRANCAT-ACCT-ID",
+      "WS-LAST-ACCT-NUM",
+      "WS-FIRST-TIME"
+     ],
+     "literals": [
+      "Y"
+     ]
+    }
+   ],
+   "then": [
+    {
+     "text": "The account update runs before the new account is read. As a result, ACCOUNT-RECORD still holds the previous account when it is updated.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       196,
+       203
+      ]
+     },
+     "fields": [
+      "FD-ACCT-ID",
+      "TRANCAT-ACCT-ID"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The previous account's current balance ACCT-CURR-BAL is increased by WS-TOTAL-INT (an add with no rounding). This happens even when the total is zero because every category had a zero rate.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       350,
+       352
+      ]
+     },
+     "fields": [
+      "WS-TOTAL-INT",
+      "ACCT-CURR-BAL"
+     ],
+     "literals": []
+    },
+    {
+     "text": "ACCT-CURR-BAL holds 10 integer digits and 2 decimals, signed.",
+     "source": {
+      "file": "CVACT01Y.cpy",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     "fields": [
+      "ACCT-CURR-BAL"
+     ],
+     "literals": []
+    },
+    {
+     "text": "WS-TOTAL-INT holds 9 integer digits and 2 decimals, signed.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       169,
+       169
+      ]
+     },
+     "fields": [
+      "WS-TOTAL-INT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The previous account's current-cycle credit ACCT-CURR-CYC-CREDIT and current-cycle debit ACCT-CURR-CYC-DEBIT are both set to zero.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       353,
+       354
+      ]
+     },
+     "fields": [
+      "ACCT-CURR-CYC-CREDIT",
+      "ACCT-CURR-CYC-DEBIT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The account record is rewritten in place from ACCOUNT-RECORD. All other account fields keep the values that were read.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       356,
+       356
+      ]
+     },
+     "fields": [
+      "FD-ACCTFILE-REC",
+      "ACCOUNT-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "On the very first record, no update is done. Instead, WS-FIRST-TIME is set to 'N'.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       197,
+       199
+      ]
+     },
+     "fields": [
+      "WS-FIRST-TIME"
+     ],
+     "literals": [
+      "N"
+     ]
+    },
+    {
+     "text": "In both cases, WS-TOTAL-INT is reset to 0 and WS-LAST-ACCT-NUM is set to the new TRANCAT-ACCT-ID.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       200,
+       201
+      ]
+     },
+     "fields": [
+      "WS-TOTAL-INT",
+      "WS-LAST-ACCT-NUM",
+      "TRANCAT-ACCT-ID"
+     ],
+     "literals": []
+    },
+    {
+     "text": "TRANCAT-ACCT-ID is copied to both FD-ACCT-ID and FD-XREF-ACCT-ID, and the new account and its card cross-reference are then read.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       202,
+       205
+      ]
+     },
+     "fields": [
+      "TRANCAT-ACCT-ID",
+      "FD-ACCT-ID",
+      "FD-XREF-ACCT-ID"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The card cross-reference is read into CARD-XREF-RECORD using FD-XREF-ACCT-ID as the key.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       394,
+       395
+      ]
+     },
+     "fields": [
+      "CARD-XREF-RECORD",
+      "FD-XREF-ACCT-ID"
+     ],
+     "literals": []
+    },
+    {
+     "text": "FD-XREF-ACCT-ID is declared as an alternate record key of XREF-FILE.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       34,
+       38
+      ]
+     },
+     "fields": [
+      "FD-XREF-ACCT-ID"
+     ],
+     "literals": []
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "traced",
+    "why": "all clauses verified (attempt 2)",
+    "by": "verifier"
+   },
+   {
+    "status": "flagged",
+    "why": "5 of 5 case(s) differ from legacy",
+    "by": "harness"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 170 declares WS-FIRST-TIME PIC X(01) VALUE 'Y', so it starts as 'Y'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 167 initializes WS-LAST-ACCT-NUM to SPACES, so the first record will not match it."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 326 only shows a READ INTO TRAN-CAT-BAL-RECORD; it shows neither key-order access nor the consecutive-account-ID grouping, which depends on lines outside the cited span."
+       },
+       "passed": false
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 213-217 perform 1300-COMPUTE-INTEREST, which does the accumulation, only when DIS-INT-RATE NOT = 0."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 467 adds WS-MONTHLY-INT to WS-TOTAL-INT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 194-196 perform 1050-UPDATE-ACCOUNT when TRANCAT-ACCT-ID NOT= WS-LAST-ACCT-NUM and WS-FIRST-TIME NOT = 'Y'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 196 performs 1050-UPDATE-ACCOUNT before lines 202-203 move the new ID to FD-ACCT-ID and read the account, so the previous record is the one updated."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 352 unconditionally adds WS-TOTAL-INT to ACCT-CURR-BAL with no ROUNDED phrase, so a zero total is still added."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "CVACT01Y line 7 defines ACCT-CURR-BAL as PIC S9(10)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 169 defines WS-TOTAL-INT as PIC S9(09)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 353-354 move 0 to ACCT-CURR-CYC-CREDIT and to ACCT-CURR-CYC-DEBIT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 356 rewrites FD-ACCTFILE-REC from ACCOUNT-RECORD, and only the balance and cycle fields are changed beforehand."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[6]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 197-198 show that when WS-FIRST-TIME is 'Y', the ELSE branch moves 'N' to WS-FIRST-TIME instead of performing the update."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[7]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 200-201 come after END-IF, so in both branches they reset WS-TOTAL-INT to 0 and move TRANCAT-ACCT-ID to WS-LAST-ACCT-NUM."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[8]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Lines 202-205 set FD-ACCT-ID and FD-XREF-ACCT-ID and perform the read paragraphs, but nothing cited shows that the xref read uses an alternate key."
+       },
+       "passed": false
+      }
+     ],
+     "failures": [
+      {
+       "clause": "given[2]",
+       "errors": [],
+       "judge": "Line 326 only shows a READ INTO TRAN-CAT-BAL-RECORD; it shows neither key-order access nor the consecutive-account-ID grouping, which depends on lines outside the cited span."
+      },
+      {
+       "clause": "then[8]",
+       "errors": [],
+       "judge": "Lines 202-205 set FD-ACCT-ID and FD-XREF-ACCT-ID and perform the read paragraphs, but nothing cited shows that the xref read uses an alternate key."
+      }
+     ]
+    },
+    {
+     "passed": true,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 170 declares WS-FIRST-TIME PIC X(01) with VALUE 'Y'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 167 initializes WS-LAST-ACCT-NUM to SPACES, so the first real account ID will not match it."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 28-31 declare TCATBAL-FILE as INDEXED, ACCESS MODE SEQUENTIAL, RECORD KEY FD-TRAN-CAT-KEY, so records are read in key order."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 326 reads TCATBAL-FILE INTO TRAN-CAT-BAL-RECORD, one record per execution of the paragraph."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 214-217 perform 1300-COMPUTE-INTEREST only when DIS-INT-RATE NOT = 0."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 467 adds WS-MONTHLY-INT to WS-TOTAL-INT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 194-196 perform the update when TRANCAT-ACCT-ID NOT= WS-LAST-ACCT-NUM and WS-FIRST-TIME NOT = 'Y'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 196-203 perform 1050-UPDATE-ACCOUNT before FD-ACCT-ID is set and 1100-GET-ACCT-DATA reads the new account, so ACCOUNT-RECORD still holds the previous account during the update."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 352 is an unconditional ADD WS-TOTAL-INT TO ACCT-CURR-BAL with no ROUNDED and no check on the total being zero."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 7 declares ACCT-CURR-BAL as PIC S9(10)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 169 declares WS-TOTAL-INT as PIC S9(09)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 353-354 move 0 to ACCT-CURR-CYC-CREDIT and to ACCT-CURR-CYC-DEBIT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 356 rewrites FD-ACCTFILE-REC FROM ACCOUNT-RECORD, so fields not modified beforehand keep the values that were read."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[6]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 197-198 are the ELSE branch taken when WS-FIRST-TIME is 'Y': no update is performed and WS-FIRST-TIME is set to 'N'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[7]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 200-201, which follow the END-IF, reset WS-TOTAL-INT to 0 and move TRANCAT-ACCT-ID to WS-LAST-ACCT-NUM in both branches."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[8]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 202-205 move TRANCAT-ACCT-ID to FD-ACCT-ID and FD-XREF-ACCT-ID and perform the account and xref read paragraphs."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[9]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 394-395 read XREF-FILE INTO CARD-XREF-RECORD with KEY IS FD-XREF-ACCT-ID."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[10]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 38 declares ALTERNATE RECORD KEY IS FD-XREF-ACCT-ID for XREF-FILE."
+       },
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   ]
+  },
+  "port_function": "cbact04c.handle_account_break",
+  "tests": [
+   "T-027",
+   "T-028",
+   "T-029",
+   "T-030",
+   "T-031"
+  ],
+  "port_functions": [
+   "cbact04c.handle_account_break"
+  ],
+  "verified_against": {
+   "cited_sha": "6aeb63779cac7dc6",
+   "port_sha": "362d5d113d324fce"
+  }
+ },
+ {
+  "id": "BR-CBACT04C-002",
+  "title": "The last account group is never written back at end of file",
+  "program": "CBACT04C",
+  "paragraph": "(main)",
+  "summary": "The end-of-file branch that should update the last account (ELSE PERFORM 1050-UPDATE-ACCOUNT) can never run. The loop condition is tested before each pass, so the loop ends as soon as END-OF-FILE becomes 'Y'. The last account in the category balance file therefore never gets its interest added or its cycle credit and debit zeroed, but its interest transactions are still written.",
+  "unit": "CBACT04C-main",
+  "scenario": {
+   "given": [
+    {
+     "text": "END-OF-FILE starts as 'N'.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       137,
+       137
+      ]
+     },
+     "fields": [
+      "END-OF-FILE"
+     ],
+     "literals": [
+      "N"
+     ]
+    },
+    {
+     "text": "The main loop repeats until END-OF-FILE = 'Y', and the test is made before each pass. Inside the loop, the ELSE branch that performs the account update is taken only when END-OF-FILE is not 'N' at the top of a pass.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       188,
+       191
+      ]
+     },
+     "fields": [
+      "END-OF-FILE"
+     ],
+     "literals": [
+      "Y",
+      "N"
+     ]
+    },
+    {
+     "text": "For each category balance record whose DIS-INT-RATE is not zero, 1300-COMPUTE-INTEREST is performed inside the loop.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       214,
+       215
+      ]
+     },
+     "fields": [
+      "DIS-INT-RATE"
+     ],
+     "literals": []
+    },
+    {
+     "text": "1300-COMPUTE-INTEREST adds the record's monthly interest into WS-TOTAL-INT and right away performs 1300-B-WRITE-TX to produce an interest transaction.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       467,
+       468
+      ]
+     },
+     "fields": [
+      "WS-MONTHLY-INT",
+      "WS-TOTAL-INT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The interest transaction record is written to the transaction file at that point, before and separately from any account update.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       500,
+       500
+      ]
+     },
+     "fields": [
+      "FD-TRANFILE-REC",
+      "TRAN-RECORD"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "Reading the category balance file returns status '10' (end of file), which sets APPL-RESULT to 16.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       330,
+       331
+      ]
+     },
+     "fields": [
+      "TCATBALF-STATUS",
+      "APPL-RESULT"
+     ],
+     "literals": [
+      "10",
+      "16"
+     ]
+    },
+    {
+     "text": "APPL-EOF (APPL-RESULT value 16) causes END-OF-FILE to be set to 'Y'.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       339,
+       340
+      ]
+     },
+     "fields": [
+      "END-OF-FILE"
+     ],
+     "literals": [
+      "Y"
+     ]
+    }
+   ],
+   "then": [
+    {
+     "text": "In the same pass, the inner check END-OF-FILE = 'N' is now false, so no more processing is done in that pass.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       191,
+       191
+      ]
+     },
+     "fields": [
+      "END-OF-FILE"
+     ],
+     "literals": [
+      "N"
+     ]
+    },
+    {
+     "text": "The loop condition END-OF-FILE = 'Y' is tested before the next pass, so the loop ends without evaluating the outer IF END-OF-FILE = 'N' again.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       188,
+       189
+      ]
+     },
+     "fields": [
+      "END-OF-FILE"
+     ],
+     "literals": [
+      "Y",
+      "N"
+     ]
+    },
+    {
+     "text": "So the outer IF's ELSE branch, which performs 1050-UPDATE-ACCOUNT, is never run.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       219,
+       220
+      ]
+     },
+     "fields": [
+      "1050-UPDATE-ACCOUNT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "As a result, the last account group's WS-TOTAL-INT is never added to ACCT-CURR-BAL, its cycle credit and debit are not zeroed, and its account record is not rewritten. If the file is empty, no account is updated at all.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       352,
+       356
+      ]
+     },
+     "fields": [
+      "WS-TOTAL-INT",
+      "ACCT-CURR-BAL",
+      "ACCT-CURR-CYC-CREDIT",
+      "ACCT-CURR-CYC-DEBIT"
+     ],
+     "literals": []
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "traced",
+    "why": "all clauses verified (attempt 2)",
+    "by": "verifier"
+   },
+   {
+    "status": "flagged",
+    "why": "4 of 5 case(s) differ from legacy",
+    "by": "harness"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 137 declares END-OF-FILE PIC X(01) with VALUE 'N'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 188 is a PERFORM UNTIL END-OF-FILE = 'Y', which tests before each pass by default, and line 189 gates the read branch on END-OF-FILE = 'N', so the alternative path applies only when it is not 'N'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": false,
+        "errors": [
+         "clause lists no fields or literals, so its citation cannot be checked"
+        ]
+       },
+       "judge": null,
+       "passed": false
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Lines 214-217 only show 1300-COMPUTE-INTEREST and 1400-COMPUTE-FEES being performed when DIS-INT-RATE is non-zero; they do not show that an interest transaction is written, nor anything specific to the last account's records."
+       },
+       "passed": false
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 330-331 move 16 to APPL-RESULT when TCATBALF-STATUS = '10'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 339-340 move 'Y' to END-OF-FILE when APPL-EOF is true."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 191 only shows the inner END-OF-FILE = 'N' test; the claims that the loop stops at its next test and that the ELSE update never runs depend on lines 188-189 and 219-220, which are not cited."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 352-356 show what 1050-UPDATE-ACCOUNT does (add WS-TOTAL-INT to ACCT-CURR-BAL, zero cycle credit/debit, rewrite the record), which is exactly what is described as being skipped."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "given[2]",
+       "errors": [
+        "clause lists no fields or literals, so its citation cannot be checked"
+       ],
+       "judge": null
+      },
+      {
+       "clause": "given[3]",
+       "errors": [],
+       "judge": "Lines 214-217 only show 1300-COMPUTE-INTEREST and 1400-COMPUTE-FEES being performed when DIS-INT-RATE is non-zero; they do not show that an interest transaction is written, nor anything specific to the last account's records."
+      },
+      {
+       "clause": "then[0]",
+       "errors": [],
+       "judge": "Line 191 only shows the inner END-OF-FILE = 'N' test; the claims that the loop stops at its next test and that the ELSE update never runs depend on lines 188-189 and 219-220, which are not cited."
+      }
+     ]
+    },
+    {
+     "passed": true,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 137 declares END-OF-FILE PIC X(01) VALUE 'N'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 188 is a PERFORM UNTIL END-OF-FILE = 'Y', which tests before each pass by default, and line 189's IF END-OF-FILE = 'N' means its ELSE branch is taken only when the flag is not 'N'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 214-215 perform 1300-COMPUTE-INTEREST when DIS-INT-RATE NOT = 0."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 467-468 add WS-MONTHLY-INT to WS-TOTAL-INT and then perform 1300-B-WRITE-TX."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 500 writes FD-TRANFILE-REC from TRAN-RECORD inside the transaction-write paragraph, separate from the account update."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 330-331 move 16 to APPL-RESULT when TCATBALF-STATUS = '10'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 339-340 move 'Y' to END-OF-FILE when APPL-EOF is true."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 191 re-tests END-OF-FILE = 'N' after the read, so the processing body is skipped once the flag is 'Y'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "The PERFORM UNTIL at line 188 tests END-OF-FILE = 'Y' before the next pass, so the loop exits before line 189 is evaluated again."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 219-220 show the outer ELSE performing 1050-UPDATE-ACCOUNT, and given the loop logic that branch can never be reached."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 352-356 show that 1050-UPDATE-ACCOUNT adds WS-TOTAL-INT to ACCT-CURR-BAL, zeroes the cycle credit and debit, and rewrites the record, none of which happens at end of file."
+       },
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   ]
+  },
+  "port_function": "cbact04c.handle_end_of_file",
+  "tests": [
+   "T-032",
+   "T-033",
+   "T-034",
+   "T-035",
+   "T-036"
+  ],
+  "port_functions": [
+   "cbact04c.handle_end_of_file"
+  ],
+  "verified_against": {
+   "cited_sha": "ba642c247cf121cf",
+   "port_sha": "362d5d113d324fce"
+  }
+ },
+ {
+  "id": "BR-CBACT04C-003",
+  "title": "Interest rate lookup by account group, transaction type and category, falling back to the DEFAULT group",
+  "program": "CBACT04C",
+  "paragraph": "1200-GET-INTEREST-RATE",
+  "summary": "For each transaction category balance, the program reads the disclosure group record keyed by the account's group ID, the transaction type code and the category code, and takes the interest rate from it. If no record exists for that key, it reads again with the group ID set to 'DEFAULT' and the same type and category codes. If that second read fails, or the first read fails for any reason other than record-not-found, the program abends. Interest and fees are only computed when the rate found is not zero.",
+  "unit": "CBACT04C-rate",
+  "scenario": {
+   "given": [
+    {
+     "text": "The disclosure group file is keyed by account group ID (10 characters), then transaction type code (2 characters), then transaction category code (4 digits).",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       78,
+       81
+      ]
+     },
+     "fields": [
+      "FD-DISCGRP-KEY",
+      "FD-DIS-ACCT-GROUP-ID",
+      "FD-DIS-TRAN-TYPE-CD",
+      "FD-DIS-TRAN-CAT-CD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The interest rate in the disclosure group record is a signed number with 4 integer digits and 2 decimal places.",
+     "source": {
+      "file": "CVTRA02Y.cpy",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     "fields": [
+      "DIS-INT-RATE"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The lookup key is made from the account's group ID (from the account record), the category code and the type code of the current transaction category balance record.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       210,
+       212
+      ]
+     },
+     "fields": [
+      "ACCT-GROUP-ID",
+      "FD-DIS-ACCT-GROUP-ID",
+      "TRANCAT-CD",
+      "FD-DIS-TRAN-CAT-CD",
+      "TRANCAT-TYPE-CD",
+      "FD-DIS-TRAN-TYPE-CD"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "The disclosure group file is read by that key for each transaction category balance record.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       416,
+       416
+      ]
+     },
+     "fields": [
+      "DISCGRP-FILE",
+      "DIS-GROUP-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "A read that succeeds (status 00) or finds no record (status 23) is accepted. Any other status stops the program with an abend.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       422,
+       435
+      ]
+     },
+     "fields": [
+      "DISCGRP-STATUS",
+      "APPL-RESULT"
+     ],
+     "literals": [
+      "00",
+      "23",
+      "ERROR READING DISCLOSURE GROUP FILE"
+     ]
+    }
+   ],
+   "then": [
+    {
+     "text": "If a record is found for the exact key, its interest rate is the one used.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       416,
+       416
+      ]
+     },
+     "fields": [
+      "DIS-GROUP-RECORD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "If no record is found (status 23), only the group ID in the key is replaced with 'DEFAULT'. The same transaction type and category codes are kept, and the record is read again.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       436,
+       439
+      ]
+     },
+     "fields": [
+      "DISCGRP-STATUS",
+      "FD-DIS-ACCT-GROUP-ID"
+     ],
+     "literals": [
+      "23",
+      "DEFAULT"
+     ]
+    },
+    {
+     "text": "The rate from the DEFAULT record is then used. If the DEFAULT read does not return status 00 (including when no DEFAULT record exists for that type and category), the program abends.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       444,
+       459
+      ]
+     },
+     "fields": [
+      "DIS-GROUP-RECORD",
+      "DISCGRP-STATUS",
+      "APPL-RESULT"
+     ],
+     "literals": [
+      "00",
+      "ERROR READING DEFAULT DISCLOSURE GROUP"
+     ]
+    },
+    {
+     "text": "Interest and fees are computed for this category balance only when the rate found is not zero. A zero rate skips both.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       214,
+       217
+      ]
+     },
+     "fields": [
+      "DIS-INT-RATE"
+     ],
+     "literals": []
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "traced",
+    "why": "all clauses verified (attempt 2)",
+    "by": "verifier"
+   },
+   {
+    "status": "flagged",
+    "why": "3 of 5 case(s) differ from legacy",
+    "by": "harness"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 78-81 define FD-DISCGRP-KEY as the group ID X(10), then type code X(02), then category code 9(04), in that order."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 9 defines DIS-INT-RATE as PIC S9(04)V99: signed, with 4 integer digits and 2 decimal places."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 210-212 move ACCT-GROUP-ID, TRANCAT-CD and TRANCAT-TYPE-CD into the three key fields."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": false,
+        "errors": [
+         "clause lists no fields or literals, so its citation cannot be checked"
+        ]
+       },
+       "judge": null,
+       "passed": false
+      },
+      {
+       "clause": "when[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 422-435 accept status '00' or '23' and otherwise display 'ERROR READING DISCLOSURE GROUP FILE' and perform 9999-ABEND-PROGRAM."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 416 reads the record for the current key into DIS-GROUP-RECORD, which loads the matching record's interest rate."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 436-439 change only FD-DIS-ACCT-GROUP-ID to 'DEFAULT' when status is '23', then perform the default read, so the other key fields are kept."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 444-459 read the DEFAULT record into DIS-GROUP-RECORD and abend with 'ERROR READING DEFAULT DISCLOSURE GROUP' when the status is not '00'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 214-217 perform 1300-COMPUTE-INTEREST and 1400-COMPUTE-FEES only when DIS-INT-RATE NOT = 0, so a zero rate skips both."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "when[0]",
+       "errors": [
+        "clause lists no fields or literals, so its citation cannot be checked"
+       ],
+       "judge": null
+      }
+     ]
+    },
+    {
+     "passed": true,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 78-81 define FD-DISCGRP-KEY as FD-DIS-ACCT-GROUP-ID PIC X(10), then FD-DIS-TRAN-TYPE-CD PIC X(02), then FD-DIS-TRAN-CAT-CD PIC 9(04), in that order."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 9 declares DIS-INT-RATE as PIC S9(04)V99, which is signed with 4 integer digits and 2 implied decimal places."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 210-212 move ACCT-GROUP-ID, TRANCAT-CD and TRANCAT-TYPE-CD into the group ID, category code and type code parts of the disclosure key."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 416 reads DISCGRP-FILE into DIS-GROUP-RECORD by the key just built, and this paragraph is performed for each category balance processed."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 422-434 set APPL-RESULT to 0 for status '00' or '23' and otherwise display 'ERROR READING DISCLOSURE GROUP FILE' and perform 9999-ABEND-PROGRAM."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "A successful READ ... INTO DIS-GROUP-RECORD on line 416 loads the matching record, including DIS-INT-RATE, so its rate is the one used."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 436-438 move 'DEFAULT' only into FD-DIS-ACCT-GROUP-ID on status '23', leaving the type and category codes unchanged, and perform the default-rate read paragraph."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 444-458 re-read the file into DIS-GROUP-RECORD and abend with 'ERROR READING DEFAULT DISCLOSURE GROUP' unless the status is '00'."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 214-217 perform 1300-COMPUTE-INTEREST and 1400-COMPUTE-FEES only when DIS-INT-RATE NOT = 0, so a zero rate skips both."
+       },
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   ]
+  },
+  "port_function": "cbact04c.lookup_interest_rate",
+  "tests": [
+   "T-037",
+   "T-038",
+   "T-039",
+   "T-040",
+   "T-041"
+  ],
+  "port_functions": [
+   "cbact04c.lookup_interest_rate"
+  ],
+  "verified_against": {
+   "cited_sha": "2b6e3a542afb5f3e",
+   "port_sha": "362d5d113d324fce"
+  }
+ },
+ {
+  "id": "BR-CBACT04C-004",
+  "title": "Monthly interest on a category balance is balance \u00d7 annual rate \u00f7 1200, truncated to cents and added to the account's interest total",
+  "program": "CBACT04C",
+  "paragraph": "1300-COMPUTE-INTEREST",
+  "summary": "For each transaction-category balance whose interest rate is not zero, the monthly interest is TRAN-CAT-BAL * DIS-INT-RATE / 1200, truncated (not rounded) to 2 decimal places. It is added to the running interest total for the current account, and an interest transaction is written.",
+  "unit": "CBACT04C-interest",
+  "scenario": {
+   "given": [
+    {
+     "text": "The interest rate found for the category balance's account group, transaction type and category is not zero. When the rate is zero, no interest is calculated and no interest transaction is written for that balance.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       213,
+       217
+      ]
+     },
+     "fields": [
+      "DIS-INT-RATE"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "The category balance is a signed amount with 9 integer digits and 2 decimal places.",
+     "source": {
+      "file": "CVTRA01Y.cpy",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     "fields": [
+      "TRAN-CAT-BAL"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The interest rate is a signed annual percentage with 4 integer digits and 2 decimal places.",
+     "source": {
+      "file": "CVTRA02Y.cpy",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     "fields": [
+      "DIS-INT-RATE"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The running interest total is reset to zero each time the input moves to a new account.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       194,
+       201
+      ]
+     },
+     "fields": [
+      "WS-TOTAL-INT",
+      "TRANCAT-ACCT-ID",
+      "WS-LAST-ACCT-NUM"
+     ],
+     "literals": [
+      "0"
+     ]
+    }
+   ],
+   "when": [
+    {
+     "text": "Monthly interest is calculated for the category balance.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       462,
+       465
+      ]
+     },
+     "fields": [
+      "WS-MONTHLY-INT",
+      "TRAN-CAT-BAL",
+      "DIS-INT-RATE"
+     ],
+     "literals": [
+      "1200"
+     ]
+    }
+   ],
+   "then": [
+    {
+     "text": "The monthly interest is the category balance multiplied by the interest rate and divided by 1200. A negative balance or a negative rate gives negative interest.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       464,
+       465
+      ]
+     },
+     "fields": [
+      "WS-MONTHLY-INT",
+      "TRAN-CAT-BAL",
+      "DIS-INT-RATE"
+     ],
+     "literals": [
+      "1200"
+     ]
+    },
+    {
+     "text": "The monthly interest is stored as a signed amount with 9 integer digits and 2 decimal places.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       168,
+       168
+      ]
+     },
+     "fields": [
+      "WS-MONTHLY-INT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The COMPUTE does not specify ROUNDED, so any digits beyond the second decimal place of the result are cut off (truncated toward zero).",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       464,
+       465
+      ]
+     },
+     "fields": [
+      "WS-MONTHLY-INT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The truncated monthly interest is added to the running interest total for the current account.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       467,
+       467
+      ]
+     },
+     "fields": [
+      "WS-MONTHLY-INT",
+      "WS-TOTAL-INT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The running interest total is also a signed amount with 9 integer digits and 2 decimal places.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       169,
+       169
+      ]
+     },
+     "fields": [
+      "WS-TOTAL-INT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "After each calculation, the interest-transaction write routine runs and writes one interest transaction record.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       468,
+       468
+      ]
+     },
+     "fields": [],
+     "literals": [
+      "1300-B-WRITE-TX"
+     ]
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "flagged",
+    "why": "1 clause(s) failed verification after one retry",
+    "by": "verifier"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 213-217 perform 1300-COMPUTE-INTEREST and 1400-COMPUTE-FEES only when DIS-INT-RATE NOT = 0, so a zero rate skips the interest calculation and the transaction write that 1300 triggers."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 9 of CVTRA01Y defines TRAN-CAT-BAL as PIC S9(09)V99: signed, 9 integer digits and 2 decimal places."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 9 of CVTRA02Y defines DIS-INT-RATE as PIC S9(04)V99: signed, 4 integer digits and 2 decimal places, and the /1200 usage is consistent with an annual percentage."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 194-201 move 0 to WS-TOTAL-INT whenever TRANCAT-ACCT-ID differs from WS-LAST-ACCT-NUM."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 462-465 show paragraph 1300-COMPUTE-INTEREST computing WS-MONTHLY-INT from TRAN-CAT-BAL and DIS-INT-RATE."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 464-465 compute (TRAN-CAT-BAL * DIS-INT-RATE) / 1200, and with signed operands a negative balance or rate yields a negative result."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 168 shows only the PIC S9(09)V99 definition; the claim that ROUNDED is absent and the result is truncated depends on the COMPUTE statement at lines 464-465, which is not cited."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 467 adds WS-MONTHLY-INT to WS-TOTAL-INT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 169 defines WS-TOTAL-INT as PIC S9(09)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": false,
+        "errors": [
+         "clause lists no fields or literals, so its citation cannot be checked"
+        ]
+       },
+       "judge": null,
+       "passed": false
+      }
+     ],
+     "failures": [
+      {
+       "clause": "then[1]",
+       "errors": [],
+       "judge": "Line 168 shows only the PIC S9(09)V99 definition; the claim that ROUNDED is absent and the result is truncated depends on the COMPUTE statement at lines 464-465, which is not cited."
+      },
+      {
+       "clause": "then[4]",
+       "errors": [
+        "clause lists no fields or literals, so its citation cannot be checked"
+       ],
+       "judge": null
+      }
+     ]
+    },
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 213-217 run 1300-COMPUTE-INTEREST and 1400-COMPUTE-FEES only when DIS-INT-RATE NOT = 0, so a zero rate skips the interest calculation."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 9 of CVTRA01Y defines TRAN-CAT-BAL as PIC S9(09)V99, a signed field with 9 integer and 2 decimal digits."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 9 of CVTRA02Y defines DIS-INT-RATE as PIC S9(04)V99, a signed field with 4 integer and 2 decimal digits."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 194-201 move 0 to WS-TOTAL-INT whenever TRANCAT-ACCT-ID differs from WS-LAST-ACCT-NUM, then record the new account number."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 462-465 are the 1300-COMPUTE-INTEREST paragraph, which computes WS-MONTHLY-INT from TRAN-CAT-BAL, DIS-INT-RATE and 1200."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 464-465 compute (TRAN-CAT-BAL * DIS-INT-RATE) / 1200 into a signed result, so a negative operand yields negative interest."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 168 defines WS-MONTHLY-INT as PIC S9(09)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "The COMPUTE on lines 464-465 has no ROUNDED phrase, so standard COBOL truncates excess decimal digits."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 467 adds WS-MONTHLY-INT to WS-TOTAL-INT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 169 defines WS-TOTAL-INT as PIC S9(09)V99."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 468 shows only PERFORM 1300-B-WRITE-TX; the cited span does not show what that routine does, so the claim that it writes exactly one interest transaction record rests on uncited code."
+       },
+       "passed": false
+      }
+     ],
+     "failures": [
+      {
+       "clause": "then[5]",
+       "errors": [],
+       "judge": "Line 468 shows only PERFORM 1300-B-WRITE-TX; the cited span does not show what that routine does, so the claim that it writes exactly one interest transaction record rests on uncited code."
+      }
+     ]
+    }
+   ]
+  },
+  "port_function": null,
+  "tests": [],
+  "port_functions": []
+ },
+ {
+  "id": "BR-CBACT04C-005",
+  "title": "Interest transaction record written for each interest-bearing category balance",
+  "program": "CBACT04C",
+  "paragraph": "1300-B-WRITE-TX",
+  "summary": "Every computed monthly interest amount produces one new 350-byte transaction record. The record has type '01', category 5 and source 'System', and its ID is the run date parameter followed by a 6-digit counter. Its description is 'Int. for a/c ' plus the account ID, and its amount is the monthly interest. Merchant fields are blank or zero, the card number comes from the cross-reference record, and both timestamps are the current time in DB2 format.",
+  "unit": "CBACT04C-interest",
+  "scenario": {
+   "given": [
+    {
+     "text": "The monthly interest for a category balance has just been calculated.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       464,
+       468
+      ]
+     },
+     "fields": [
+      "WS-MONTHLY-INT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The transaction ID counter is a 6-digit unsigned number that starts at 0 when the program begins.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       173,
+       173
+      ]
+     },
+     "fields": [
+      "WS-TRANID-SUFFIX"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "The run date parameter is 10 characters long and is passed to the program.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       178,
+       178
+      ]
+     },
+     "fields": [
+      "PARM-DATE"
+     ],
+     "literals": []
+    }
+   ],
+   "when": [
+    {
+     "text": "The interest transaction is built and written to the transaction file.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       473,
+       500
+      ]
+     },
+     "fields": [
+      "FD-TRANFILE-REC",
+      "TRAN-RECORD"
+     ],
+     "literals": []
+    }
+   ],
+   "then": [
+    {
+     "text": "The counter is increased by 1. TRAN-ID (16 characters) is the 10-character run date followed by the 6-digit, zero-padded counter.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       474,
+       480
+      ]
+     },
+     "fields": [
+      "WS-TRANID-SUFFIX",
+      "PARM-DATE",
+      "TRAN-ID"
+     ],
+     "literals": [
+      "1"
+     ]
+    },
+    {
+     "text": "TRAN-TYPE-CD is set to '01'.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       482,
+       482
+      ]
+     },
+     "fields": [
+      "TRAN-TYPE-CD"
+     ],
+     "literals": [
+      "01"
+     ]
+    },
+    {
+     "text": "TRAN-CAT-CD is set from the literal '05'.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       483,
+       483
+      ]
+     },
+     "fields": [
+      "TRAN-CAT-CD"
+     ],
+     "literals": [
+      "05"
+     ]
+    },
+    {
+     "text": "TRAN-CAT-CD is a 4-digit unsigned numeric field, so the stored category code is 0005.",
+     "source": {
+      "file": "CVTRA05Y.cpy",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     "fields": [
+      "TRAN-CAT-CD"
+     ],
+     "literals": []
+    },
+    {
+     "text": "TRAN-SOURCE is set to 'System'.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       484,
+       484
+      ]
+     },
+     "fields": [
+      "TRAN-SOURCE"
+     ],
+     "literals": [
+      "System"
+     ]
+    },
+    {
+     "text": "TRAN-SOURCE is a 10-character field, so 'System' is followed by 4 trailing spaces.",
+     "source": {
+      "file": "CVTRA05Y.cpy",
+      "lines": [
+       8,
+       8
+      ]
+     },
+     "fields": [
+      "TRAN-SOURCE"
+     ],
+     "literals": []
+    },
+    {
+     "text": "TRAN-DESC receives 'Int. for a/c ' followed immediately by the account ID. STRING does not clear the rest of TRAN-DESC, so any characters after the account ID keep their previous contents.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       485,
+       489
+      ]
+     },
+     "fields": [
+      "ACCT-ID",
+      "TRAN-DESC"
+     ],
+     "literals": [
+      "Int. for a/c "
+     ]
+    },
+    {
+     "text": "The account ID is an 11-digit unsigned number, so all 11 digits, including leading zeros, are copied into the description.",
+     "source": {
+      "file": "CVACT01Y.cpy",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     "fields": [
+      "ACCT-ID"
+     ],
+     "literals": []
+    },
+    {
+     "text": "TRAN-DESC is a 100-character field, so the 24 characters written by STRING fill only its first 24 positions.",
+     "source": {
+      "file": "CVTRA05Y.cpy",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     "fields": [
+      "TRAN-DESC"
+     ],
+     "literals": []
+    },
+    {
+     "text": "TRAN-AMT is set to the monthly interest amount.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       490,
+       490
+      ]
+     },
+     "fields": [
+      "WS-MONTHLY-INT",
+      "TRAN-AMT"
+     ],
+     "literals": []
+    },
+    {
+     "text": "TRAN-MERCHANT-ID is set to zero. TRAN-MERCHANT-NAME, TRAN-MERCHANT-CITY and TRAN-MERCHANT-ZIP are set to spaces.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       491,
+       494
+      ]
+     },
+     "fields": [
+      "TRAN-MERCHANT-ID",
+      "TRAN-MERCHANT-NAME",
+      "TRAN-MERCHANT-CITY",
+      "TRAN-MERCHANT-ZIP"
+     ],
+     "literals": [
+      "0"
+     ]
+    },
+    {
+     "text": "TRAN-CARD-NUM is set to the card number from the account's cross-reference record.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       495,
+       495
+      ]
+     },
+     "fields": [
+      "XREF-CARD-NUM",
+      "TRAN-CARD-NUM"
+     ],
+     "literals": []
+    },
+    {
+     "text": "TRAN-ORIG-TS and TRAN-PROC-TS are both set to the same current timestamp.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       496,
+       498
+      ]
+     },
+     "fields": [
+      "DB2-FORMAT-TS",
+      "TRAN-ORIG-TS",
+      "TRAN-PROC-TS"
+     ],
+     "literals": []
+    },
+    {
+     "text": "The timestamp is built from the system date and time as YYYY-MM-DD-HH.MM.SS.hh0000, where hh is hundredths of a second and is followed by '0000'.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       614,
+       624
+      ]
+     },
+     "fields": [
+      "COBOL-TS",
+      "DB2-YYYY",
+      "DB2-MM",
+      "DB2-DD",
+      "DB2-HH",
+      "DB2-MIN",
+      "DB2-SS",
+      "DB2-MIL",
+      "DB2-REST",
+      "COB-MIL"
+     ],
+     "literals": [
+      "0000",
+      "-",
+      "."
+     ]
+    },
+    {
+     "text": "The completed record is appended to the sequential transaction file. If the write fails (status other than '00'), the program displays 'ERROR WRITING TRANSACTION RECORD' and ends abnormally.",
+     "source": {
+      "file": "CBACT04C.cbl",
+      "lines": [
+       500,
+       513
+      ]
+     },
+     "fields": [
+      "FD-TRANFILE-REC",
+      "TRAN-RECORD",
+      "TRANFILE-STATUS"
+     ],
+     "literals": [
+      "00",
+      "ERROR WRITING TRANSACTION RECORD"
+     ]
+    }
+   ]
+  },
+  "status": "flagged",
+  "status_history": [
+   {
+    "status": "extracted",
+    "why": "drafted by extractor",
+    "by": "extractor"
+   },
+   {
+    "status": "extracted",
+    "why": "retried after verifier rejection",
+    "by": "extractor"
+   },
+   {
+    "status": "flagged",
+    "why": "1 clause(s) failed verification after one retry",
+    "by": "verifier"
+   }
+  ],
+  "verification": {
+   "attempts": [
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 464-468 compute WS-MONTHLY-INT, add it to the total, and then perform 1300-B-WRITE-TX, so the write happens right after the calculation."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 173 shows a PIC 9(06) counter with VALUE 0, but a declaration alone cannot show that the counter is never reset during the run."
+       },
+       "passed": false
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 178 declares PARM-DATE as PIC X(10) in the linkage parameter block passed to the program."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 473-500 populate TRAN-RECORD fields and WRITE FD-TRANFILE-REC FROM TRAN-RECORD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 474 adds 1 to the counter, and lines 476-480 STRING the 10-character PARM-DATE and the unsigned 6-digit suffix (zero-padded display) into TRAN-ID, giving 16 characters."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 482 moves '01' to TRAN-TYPE-CD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 483 moves '05' to TRAN-CAT-CD, but the cited line does not show that the field is a 4-digit numeric, so the claim that it holds 0005 is unsupported."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Line 484 moves 'System' to TRAN-SOURCE, but the 10-character field length is not shown in the cited lines."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "Lines 485-489 STRING the prefix and ACCT-ID into TRAN-DESC without clearing the field, but the 11-digit account ID and 100-character TRAN-DESC sizes are not shown in the cited lines."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 490 moves WS-MONTHLY-INT to TRAN-AMT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[6]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 491-494 move 0 to TRAN-MERCHANT-ID and SPACES to the merchant name, city and zip."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[7]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 495 moves XREF-CARD-NUM, the cross-reference card number, to TRAN-CARD-NUM."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[8]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 496 builds the timestamp once, and lines 497-498 move the same DB2-FORMAT-TS to both TRAN-ORIG-TS and TRAN-PROC-TS."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[9]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 614-624 take CURRENT-DATE and move year, month, day, hour, minute, second and hundredths into the DB2 fields, with '0000' as the rest and '-' and '.' separators, matching the stated format."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[10]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 500-513 write the record, set APPL-RESULT to 12 when the status is not '00', then display 'ERROR WRITING TRANSACTION RECORD' and perform the abend routine."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "given[1]",
+       "errors": [],
+       "judge": "Line 173 shows a PIC 9(06) counter with VALUE 0, but a declaration alone cannot show that the counter is never reset during the run."
+      },
+      {
+       "clause": "then[2]",
+       "errors": [],
+       "judge": "Line 483 moves '05' to TRAN-CAT-CD, but the cited line does not show that the field is a 4-digit numeric, so the claim that it holds 0005 is unsupported."
+      },
+      {
+       "clause": "then[3]",
+       "errors": [],
+       "judge": "Line 484 moves 'System' to TRAN-SOURCE, but the 10-character field length is not shown in the cited lines."
+      },
+      {
+       "clause": "then[4]",
+       "errors": [],
+       "judge": "Lines 485-489 STRING the prefix and ACCT-ID into TRAN-DESC without clearing the field, but the 11-digit account ID and 100-character TRAN-DESC sizes are not shown in the cited lines."
+      }
+     ]
+    },
+    {
+     "passed": false,
+     "clauses": [
+      {
+       "clause": "given[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 464-468 compute WS-MONTHLY-INT, add it to the total, and then perform 1300-B-WRITE-TX, so the write follows the calculation."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 173 defines WS-TRANID-SUFFIX as PIC 9(06) VALUE 0, an unsigned 6-digit counter initialized to zero."
+       },
+       "passed": true
+      },
+      {
+       "clause": "given[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 178 defines PARM-DATE as PIC X(10) within the LINKAGE SECTION parameter block, which the program receives from its caller."
+       },
+       "passed": true
+      },
+      {
+       "clause": "when[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 473-500 populate the TRAN-RECORD fields and write FD-TRANFILE-REC FROM TRAN-RECORD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[0]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 474 adds 1 to the suffix, and lines 476-480 STRING PARM-DATE and the 6-digit suffix, delimited by size, into TRAN-ID, so the zero-padded digits follow the date."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[1]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 482 moves '01' to TRAN-TYPE-CD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[2]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 483 moves the literal '05' to TRAN-CAT-CD."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[3]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "TRAN-CAT-CD is PIC 9(04), so a move of '05' is right-justified and zero-filled, storing 0005."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[4]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 484 moves 'System' to TRAN-SOURCE."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[5]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "TRAN-SOURCE is PIC X(10), so moving the 6-character 'System' pads it with 4 trailing spaces."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[6]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 485-489 STRING the literal and ACCT-ID into TRAN-DESC, and STRING does not space-fill the unused remainder of the target."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[7]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "ACCT-ID is PIC 9(11), so with DELIMITED BY SIZE all 11 digits, including leading zeros, are transferred."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[8]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "TRAN-DESC is PIC X(100), and the 13-character literal plus the 11-digit ACCT-ID total 24 characters."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[9]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 490 moves WS-MONTHLY-INT to TRAN-AMT."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[10]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 491-494 move 0 to the merchant ID and SPACES to the merchant name, city and zip."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[11]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 495 moves XREF-CARD-NUM, the cross-reference card number, to TRAN-CARD-NUM."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[12]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Line 496 builds the timestamp once, and lines 497-498 move the same DB2-FORMAT-TS to both TRAN-ORIG-TS and TRAN-PROC-TS."
+       },
+       "passed": true
+      },
+      {
+       "clause": "then[13]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": false,
+        "reason": "The cited lines show the components and separator moves, but the exact YYYY-MM-DD-HH.MM.SS.hh0000 ordering and the hundredths meaning of COB-MIL depend on the COBOL-TS and DB2-FORMAT-TS layouts, which are not cited."
+       },
+       "passed": false
+      },
+      {
+       "clause": "then[14]",
+       "deterministic": {
+        "passed": true,
+        "errors": []
+       },
+       "judge": {
+        "supported": true,
+        "reason": "Lines 500-513 write the record, and if TRANFILE-STATUS is not '00' they display 'ERROR WRITING TRANSACTION RECORD' and perform 9999-ABEND-PROGRAM."
+       },
+       "passed": true
+      }
+     ],
+     "failures": [
+      {
+       "clause": "then[13]",
+       "errors": [],
+       "judge": "The cited lines show the components and separator moves, but the exact YYYY-MM-DD-HH.MM.SS.hh0000 ordering and the hundredths meaning of COB-MIL depend on the COBOL-TS and DB2-FORMAT-TS layouts, which are not cited."
+      }
+     ]
+    }
+   ]
+  },
+  "port_function": null,
+  "tests": [],
+  "port_functions": []
+ }
+]

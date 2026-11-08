@@ -1,0 +1,310 @@
+{
+ "agent": "extractor",
+ "key": "f468a06a4976ff5dbe02d413e0db768f2c7ccbf04399df65753bb199dfaa6a4c",
+ "seconds": 16.1,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 64000,
+  "system": "You are the extractor in Ledger, a system that documents legacy COBOL business rules so that a modern port can be written from the rules alone and checked against the running original.\n\nWrite business rules as Given/When/Then scenarios in plain English that a policy owner can read and approve. Hard requirements:\n\n- Every clause cites the exact source lines it comes from (file plus [first, last] line numbers from the numbered listing; keep spans tight, normally 1-12 lines). If a statement cannot be sourced to specific lines, leave it out.\n- Every clause lists the COBOL data names (\"fields\") and literal values (\"literals\": codes, messages, constants, without quotes) it relies on. Each listed field and literal must literally appear in the cited lines; a checker will reject the clause otherwise. Cite a declaration line (for example a PIC clause in WORKING-STORAGE) when the clause depends on a field's size or precision.\n- Describe what the code actually does, not what it was probably meant to do. If the code has surprising behaviour (a later check overwriting an earlier result, a branch that can never run, arithmetic that truncates, a check that ignores something), state that behaviour precisely in the rule.\n- Separate business logic from file plumbing. Opening/closing files, file-status checks, and abend handling are plumbing; leave them out unless they change a business outcome. Balance and record updates (for example 2700-*, 2800-*, 1050-* paragraphs) are business logic: a port that skips them would produce different output files.\n- Be precise enough that a developer who never sees the COBOL could reproduce the outputs exactly: name the output fields set, the exact codes and message texts, the order of checks, signs and arithmetic (COBOL truncates toward zero unless ROUNDED is written), and which records are created versus updated.\n- Keep each clause to one checkable fact. When a fact depends on a record layout, field size or precision, put it in its own clause that cites the declaration. Do not restate in one clause what another clause (or another part of the program) establishes.\n- Use the field names exactly as declared. Use the tools to read any other paragraph or field layout you need; do not guess line numbers.\n\nReturn only rules for the unit you are given, at most the number requested, each one a distinct behaviour with an observable effect on the program's outputs.\n\nYou are now repairing one rule whose clauses failed verification. For each failed clause, fix the citation (lines, fields, literals) or the wording so it is exactly supported by the cited code, or remove the clause if it cannot be sourced. Keep passing clauses unchanged. Return the corrected rule as a single-element \"rules\" array.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Program: CBACT04C (CBACT04C.cbl, 653 lines). Copybooks: CVTRA01Y, CVACT03Y, CVTRA02Y, CVACT01Y, CVTRA05Y.\n\nUnit: CBACT04C-interest. Focus: Computing monthly interest for one category balance and the interest transaction record that is written.\nReturn at most 2 rule(s).\n\nFiles (FILE-CONTROL):\n  TCATBAL-FILE: ASSIGN TCATBALF, INDEXED SEQUENTIAL, key FD-TRAN-CAT-KEY\n  XREF-FILE: ASSIGN XREFFILE, INDEXED RANDOM, key FD-XREF-CARD-NUM, alternate key FD-XREF-ACCT-ID\n  ACCOUNT-FILE: ASSIGN ACCTFILE, INDEXED RANDOM, key FD-ACCT-ID\n  DISCGRP-FILE: ASSIGN DISCGRP, INDEXED RANDOM, key FD-DISCGRP-KEY\n  TRANSACT-FILE: ASSIGN TRANSACT, SEQUENTIAL SEQUENTIAL, key None\n\nSource for this unit (root paragraph(s) and their non-plumbing callees, with line numbers):\n\n--- CBACT04C.cbl paragraph 1300-COMPUTE-INTEREST (lines 462-470) ---\n 462        1300-COMPUTE-INTEREST.\n 463 \n 464            COMPUTE WS-MONTHLY-INT\n 465             = ( TRAN-CAT-BAL * DIS-INT-RATE) / 1200\n 466 \n 467            ADD WS-MONTHLY-INT  TO WS-TOTAL-INT\n 468            PERFORM 1300-B-WRITE-TX.\n 469 \n 470            EXIT.\n\n--- CBACT04C.cbl paragraph 1300-B-WRITE-TX (lines 473-515) ---\n 473        1300-B-WRITE-TX.\n 474            ADD 1 TO WS-TRANID-SUFFIX\n 475 \n 476            STRING PARM-DATE,\n 477                   WS-TRANID-SUFFIX\n 478              DELIMITED BY SIZE\n 479              INTO TRAN-ID\n 480            END-STRING.\n 481 \n 482            MOVE '01'                 TO TRAN-TYPE-CD\n 483            MOVE '05'                 TO TRAN-CAT-CD\n 484            MOVE 'System'             TO TRAN-SOURCE\n 485            STRING 'Int. for a/c ' ,\n 486                   ACCT-ID\n 487                   DELIMITED BY SIZE\n 488             INTO TRAN-DESC\n 489            END-STRING\n 490            MOVE WS-MONTHLY-INT       TO TRAN-AMT\n 491            MOVE 0                    TO TRAN-MERCHANT-ID\n 492            MOVE SPACES               TO TRAN-MERCHANT-NAME\n 493            MOVE SPACES               TO TRAN-MERCHANT-CITY\n 494            MOVE SPACES               TO TRAN-MERCHANT-ZIP\n 495            MOVE XREF-CARD-NUM        TO TRAN-CARD-NUM\n 496            PERFORM Z-GET-DB2-FORMAT-TIMESTAMP\n 497            MOVE DB2-FORMAT-TS        TO TRAN-ORIG-TS\n 498            MOVE DB2-FORMAT-TS        TO TRAN-PROC-TS\n 499 \n 500            WRITE FD-TRANFILE-REC FROM TRAN-RECORD\n 501            IF  TRANFILE-STATUS   = '00'\n 502                MOVE 0 TO APPL-RESULT\n 503            ELSE\n 504                MOVE 12 TO APPL-RESULT\n 505            END-IF\n 506 \n 507            IF  APPL-AOK\n 508                CONTINUE\n 509            ELSE\n 510                DISPLAY 'ERROR WRITING TRANSACTION RECORD'\n 511                MOVE TRANFILE-STATUS   TO IO-STATUS\n 512                PERFORM 9910-DISPLAY-IO-STATUS\n 513                PERFORM 9999-ABEND-PROGRAM\n 514            END-IF\n 515            EXIT.\n\n--- CBACT04C.cbl paragraph Z-GET-DB2-FORMAT-TIMESTAMP (lines 613-626) ---\n 613        Z-GET-DB2-FORMAT-TIMESTAMP.\n 614            MOVE FUNCTION CURRENT-DATE TO COBOL-TS\n 615            MOVE COB-YYYY TO DB2-YYYY\n 616            MOVE COB-MM   TO DB2-MM\n 617            MOVE COB-DD   TO DB2-DD\n 618            MOVE COB-HH   TO DB2-HH\n 619            MOVE COB-MIN  TO DB2-MIN\n 620            MOVE COB-SS   TO DB2-SS\n 621            MOVE COB-MIL  TO DB2-MIL\n 622            MOVE '0000'   TO DB2-REST\n 623            MOVE '-' TO DB2-STREEP-1 DB2-STREEP-2 DB2-STREEP-3\n 624            MOVE '.' TO DB2-DOT-1 DB2-DOT-2 DB2-DOT-3\n 625       *    DISPLAY 'DB2-TIMESTAMP = ' DB2-FORMAT-TS\n 626            EXIT.\n\n--- CBACT04C.cbl paragraph 1400-COMPUTE-FEES (lines 518-520) ---\n 518        1400-COMPUTE-FEES.\n 519       * To be implemented\n 520            EXIT.\n\nLayouts of data names referenced above (from the deterministic parser):\nACCT-ID                            9(11)            record=ACCOUNT-RECORD offset=0 size=11 declared=CVACT01Y.cpy:5\nAPPL-RESULT                        S9(9) COMP       record=APPL-RESULT offset=0 size=4 declared=CBACT04C.cbl:133\nCOB-DD                             X(2)             record=COBOL-TS offset=6 size=2 declared=CBACT04C.cbl:144\nCOB-HH                             X(2)             record=COBOL-TS offset=8 size=2 declared=CBACT04C.cbl:145\nCOB-MIL                            X(2)             record=COBOL-TS offset=14 size=2 declared=CBACT04C.cbl:148\nCOB-MIN                            X(2)             record=COBOL-TS offset=10 size=2 declared=CBACT04C.cbl:146\nCOB-MM                             X(2)             record=COBOL-TS offset=4 size=2 declared=CBACT04C.cbl:143\nCOB-SS                             X(2)             record=COBOL-TS offset=12 size=2 declared=CBACT04C.cbl:147\nCOB-YYYY                           X(4)             record=COBOL-TS offset=0 size=4 declared=CBACT04C.cbl:142\nCOBOL-TS                           group            record=COBOL-TS offset=0 size=21 declared=CBACT04C.cbl:141\nDB2-DD                             X(2)             record=FILLER offset=8 size=2 declared=CBACT04C.cbl:156\nDB2-DOT-1                          X(1)             record=FILLER offset=13 size=1 declared=CBACT04C.cbl:159\nDB2-DOT-2                          X(1)             record=FILLER offset=16 size=1 declared=CBACT04C.cbl:161\nDB2-DOT-3                          X(1)             record=FILLER offset=19 size=1 declared=CBACT04C.cbl:163\nDB2-FORMAT-TS                      X(26)            record=DB2-FORMAT-TS offset=0 size=26 declared=CBACT04C.cbl:150\nDB2-HH                             X(2)             record=FILLER offset=11 size=2 declared=CBACT04C.cbl:158\nDB2-MIL                            9(2)             record=FILLER offset=20 size=2 declared=CBACT04C.cbl:164\nDB2-MIN                            X(2)             record=FILLER offset=14 size=2 declared=CBACT04C.cbl:160\nDB2-MM                             X(2)             record=FILLER offset=5 size=2 declared=CBACT04C.cbl:154\nDB2-REST                           X(4)             record=FILLER offset=22 size=4 declared=CBACT04C.cbl:165\nDB2-SS                             X(2)             record=FILLER offset=17 size=2 declared=CBACT04C.cbl:162\nDB2-STREEP-1                       X(1)             record=FILLER offset=4 size=1 declared=CBACT04C.cbl:153\nDB2-STREEP-2                       X(1)             record=FILLER offset=7 size=1 declared=CBACT04C.cbl:155\nDB2-STREEP-3                       X(1)             record=FILLER offset=10 size=1 declared=CBACT04C.cbl:157\nDB2-YYYY                           X(4)             record=FILLER offset=0 size=4 declared=CBACT04C.cbl:152\nDIS-INT-RATE                       S9(4)V9(2)       record=DIS-GROUP-RECORD offset=16 size=6 declared=CVTRA02Y.cpy:9\nFD-TRANFILE-REC                    group            record=FD-TRANFILE-REC offset=0 size=350 declared=CBACT04C.cbl:90\nIO-STATUS                          group            record=IO-STATUS offset=0 size=2 declared=CBACT04C.cbl:122\nPARM-DATE                          X(10)            record=EXTERNAL-PARMS offset=2 size=10 declared=CBACT04C.cbl:178\nTRAN-AMT                           S9(9)V9(2)       record=TRAN-RECORD offset=132 size=11 declared=CVTRA05Y.cpy:10\nTRAN-CARD-NUM                      X(16)            record=TRAN-RECORD offset=262 size=16 declared=CVTRA05Y.cpy:15\nTRAN-CAT-BAL                       S9(9)V9(2)       record=TRAN-CAT-BAL-RECORD offset=17 size=11 declared=CVTRA01Y.cpy:9\nTRAN-CAT-CD                        9(4)             record=TRAN-RECORD offset=18 size=4 declared=CVTRA05Y.cpy:7\nTRAN-DESC                          X(100)           record=TRAN-RECORD offset=32 size=100 declared=CVTRA05Y.cpy:9\nTRAN-ID                            X(16)            record=TRAN-RECORD offset=0 size=16 declared=CVTRA05Y.cpy:5\nTRAN-MERCHANT-CITY                 X(50)            record=TRAN-RECORD offset=202 size=50 declared=CVTRA05Y.cpy:13\nTRAN-MERCHANT-ID                   9(9)             record=TRAN-RECORD offset=143 size=9 declared=CVTRA05Y.cpy:11\nTRAN-MERCHANT-NAME                 X(50)            record=TRAN-RECORD offset=152 size=50 declared=CVTRA05Y.cpy:12\nTRAN-MERCHANT-ZIP                  X(10)            record=TRAN-RECORD offset=252 size=10 declared=CVTRA05Y.cpy:14\nTRAN-ORIG-TS                       X(26)            record=TRAN-RECORD offset=278 size=26 declared=CVTRA05Y.cpy:16\nTRAN-PROC-TS                       X(26)            record=TRAN-RECORD offset=304 size=26 declared=CVTRA05Y.cpy:17\nTRAN-RECORD                        group            record=TRAN-RECORD offset=0 size=350 declared=CVTRA05Y.cpy:4\nTRAN-SOURCE                        X(10)            record=TRAN-RECORD offset=22 size=10 declared=CVTRA05Y.cpy:8\nTRAN-TYPE-CD                       X(2)             record=TRAN-RECORD offset=16 size=2 declared=CVTRA05Y.cpy:6\nTRANFILE-STATUS                    group            record=TRANFILE-STATUS offset=0 size=2 declared=CBACT04C.cbl:118\nWS-MONTHLY-INT                     S9(9)V9(2)       record=WS-MISC-VARS offset=11 size=11 declared=CBACT04C.cbl:168\nWS-TOTAL-INT                       S9(9)V9(2)       record=WS-MISC-VARS offset=22 size=11 declared=CBACT04C.cbl:169\nWS-TRANID-SUFFIX                   9(6)             record=WS-COUNTERS offset=9 size=6 declared=CBACT04C.cbl:173\nXREF-CARD-NUM                      X(16)            record=CARD-XREF-RECORD offset=0 size=16 declared=CVACT03Y.cpy:5\n\nOther paragraphs you can read with get_paragraph: (main), 0000-TCATBALF-OPEN, 0100-XREFFILE-OPEN, 0200-DISCGRP-OPEN, 0300-ACCTFILE-OPEN, 0400-TRANFILE-OPEN, 1000-TCATBALF-GET-NEXT, 1050-UPDATE-ACCOUNT, 1100-GET-ACCT-DATA, 1110-GET-XREF-DATA, 1200-GET-INTEREST-RATE, 1200-A-GET-DEFAULT-INT-RATE, 9000-TCATBALF-CLOSE, 9100-XREFFILE-CLOSE, 9200-DISCGRP-CLOSE, 9300-ACCTFILE-CLOSE, 9400-TRANFILE-CLOSE, 9999-ABEND-PROGRAM, 9910-DISPLAY-IO-STATUS\n\nRule to repair:\n{\n \"title\": \"Monthly interest on a category balance is balance \\u00d7 annual rate \\u00f7 1200, truncated to cents and added to the account's interest total\",\n \"paragraph\": \"1300-COMPUTE-INTEREST\",\n \"summary\": \"For each transaction-category balance whose interest rate is not zero, the monthly interest is TRAN-CAT-BAL * DIS-INT-RATE / 1200, truncated (not rounded) to 2 decimal places. It is added to the running interest total for the current account, and an interest transaction is written.\",\n \"given\": [\n  {\n   \"text\": \"The interest rate found for the category balance's account group, transaction type and category is not zero. When the rate is zero, no interest is calculated and no interest transaction is written for that balance.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     213,\n     217\n    ]\n   },\n   \"fields\": [\n    \"DIS-INT-RATE\"\n   ],\n   \"literals\": [\n    \"0\"\n   ]\n  },\n  {\n   \"text\": \"The category balance is a signed amount with 9 integer digits and 2 decimal places.\",\n   \"source\": {\n    \"file\": \"CVTRA01Y.cpy\",\n    \"lines\": [\n     9,\n     9\n    ]\n   },\n   \"fields\": [\n    \"TRAN-CAT-BAL\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"The interest rate is a signed annual percentage with 4 integer digits and 2 decimal places.\",\n   \"source\": {\n    \"file\": \"CVTRA02Y.cpy\",\n    \"lines\": [\n     9,\n     9\n    ]\n   },\n   \"fields\": [\n    \"DIS-INT-RATE\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"The running interest total is reset to zero each time the input moves to a new account.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     194,\n     201\n    ]\n   },\n   \"fields\": [\n    \"WS-TOTAL-INT\",\n    \"TRANCAT-ACCT-ID\",\n    \"WS-LAST-ACCT-NUM\"\n   ],\n   \"literals\": [\n    \"0\"\n   ]\n  }\n ],\n \"when\": [\n  {\n   \"text\": \"Monthly interest is calculated for the category balance.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     462,\n     465\n    ]\n   },\n   \"fields\": [\n    \"WS-MONTHLY-INT\",\n    \"TRAN-CAT-BAL\",\n    \"DIS-INT-RATE\"\n   ],\n   \"literals\": [\n    \"1200\"\n   ]\n  }\n ],\n \"then\": [\n  {\n   \"text\": \"The monthly interest is the category balance multiplied by the interest rate and divided by 1200. A negative balance or a negative rate gives negative interest.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     464,\n     465\n    ]\n   },\n   \"fields\": [\n    \"WS-MONTHLY-INT\",\n    \"TRAN-CAT-BAL\",\n    \"DIS-INT-RATE\"\n   ],\n   \"literals\": [\n    \"1200\"\n   ]\n  },\n  {\n   \"text\": \"The result is stored as a signed amount with 9 integer digits and 2 decimal places. ROUNDED is not specified, so any digits beyond the second decimal place are cut off (truncated toward zero).\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     168,\n     168\n    ]\n   },\n   \"fields\": [\n    \"WS-MONTHLY-INT\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"The truncated monthly interest is added to the running interest total for the current account.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     467,\n     467\n    ]\n   },\n   \"fields\": [\n    \"WS-MONTHLY-INT\",\n    \"WS-TOTAL-INT\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"The running interest total is also a signed amount with 9 integer digits and 2 decimal places.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     169,\n     169\n    ]\n   },\n   \"fields\": [\n    \"WS-TOTAL-INT\"\n   ],\n   \"literals\": []\n  },\n  {\n   \"text\": \"After each calculation, one interest transaction record is written.\",\n   \"source\": {\n    \"file\": \"CBACT04C.cbl\",\n    \"lines\": [\n     468,\n     468\n    ]\n   },\n   \"fields\": [],\n   \"literals\": []\n  }\n ]\n}\n\nVerifier failures:\n[\n {\n  \"clause\": \"then[1]\",\n  \"errors\": [],\n  \"judge\": \"Line 168 shows only the PIC S9(09)V99 definition; the claim that ROUNDED is absent and the result is truncated depends on the COMPUTE statement at lines 464-465, which is not cited.\"\n },\n {\n  \"clause\": \"then[4]\",\n  \"errors\": [\n   \"clause lists no fields or literals, so its citation cannot be checked\"\n  ],\n  \"judge\": null\n }\n]"
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "high",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "rules": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "title": {
+          "type": "string"
+         },
+         "paragraph": {
+          "type": "string",
+          "description": "Main paragraph implementing the rule"
+         },
+         "summary": {
+          "type": "string",
+          "description": "One or two sentences for the catalog"
+         },
+         "given": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in the cited lines"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in the cited lines"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "when": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in the cited lines"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in the cited lines"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "then": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in the cited lines"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in the cited lines"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         }
+        },
+        "required": [
+         "title",
+         "paragraph",
+         "summary",
+         "given",
+         "when",
+         "then"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "rules"
+     ],
+     "additionalProperties": false
+    }
+   }
+  },
+  "tools": [
+   {
+    "name": "get_paragraph",
+    "description": "Numbered source of one paragraph of the program.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "name": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   },
+   {
+    "name": "get_lines",
+    "description": "Numbered source lines [first, last] of the program or a copybook (file e.g. 'CVACT01Y.cpy'; default the program).",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "file": {
+       "type": "string"
+      },
+      "first": {
+       "type": "integer"
+      },
+      "last": {
+       "type": "integer"
+      }
+     },
+     "required": [
+      "file",
+      "first",
+      "last"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   },
+   {
+    "name": "get_field",
+    "description": "Layout of a data item: PIC, offset, size, record, declaring file and line.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "name": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   }
+  ]
+ },
+ "response": {
+  "id": "msg_011Cgpb9dfqNVAMkQP6hxSsk",
+  "container": null,
+  "content": [
+   {
+    "signature": "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",
+    "thinking": "",
+    "type": "thinking"
+   },
+   {
+    "text": "{\"rules\":[{\"title\":\"Monthly interest on a category balance is balance \u00d7 annual rate \u00f7 1200, truncated to cents and added to the account's interest total\",\"paragraph\":\"1300-COMPUTE-INTEREST\",\"summary\":\"For each transaction-category balance whose interest rate is not zero, the monthly interest is TRAN-CAT-BAL * DIS-INT-RATE / 1200, truncated (not rounded) to 2 decimal places. It is added to the running interest total for the current account, and an interest transaction is written.\",\"given\":[{\"text\":\"The interest rate found for the category balance's account group, transaction type and category is not zero. When the rate is zero, no interest is calculated and no interest transaction is written for that balance.\",\"file\":\"CBACT04C.cbl\",\"lines\":[213,217],\"fields\":[\"DIS-INT-RATE\"],\"literals\":[\"0\"]},{\"text\":\"The category balance is a signed amount with 9 integer digits and 2 decimal places.\",\"file\":\"CVTRA01Y.cpy\",\"lines\":[9,9],\"fields\":[\"TRAN-CAT-BAL\"],\"literals\":[]},{\"text\":\"The interest rate is a signed annual percentage with 4 integer digits and 2 decimal places.\",\"file\":\"CVTRA02Y.cpy\",\"lines\":[9,9],\"fields\":[\"DIS-INT-RATE\"],\"literals\":[]},{\"text\":\"The running interest total is reset to zero each time the input moves to a new account.\",\"file\":\"CBACT04C.cbl\",\"lines\":[194,201],\"fields\":[\"WS-TOTAL-INT\",\"TRANCAT-ACCT-ID\",\"WS-LAST-ACCT-NUM\"],\"literals\":[\"0\"]}],\"when\":[{\"text\":\"Monthly interest is calculated for the category balance.\",\"file\":\"CBACT04C.cbl\",\"lines\":[462,465],\"fields\":[\"WS-MONTHLY-INT\",\"TRAN-CAT-BAL\",\"DIS-INT-RATE\"],\"literals\":[\"1200\"]}],\"then\":[{\"text\":\"The monthly interest is the category balance multiplied by the interest rate and divided by 1200. A negative balance or a negative rate gives negative interest.\",\"file\":\"CBACT04C.cbl\",\"lines\":[464,465],\"fields\":[\"WS-MONTHLY-INT\",\"TRAN-CAT-BAL\",\"DIS-INT-RATE\"],\"literals\":[\"1200\"]},{\"text\":\"The monthly interest is stored as a signed amount with 9 integer digits and 2 decimal places.\",\"file\":\"CBACT04C.cbl\",\"lines\":[168,168],\"fields\":[\"WS-MONTHLY-INT\"],\"literals\":[]},{\"text\":\"The COMPUTE does not specify ROUNDED, so any digits beyond the second decimal place of the result are cut off (truncated toward zero).\",\"file\":\"CBACT04C.cbl\",\"lines\":[464,465],\"fields\":[\"WS-MONTHLY-INT\"],\"literals\":[]},{\"text\":\"The truncated monthly interest is added to the running interest total for the current account.\",\"file\":\"CBACT04C.cbl\",\"lines\":[467,467],\"fields\":[\"WS-MONTHLY-INT\",\"WS-TOTAL-INT\"],\"literals\":[]},{\"text\":\"The running interest total is also a signed amount with 9 integer digits and 2 decimal places.\",\"file\":\"CBACT04C.cbl\",\"lines\":[169,169],\"fields\":[\"WS-TOTAL-INT\"],\"literals\":[]},{\"text\":\"After each calculation, the interest-transaction write routine runs and writes one interest transaction record.\",\"file\":\"CBACT04C.cbl\",\"lines\":[468,468],\"fields\":[],\"literals\":[\"1300-B-WRITE-TX\"]}]}]}",
+    "type": "text"
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 9794,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 9794,
+     "model": null,
+     "output_tokens": 1996,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 1996,
+   "output_tokens_details": {
+    "thinking_tokens": 749
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}

@@ -1,0 +1,3914 @@
+{
+ "CBTRN02C": {
+  "statement_lines": 339,
+  "executed_any": 231,
+  "executed_by_sample": 226,
+  "trace_lines_sample": 251,
+  "cited_by_rules": 94,
+  "neither": 104,
+  "uncovered_lines": [
+   {
+    "line": 242,
+    "paragraph": "0000-DALYTRAN-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 247,
+    "paragraph": "0000-DALYTRAN-OPEN",
+    "text": "DISPLAY 'ERROR OPENING DALYTRAN'"
+   },
+   {
+    "line": 248,
+    "paragraph": "0000-DALYTRAN-OPEN",
+    "text": "MOVE DALYTRAN-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 249,
+    "paragraph": "0000-DALYTRAN-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 250,
+    "paragraph": "0000-DALYTRAN-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 260,
+    "paragraph": "0100-TRANFILE-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 265,
+    "paragraph": "0100-TRANFILE-OPEN",
+    "text": "DISPLAY 'ERROR OPENING TRANSACTION FILE'"
+   },
+   {
+    "line": 266,
+    "paragraph": "0100-TRANFILE-OPEN",
+    "text": "MOVE TRANFILE-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 267,
+    "paragraph": "0100-TRANFILE-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 268,
+    "paragraph": "0100-TRANFILE-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 279,
+    "paragraph": "0200-XREFFILE-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 284,
+    "paragraph": "0200-XREFFILE-OPEN",
+    "text": "DISPLAY 'ERROR OPENING CROSS REF FILE'"
+   },
+   {
+    "line": 285,
+    "paragraph": "0200-XREFFILE-OPEN",
+    "text": "MOVE XREFFILE-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 286,
+    "paragraph": "0200-XREFFILE-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 287,
+    "paragraph": "0200-XREFFILE-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 297,
+    "paragraph": "0300-DALYREJS-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 302,
+    "paragraph": "0300-DALYREJS-OPEN",
+    "text": "DISPLAY 'ERROR OPENING DALY REJECTS FILE'"
+   },
+   {
+    "line": 303,
+    "paragraph": "0300-DALYREJS-OPEN",
+    "text": "MOVE DALYREJS-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 304,
+    "paragraph": "0300-DALYREJS-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 305,
+    "paragraph": "0300-DALYREJS-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 315,
+    "paragraph": "0400-ACCTFILE-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 320,
+    "paragraph": "0400-ACCTFILE-OPEN",
+    "text": "DISPLAY 'ERROR OPENING ACCOUNT MASTER FILE'"
+   },
+   {
+    "line": 321,
+    "paragraph": "0400-ACCTFILE-OPEN",
+    "text": "MOVE ACCTFILE-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 322,
+    "paragraph": "0400-ACCTFILE-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 323,
+    "paragraph": "0400-ACCTFILE-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 333,
+    "paragraph": "0500-TCATBALF-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 338,
+    "paragraph": "0500-TCATBALF-OPEN",
+    "text": "DISPLAY 'ERROR OPENING TRANSACTION BALANCE FILE'"
+   },
+   {
+    "line": 339,
+    "paragraph": "0500-TCATBALF-OPEN",
+    "text": "MOVE TCATBALF-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 340,
+    "paragraph": "0500-TCATBALF-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 341,
+    "paragraph": "0500-TCATBALF-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 354,
+    "paragraph": "1000-DALYTRAN-GET-NEXT",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 363,
+    "paragraph": "1000-DALYTRAN-GET-NEXT",
+    "text": "DISPLAY 'ERROR READING DALYTRAN FILE'"
+   },
+   {
+    "line": 364,
+    "paragraph": "1000-DALYTRAN-GET-NEXT",
+    "text": "MOVE DALYTRAN-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 365,
+    "paragraph": "1000-DALYTRAN-GET-NEXT",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 366,
+    "paragraph": "1000-DALYTRAN-GET-NEXT",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 455,
+    "paragraph": "2500-WRITE-REJECT-REC",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 460,
+    "paragraph": "2500-WRITE-REJECT-REC",
+    "text": "DISPLAY 'ERROR WRITING TO REJECTS FILE'"
+   },
+   {
+    "line": 461,
+    "paragraph": "2500-WRITE-REJECT-REC",
+    "text": "MOVE DALYREJS-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 462,
+    "paragraph": "2500-WRITE-REJECT-REC",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 463,
+    "paragraph": "2500-WRITE-REJECT-REC",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 484,
+    "paragraph": "2700-UPDATE-TCATBAL",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 489,
+    "paragraph": "2700-UPDATE-TCATBAL",
+    "text": "DISPLAY 'ERROR READING TRANSACTION BALANCE FILE'"
+   },
+   {
+    "line": 490,
+    "paragraph": "2700-UPDATE-TCATBAL",
+    "text": "MOVE TCATBALF-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 491,
+    "paragraph": "2700-UPDATE-TCATBAL",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 492,
+    "paragraph": "2700-UPDATE-TCATBAL",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 515,
+    "paragraph": "2700-A-CREATE-TCATBAL-REC",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 520,
+    "paragraph": "2700-A-CREATE-TCATBAL-REC",
+    "text": "DISPLAY 'ERROR WRITING TRANSACTION BALANCE FILE'"
+   },
+   {
+    "line": 521,
+    "paragraph": "2700-A-CREATE-TCATBAL-REC",
+    "text": "MOVE TCATBALF-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 522,
+    "paragraph": "2700-A-CREATE-TCATBAL-REC",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 523,
+    "paragraph": "2700-A-CREATE-TCATBAL-REC",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 533,
+    "paragraph": "2700-B-UPDATE-TCATBAL-REC",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 538,
+    "paragraph": "2700-B-UPDATE-TCATBAL-REC",
+    "text": "DISPLAY 'ERROR REWRITING TRANSACTION BALANCE FILE'"
+   },
+   {
+    "line": 539,
+    "paragraph": "2700-B-UPDATE-TCATBAL-REC",
+    "text": "MOVE TCATBALF-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 540,
+    "paragraph": "2700-B-UPDATE-TCATBAL-REC",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 541,
+    "paragraph": "2700-B-UPDATE-TCATBAL-REC",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 569,
+    "paragraph": "2900-WRITE-TRANSACTION-FILE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 574,
+    "paragraph": "2900-WRITE-TRANSACTION-FILE",
+    "text": "DISPLAY 'ERROR WRITING TO TRANSACTION FILE'"
+   },
+   {
+    "line": 575,
+    "paragraph": "2900-WRITE-TRANSACTION-FILE",
+    "text": "MOVE TRANFILE-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 576,
+    "paragraph": "2900-WRITE-TRANSACTION-FILE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 577,
+    "paragraph": "2900-WRITE-TRANSACTION-FILE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 588,
+    "paragraph": "9000-DALYTRAN-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 593,
+    "paragraph": "9000-DALYTRAN-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING DALYTRAN FILE'"
+   },
+   {
+    "line": 594,
+    "paragraph": "9000-DALYTRAN-CLOSE",
+    "text": "MOVE DALYTRAN-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 595,
+    "paragraph": "9000-DALYTRAN-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 596,
+    "paragraph": "9000-DALYTRAN-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 606,
+    "paragraph": "9100-TRANFILE-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 611,
+    "paragraph": "9100-TRANFILE-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING TRANSACTION FILE'"
+   },
+   {
+    "line": 612,
+    "paragraph": "9100-TRANFILE-CLOSE",
+    "text": "MOVE TRANFILE-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 613,
+    "paragraph": "9100-TRANFILE-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 614,
+    "paragraph": "9100-TRANFILE-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 625,
+    "paragraph": "9200-XREFFILE-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 630,
+    "paragraph": "9200-XREFFILE-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING CROSS REF FILE'"
+   },
+   {
+    "line": 631,
+    "paragraph": "9200-XREFFILE-CLOSE",
+    "text": "MOVE XREFFILE-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 632,
+    "paragraph": "9200-XREFFILE-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 633,
+    "paragraph": "9200-XREFFILE-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 643,
+    "paragraph": "9300-DALYREJS-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 648,
+    "paragraph": "9300-DALYREJS-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING DAILY REJECTS FILE'"
+   },
+   {
+    "line": 649,
+    "paragraph": "9300-DALYREJS-CLOSE",
+    "text": "MOVE XREFFILE-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 650,
+    "paragraph": "9300-DALYREJS-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 651,
+    "paragraph": "9300-DALYREJS-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 661,
+    "paragraph": "9400-ACCTFILE-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 666,
+    "paragraph": "9400-ACCTFILE-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING ACCOUNT FILE'"
+   },
+   {
+    "line": 667,
+    "paragraph": "9400-ACCTFILE-CLOSE",
+    "text": "MOVE ACCTFILE-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 668,
+    "paragraph": "9400-ACCTFILE-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 669,
+    "paragraph": "9400-ACCTFILE-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 680,
+    "paragraph": "9500-TCATBALF-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 685,
+    "paragraph": "9500-TCATBALF-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING TRANSACTION BALANCE FILE'"
+   },
+   {
+    "line": 686,
+    "paragraph": "9500-TCATBALF-CLOSE",
+    "text": "MOVE TCATBALF-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 687,
+    "paragraph": "9500-TCATBALF-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 688,
+    "paragraph": "9500-TCATBALF-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 708,
+    "paragraph": "9999-ABEND-PROGRAM",
+    "text": "DISPLAY 'ABENDING PROGRAM'"
+   },
+   {
+    "line": 709,
+    "paragraph": "9999-ABEND-PROGRAM",
+    "text": "MOVE 0 TO TIMING"
+   },
+   {
+    "line": 710,
+    "paragraph": "9999-ABEND-PROGRAM",
+    "text": "MOVE 999 TO ABCODE"
+   },
+   {
+    "line": 711,
+    "paragraph": "9999-ABEND-PROGRAM",
+    "text": "CALL 'CEE3ABD' USING ABCODE, TIMING."
+   },
+   {
+    "line": 715,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "IF  IO-STATUS NOT NUMERIC"
+   },
+   {
+    "line": 717,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE IO-STAT1 TO IO-STATUS-04(1:1)"
+   },
+   {
+    "line": 718,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE 0        TO TWO-BYTES-BINARY"
+   },
+   {
+    "line": 719,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE IO-STAT2 TO TWO-BYTES-RIGHT"
+   },
+   {
+    "line": 720,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE TWO-BYTES-BINARY TO IO-STATUS-0403"
+   },
+   {
+    "line": 721,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "DISPLAY 'FILE STATUS IS: NNNN' IO-STATUS-04"
+   },
+   {
+    "line": 723,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE '0000' TO IO-STATUS-04"
+   },
+   {
+    "line": 724,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE IO-STATUS TO IO-STATUS-04(3:2)"
+   },
+   {
+    "line": 725,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "DISPLAY 'FILE STATUS IS: NNNN' IO-STATUS-04"
+   },
+   {
+    "line": 727,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "EXIT."
+   }
+  ],
+  "lines": {
+   "194": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "195": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "196": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "197": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "198": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "199": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "200": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "202": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "203": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "204": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "205": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "206": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "208": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-001",
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "209": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-001",
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "210": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "211": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-001",
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004",
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-006",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "212": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-001",
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004",
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-006",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "214": {
+    "executed": 11,
+    "cited_by": [
+     "BR-CBTRN02C-001",
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004",
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "215": {
+    "executed": 11,
+    "cited_by": [
+     "BR-CBTRN02C-001",
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004",
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "221": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "222": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "223": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "224": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "225": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "226": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "227": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "228": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "229": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "230": {
+    "executed": 11,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "232": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "234": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "237": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "238": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "239": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "240": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "242": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "244": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "245": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "247": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "248": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "249": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "250": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "252": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "255": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "256": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "257": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "258": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "260": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "262": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "263": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "265": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "266": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "267": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "268": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "270": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "274": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "275": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "276": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "277": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "279": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "281": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "282": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "284": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "285": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "286": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "287": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "289": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "292": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "293": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "294": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "295": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "297": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "299": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "300": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "302": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "303": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "304": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "305": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "307": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "310": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "311": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "312": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "313": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "315": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "317": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "318": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "320": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "321": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "322": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "323": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "325": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "328": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "329": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "330": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "331": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "333": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "335": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "336": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "338": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "339": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "340": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "341": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "343": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "346": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "347": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "348": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "351": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "352": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "354": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "357": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "358": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "360": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "361": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "363": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "364": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "365": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "366": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "369": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "371": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-001"
+    ]
+   },
+   "372": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-001",
+     "BR-CBTRN02C-002"
+    ]
+   },
+   "373": {
+    "executed": 23,
+    "cited_by": [
+     "BR-CBTRN02C-001",
+     "BR-CBTRN02C-002"
+    ]
+   },
+   "375": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-001"
+    ]
+   },
+   "378": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "382": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-001"
+    ]
+   },
+   "383": {
+    "executed": 27,
+    "cited_by": [
+     "BR-CBTRN02C-001"
+    ]
+   },
+   "385": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-001"
+    ]
+   },
+   "386": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-001"
+    ]
+   },
+   "390": {
+    "executed": 23,
+    "cited_by": []
+   },
+   "392": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "394": {
+    "executed": 23,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "395": {
+    "executed": 23,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "397": {
+    "executed": 4,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003"
+    ]
+   },
+   "398": {
+    "executed": 4,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003"
+    ]
+   },
+   "403": {
+    "executed": 20,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003"
+    ]
+   },
+   "407": {
+    "executed": 20,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004"
+    ]
+   },
+   "408": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004"
+    ]
+   },
+   "410": {
+    "executed": 2,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004"
+    ]
+   },
+   "411": {
+    "executed": 2,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-003",
+     "BR-CBTRN02C-004"
+    ]
+   },
+   "414": {
+    "executed": 20,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-004"
+    ]
+   },
+   "415": {
+    "executed": 20,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-004"
+    ]
+   },
+   "417": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-004"
+    ]
+   },
+   "418": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBTRN02C-002",
+     "BR-CBTRN02C-004"
+    ]
+   },
+   "422": {
+    "executed": 23,
+    "cited_by": []
+   },
+   "425": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "426": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "427": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "428": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "429": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "430": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "431": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "432": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "433": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "434": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "435": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "436": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "437": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "438": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "440": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "441": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "442": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "444": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "447": {
+    "executed": 11,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "448": {
+    "executed": 11,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "450": {
+    "executed": 11,
+    "cited_by": []
+   },
+   "451": {
+    "executed": 11,
+    "cited_by": [
+     "BR-CBTRN02C-005"
+    ]
+   },
+   "452": {
+    "executed": 11,
+    "cited_by": []
+   },
+   "453": {
+    "executed": 11,
+    "cited_by": []
+   },
+   "455": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "457": {
+    "executed": 11,
+    "cited_by": []
+   },
+   "458": {
+    "executed": 11,
+    "cited_by": []
+   },
+   "460": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "461": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "462": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "463": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "465": {
+    "executed": 11,
+    "cited_by": []
+   },
+   "469": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "470": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "471": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "473": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "474": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "476": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "478": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "481": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "482": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "484": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "486": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "487": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "489": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "490": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "491": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "492": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "495": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "496": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "498": {
+    "executed": 17,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "501": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "504": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "505": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "506": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "507": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "508": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "510": {
+    "executed": 5,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "512": {
+    "executed": 5,
+    "cited_by": []
+   },
+   "513": {
+    "executed": 5,
+    "cited_by": []
+   },
+   "515": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "517": {
+    "executed": 5,
+    "cited_by": []
+   },
+   "518": {
+    "executed": 5,
+    "cited_by": []
+   },
+   "520": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "521": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "522": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "523": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "527": {
+    "executed": 17,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "528": {
+    "executed": 17,
+    "cited_by": [
+     "BR-CBTRN02C-006"
+    ]
+   },
+   "530": {
+    "executed": 17,
+    "cited_by": []
+   },
+   "531": {
+    "executed": 17,
+    "cited_by": []
+   },
+   "533": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "535": {
+    "executed": 17,
+    "cited_by": []
+   },
+   "536": {
+    "executed": 17,
+    "cited_by": []
+   },
+   "538": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "539": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "540": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "541": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "547": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "548": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "549": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "551": {
+    "executed": 7,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "554": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "556": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "557": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBTRN02C-005",
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "560": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "563": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "564": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "566": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "567": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "569": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "571": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "572": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "574": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "575": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "576": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "577": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "579": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "583": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "584": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "585": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "586": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "588": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "590": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "591": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "593": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "594": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "595": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "596": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "598": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "601": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "602": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "603": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "604": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "606": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "608": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "609": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "611": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "612": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "613": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "614": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "616": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "620": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "621": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "622": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "623": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "625": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "627": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "628": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "630": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "631": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "632": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "633": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "635": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "638": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "639": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "640": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "641": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "643": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "645": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "646": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "648": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "649": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "650": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "651": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "653": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "656": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "657": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "658": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "659": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "661": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "663": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "664": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "666": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "667": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "668": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "669": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "671": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "675": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "676": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "677": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "678": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "680": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "682": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "683": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "685": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "686": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "687": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "688": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "690": {
+    "executed": 27,
+    "cited_by": []
+   },
+   "693": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "694": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "695": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "696": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "697": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "698": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "699": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "700": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "701": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "702": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "703": {
+    "executed": 19,
+    "cited_by": [
+     "BR-CBTRN02C-007"
+    ]
+   },
+   "705": {
+    "executed": 19,
+    "cited_by": []
+   },
+   "708": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "709": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "710": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "711": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "715": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "717": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "718": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "719": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "720": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "721": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "723": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "724": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "725": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "727": {
+    "executed": 0,
+    "cited_by": []
+   }
+  }
+ },
+ "CBACT04C": {
+  "statement_lines": 294,
+  "executed_any": 206,
+  "executed_by_sample": 192,
+  "trace_lines_sample": 213,
+  "cited_by_rules": 94,
+  "neither": 77,
+  "uncovered_lines": [
+   {
+    "line": 240,
+    "paragraph": "0000-TCATBALF-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 245,
+    "paragraph": "0000-TCATBALF-OPEN",
+    "text": "DISPLAY 'ERROR OPENING TRANSACTION CATEGORY BALANCE'"
+   },
+   {
+    "line": 246,
+    "paragraph": "0000-TCATBALF-OPEN",
+    "text": "MOVE TCATBALF-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 247,
+    "paragraph": "0000-TCATBALF-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 248,
+    "paragraph": "0000-TCATBALF-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 258,
+    "paragraph": "0100-XREFFILE-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 263,
+    "paragraph": "0100-XREFFILE-OPEN",
+    "text": "DISPLAY 'ERROR OPENING CROSS REF FILE'   XREFFILE-STATUS"
+   },
+   {
+    "line": 264,
+    "paragraph": "0100-XREFFILE-OPEN",
+    "text": "MOVE XREFFILE-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 265,
+    "paragraph": "0100-XREFFILE-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 266,
+    "paragraph": "0100-XREFFILE-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 276,
+    "paragraph": "0200-DISCGRP-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 281,
+    "paragraph": "0200-DISCGRP-OPEN",
+    "text": "DISPLAY 'ERROR OPENING DALY REJECTS FILE'"
+   },
+   {
+    "line": 282,
+    "paragraph": "0200-DISCGRP-OPEN",
+    "text": "MOVE DISCGRP-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 283,
+    "paragraph": "0200-DISCGRP-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 284,
+    "paragraph": "0200-DISCGRP-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 295,
+    "paragraph": "0300-ACCTFILE-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 300,
+    "paragraph": "0300-ACCTFILE-OPEN",
+    "text": "DISPLAY 'ERROR OPENING ACCOUNT MASTER FILE'"
+   },
+   {
+    "line": 301,
+    "paragraph": "0300-ACCTFILE-OPEN",
+    "text": "MOVE ACCTFILE-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 302,
+    "paragraph": "0300-ACCTFILE-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 303,
+    "paragraph": "0300-ACCTFILE-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 313,
+    "paragraph": "0400-TRANFILE-OPEN",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 318,
+    "paragraph": "0400-TRANFILE-OPEN",
+    "text": "DISPLAY 'ERROR OPENING TRANSACTION FILE'"
+   },
+   {
+    "line": 319,
+    "paragraph": "0400-TRANFILE-OPEN",
+    "text": "MOVE TRANFILE-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 320,
+    "paragraph": "0400-TRANFILE-OPEN",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 321,
+    "paragraph": "0400-TRANFILE-OPEN",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 333,
+    "paragraph": "1000-TCATBALF-GET-NEXT",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 342,
+    "paragraph": "1000-TCATBALF-GET-NEXT",
+    "text": "DISPLAY 'ERROR READING TRANSACTION CATEGORY FILE'"
+   },
+   {
+    "line": 343,
+    "paragraph": "1000-TCATBALF-GET-NEXT",
+    "text": "MOVE TCATBALF-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 344,
+    "paragraph": "1000-TCATBALF-GET-NEXT",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 345,
+    "paragraph": "1000-TCATBALF-GET-NEXT",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 360,
+    "paragraph": "1050-UPDATE-ACCOUNT",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 365,
+    "paragraph": "1050-UPDATE-ACCOUNT",
+    "text": "DISPLAY 'ERROR RE-WRITING ACCOUNT FILE'"
+   },
+   {
+    "line": 366,
+    "paragraph": "1050-UPDATE-ACCOUNT",
+    "text": "MOVE ACCTFILE-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 367,
+    "paragraph": "1050-UPDATE-ACCOUNT",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 368,
+    "paragraph": "1050-UPDATE-ACCOUNT",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 375,
+    "paragraph": "1100-GET-ACCT-DATA",
+    "text": "DISPLAY 'ACCOUNT NOT FOUND: ' FD-ACCT-ID"
+   },
+   {
+    "line": 381,
+    "paragraph": "1100-GET-ACCT-DATA",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 386,
+    "paragraph": "1100-GET-ACCT-DATA",
+    "text": "DISPLAY 'ERROR READING ACCOUNT FILE'"
+   },
+   {
+    "line": 387,
+    "paragraph": "1100-GET-ACCT-DATA",
+    "text": "MOVE ACCTFILE-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 388,
+    "paragraph": "1100-GET-ACCT-DATA",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 389,
+    "paragraph": "1100-GET-ACCT-DATA",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 397,
+    "paragraph": "1110-GET-XREF-DATA",
+    "text": "DISPLAY 'ACCOUNT NOT FOUND: ' FD-XREF-ACCT-ID"
+   },
+   {
+    "line": 403,
+    "paragraph": "1110-GET-XREF-DATA",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 408,
+    "paragraph": "1110-GET-XREF-DATA",
+    "text": "DISPLAY 'ERROR READING XREF FILE'"
+   },
+   {
+    "line": 409,
+    "paragraph": "1110-GET-XREF-DATA",
+    "text": "MOVE XREFFILE-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 410,
+    "paragraph": "1110-GET-XREF-DATA",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 411,
+    "paragraph": "1110-GET-XREF-DATA",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 528,
+    "paragraph": "9000-TCATBALF-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 533,
+    "paragraph": "9000-TCATBALF-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING TRANSACTION BALANCE FILE'"
+   },
+   {
+    "line": 534,
+    "paragraph": "9000-TCATBALF-CLOSE",
+    "text": "MOVE TCATBALF-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 535,
+    "paragraph": "9000-TCATBALF-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 536,
+    "paragraph": "9000-TCATBALF-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 547,
+    "paragraph": "9100-XREFFILE-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 552,
+    "paragraph": "9100-XREFFILE-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING CROSS REF FILE'"
+   },
+   {
+    "line": 553,
+    "paragraph": "9100-XREFFILE-CLOSE",
+    "text": "MOVE XREFFILE-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 554,
+    "paragraph": "9100-XREFFILE-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 555,
+    "paragraph": "9100-XREFFILE-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 565,
+    "paragraph": "9200-DISCGRP-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 570,
+    "paragraph": "9200-DISCGRP-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING DISCLOSURE GROUP FILE'"
+   },
+   {
+    "line": 571,
+    "paragraph": "9200-DISCGRP-CLOSE",
+    "text": "MOVE DISCGRP-STATUS TO IO-STATUS"
+   },
+   {
+    "line": 572,
+    "paragraph": "9200-DISCGRP-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 573,
+    "paragraph": "9200-DISCGRP-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 583,
+    "paragraph": "9300-ACCTFILE-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 588,
+    "paragraph": "9300-ACCTFILE-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING ACCOUNT FILE'"
+   },
+   {
+    "line": 589,
+    "paragraph": "9300-ACCTFILE-CLOSE",
+    "text": "MOVE ACCTFILE-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 590,
+    "paragraph": "9300-ACCTFILE-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 591,
+    "paragraph": "9300-ACCTFILE-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 601,
+    "paragraph": "9400-TRANFILE-CLOSE",
+    "text": "MOVE 12 TO APPL-RESULT"
+   },
+   {
+    "line": 606,
+    "paragraph": "9400-TRANFILE-CLOSE",
+    "text": "DISPLAY 'ERROR CLOSING TRANSACTION FILE'"
+   },
+   {
+    "line": 607,
+    "paragraph": "9400-TRANFILE-CLOSE",
+    "text": "MOVE TRANFILE-STATUS  TO IO-STATUS"
+   },
+   {
+    "line": 608,
+    "paragraph": "9400-TRANFILE-CLOSE",
+    "text": "PERFORM 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "line": 609,
+    "paragraph": "9400-TRANFILE-CLOSE",
+    "text": "PERFORM 9999-ABEND-PROGRAM"
+   },
+   {
+    "line": 638,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE IO-STAT1 TO IO-STATUS-04(1:1)"
+   },
+   {
+    "line": 639,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE 0        TO TWO-BYTES-BINARY"
+   },
+   {
+    "line": 640,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE IO-STAT2 TO TWO-BYTES-RIGHT"
+   },
+   {
+    "line": 641,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "MOVE TWO-BYTES-BINARY TO IO-STATUS-0403"
+   },
+   {
+    "line": 642,
+    "paragraph": "9910-DISPLAY-IO-STATUS",
+    "text": "DISPLAY 'FILE STATUS IS: NNNN' IO-STATUS-04"
+   }
+  ],
+  "lines": {
+   "181": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "182": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "183": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "184": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "185": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "186": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "188": {
+    "executed": 16,
+    "cited_by": [
+     "BR-CBACT04C-002"
+    ]
+   },
+   "189": {
+    "executed": 16,
+    "cited_by": [
+     "BR-CBACT04C-002"
+    ]
+   },
+   "190": {
+    "executed": 16,
+    "cited_by": [
+     "BR-CBACT04C-002"
+    ]
+   },
+   "191": {
+    "executed": 16,
+    "cited_by": [
+     "BR-CBACT04C-002"
+    ]
+   },
+   "192": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "193": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "194": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "195": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "196": {
+    "executed": 8,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "198": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "200": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "201": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "202": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
+   },
+   "203": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
+   },
+   "204": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
+   },
+   "205": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
+   },
+   "210": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "211": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "212": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "213": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "214": {
+    "executed": 14,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-002",
+     "BR-CBACT04C-003",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "215": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-002",
+     "BR-CBACT04C-003",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "216": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-003",
+     "BR-CBACT04C-004"
+    ]
+   },
+   "220": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-002"
+    ]
+   },
+   "224": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "225": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "226": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "227": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "228": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "230": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "232": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "235": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "236": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "237": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "238": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "240": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "242": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "243": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "245": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "246": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "247": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "248": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "250": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "253": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "254": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "255": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "256": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "258": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "260": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "261": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "263": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "264": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "265": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "266": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "268": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "271": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "272": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "273": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "274": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "276": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "278": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "279": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "281": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "282": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "283": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "284": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "286": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "290": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "291": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "292": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "293": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "295": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "297": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "298": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "300": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "301": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "302": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "303": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "305": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "308": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "309": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "310": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "311": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "313": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "315": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "316": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "318": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "319": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "320": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "321": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "323": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "326": {
+    "executed": 16,
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
+   },
+   "327": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "328": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "330": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-002"
+    ]
+   },
+   "331": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-002"
+    ]
+   },
+   "333": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "336": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "337": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "339": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-002"
+    ]
+   },
+   "340": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-002"
+    ]
+   },
+   "342": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "343": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "344": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "345": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "348": {
+    "executed": 16,
+    "cited_by": []
+   },
+   "352": {
+    "executed": 8,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-002"
+    ]
+   },
+   "353": {
+    "executed": 8,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-002"
+    ]
+   },
+   "354": {
+    "executed": 8,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-002"
+    ]
+   },
+   "356": {
+    "executed": 8,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-002"
+    ]
+   },
+   "357": {
+    "executed": 8,
+    "cited_by": []
+   },
+   "358": {
+    "executed": 8,
+    "cited_by": []
+   },
+   "360": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "362": {
+    "executed": 8,
+    "cited_by": []
+   },
+   "363": {
+    "executed": 8,
+    "cited_by": []
+   },
+   "365": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "366": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "367": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "368": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "370": {
+    "executed": 8,
+    "cited_by": []
+   },
+   "373": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "375": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "378": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "379": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "381": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "383": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "384": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "386": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "387": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "388": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "389": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "391": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "394": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-001"
+    ]
+   },
+   "397": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "400": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "401": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "403": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "405": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "406": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "408": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "409": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "410": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "411": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "413": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "416": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "418": {
+    "executed": 4,
+    "cited_by": []
+   },
+   "419": {
+    "executed": 4,
+    "cited_by": []
+   },
+   "422": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "423": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "425": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "428": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "429": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "431": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "432": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "433": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "434": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "436": {
+    "executed": 15,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "437": {
+    "executed": 4,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "438": {
+    "executed": 4,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "440": {
+    "executed": 14,
+    "cited_by": []
+   },
+   "444": {
+    "executed": 4,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "446": {
+    "executed": 4,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "447": {
+    "executed": 3,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "449": {
+    "executed": 1,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "452": {
+    "executed": 4,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "453": {
+    "executed": 3,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "455": {
+    "executed": 1,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "456": {
+    "executed": 1,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "457": {
+    "executed": 1,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "458": {
+    "executed": 1,
+    "cited_by": [
+     "BR-CBACT04C-003"
+    ]
+   },
+   "460": {
+    "executed": 3,
+    "cited_by": []
+   },
+   "464": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-004",
+     "BR-CBACT04C-005"
+    ]
+   },
+   "467": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-001",
+     "BR-CBACT04C-002",
+     "BR-CBACT04C-004",
+     "BR-CBACT04C-005"
+    ]
+   },
+   "468": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-002",
+     "BR-CBACT04C-004",
+     "BR-CBACT04C-005"
+    ]
+   },
+   "470": {
+    "executed": 13,
+    "cited_by": []
+   },
+   "474": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "476": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "482": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "483": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "484": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "485": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "490": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "491": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "492": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "493": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "494": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "495": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "496": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "497": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "498": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "500": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-002",
+     "BR-CBACT04C-005"
+    ]
+   },
+   "501": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "502": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "504": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "507": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "508": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "510": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "511": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "512": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "513": {
+    "executed": 0,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "515": {
+    "executed": 13,
+    "cited_by": []
+   },
+   "520": {
+    "executed": 13,
+    "cited_by": []
+   },
+   "523": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "524": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "525": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "526": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "528": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "530": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "531": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "533": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "534": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "535": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "536": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "538": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "542": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "543": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "544": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "545": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "547": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "549": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "550": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "552": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "553": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "554": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "555": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "557": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "560": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "561": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "562": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "563": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "565": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "567": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "568": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "570": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "571": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "572": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "573": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "575": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "578": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "579": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "580": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "581": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "583": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "585": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "586": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "588": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "589": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "590": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "591": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "593": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "596": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "597": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "598": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "599": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "601": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "603": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "604": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "606": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "607": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "608": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "609": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "611": {
+    "executed": 15,
+    "cited_by": []
+   },
+   "614": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "615": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "616": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "617": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "618": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "619": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "620": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "621": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "622": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "623": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "624": {
+    "executed": 13,
+    "cited_by": [
+     "BR-CBACT04C-005"
+    ]
+   },
+   "626": {
+    "executed": 13,
+    "cited_by": []
+   },
+   "629": {
+    "executed": 1,
+    "cited_by": []
+   },
+   "630": {
+    "executed": 1,
+    "cited_by": []
+   },
+   "631": {
+    "executed": 1,
+    "cited_by": []
+   },
+   "632": {
+    "executed": 1,
+    "cited_by": []
+   },
+   "636": {
+    "executed": 1,
+    "cited_by": []
+   },
+   "638": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "639": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "640": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "641": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "642": {
+    "executed": 0,
+    "cited_by": []
+   },
+   "644": {
+    "executed": 1,
+    "cited_by": []
+   },
+   "645": {
+    "executed": 1,
+    "cited_by": []
+   },
+   "646": {
+    "executed": 1,
+    "cited_by": []
+   },
+   "648": {
+    "executed": 1,
+    "cited_by": []
+   }
+  }
+ }
+}

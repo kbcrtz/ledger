@@ -1,0 +1,110 @@
+{
+ "agent": "verifier",
+ "key": "8801856e2029ee5e74e2ea6da70cc158973bc90d77865245360cf262283dcfa8",
+ "seconds": 16.0,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 32000,
+  "system": "You are the verifier judge in Ledger. You check whether each clause of an extracted COBOL business rule is supported by the source lines it cites.\n\nFor each clause you get its text and the cited lines (marked with >>), with a few surrounding lines for context only. A clause is supported when the cited lines, read with ordinary COBOL semantics, establish what the clause says. Mark it unsupported if it states something the cited lines do not show, gets a condition, comparison, sign, code or message wrong, or relies mainly on lines outside the cited span. Be strict about meaning, not about wording. Give a one-sentence reason either way.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Rule BR-CBTRN02C-007: Posting updates the account balances and writes the transaction record\n\n### given[0]: The account record being updated is the one read during validation, using the account ID from the card cross-reference.\nfields=['XREF-ACCT-ID', 'FD-ACCT-ID', 'ACCOUNT-FILE', 'ACCOUNT-RECORD'] literals=[]\nCBTRN02C.cbl:\n   390                   CONTINUE\n   391            END-READ\n   392            EXIT.\n   393        1500-B-LOOKUP-ACCT.\n>> 394            MOVE XREF-ACCT-ID TO FD-ACCT-ID\n>> 395            READ ACCOUNT-FILE INTO ACCOUNT-RECORD\n   396               INVALID KEY\n   397                 MOVE 101 TO WS-VALIDATION-FAIL-REASON\n   398                 MOVE 'ACCOUNT RECORD NOT FOUND'\n   399                   TO WS-VALIDATION-FAIL-REASON-DESC\n\n### given[1]: The account's current balance is a signed amount with 10 integer digits and 2 decimal places.\nfields=['ACCT-CURR-BAL'] literals=[]\nCVACT01Y.cpy:\n     3       *****************************************************************\n     4        01  ACCOUNT-RECORD.\n     5            05  ACCT-ID                           PIC 9(11).\n     6            05  ACCT-ACTIVE-STATUS                PIC X(01).\n>>   7            05  ACCT-CURR-BAL                     PIC S9(10)V99.\n     8            05  ACCT-CREDIT-LIMIT                 PIC S9(10)V99.\n     9            05  ACCT-CASH-CREDIT-LIMIT            PIC S9(10)V99.\n    10            05  ACCT-OPEN-DATE                    PIC X(10).\n    11            05  ACCT-EXPIRAION-DATE               PIC X(10).\n\n### given[2]: The cycle credit and cycle debit totals are signed amounts with 10 integer digits and 2 decimal places.\nfields=['ACCT-CURR-CYC-CREDIT', 'ACCT-CURR-CYC-DEBIT'] literals=[]\nCVACT01Y.cpy:\n     9            05  ACCT-CASH-CREDIT-LIMIT            PIC S9(10)V99.\n    10            05  ACCT-OPEN-DATE                    PIC X(10).\n    11            05  ACCT-EXPIRAION-DATE               PIC X(10).\n    12            05  ACCT-REISSUE-DATE                 PIC X(10).\n>>  13            05  ACCT-CURR-CYC-CREDIT              PIC S9(10)V99.\n>>  14            05  ACCT-CURR-CYC-DEBIT               PIC S9(10)V99.\n    15            05  ACCT-ADDR-ZIP                     PIC X(10).\n    16            05  ACCT-GROUP-ID                     PIC X(10).\n    17            05  FILLER                            PIC X(178).\n    18       *\n\n### given[3]: The steps run in this order: category balance update, account update, then the transaction write.\nfields=[] literals=[]\nCBTRN02C.cbl:\n   436            MOVE  DALYTRAN-ORIG-TS       TO    TRAN-ORIG-TS\n   437            PERFORM Z-GET-DB2-FORMAT-TIMESTAMP\n   438            MOVE  DB2-FORMAT-TS          TO    TRAN-PROC-TS\n   439 \n>> 440            PERFORM 2700-UPDATE-TCATBAL\n>> 441            PERFORM 2800-UPDATE-ACCOUNT-REC\n>> 442            PERFORM 2900-WRITE-TRANSACTION-FILE\n   443 \n   444            EXIT.\n   445 \n   446        2500-WRITE-REJECT-REC.\n\n### when[0]: A validated transaction is posted and its amount is checked for being zero or positive versus negative.\nfields=['DALYTRAN-AMT'] literals=[]\nCBTRN02C.cbl:\n   544       *---------------------------------------------------------------*\n   545        2800-UPDATE-ACCOUNT-REC.\n   546       * Update the balances in account record to reflect posted trans.\n   547            ADD DALYTRAN-AMT  TO ACCT-CURR-BAL\n>> 548            IF DALYTRAN-AMT >= 0\n   549               ADD DALYTRAN-AMT TO ACCT-CURR-CYC-CREDIT\n   550            ELSE\n   551               ADD DALYTRAN-AMT TO ACCT-CURR-CYC-DEBIT\n   552            END-IF\n\n### then[0]: The transaction amount, with its sign, is always added to the account's current balance.\nfields=['DALYTRAN-AMT', 'ACCT-CURR-BAL'] literals=[]\nCBTRN02C.cbl:\n   543 \n   544       *---------------------------------------------------------------*\n   545        2800-UPDATE-ACCOUNT-REC.\n   546       * Update the balances in account record to reflect posted trans.\n>> 547            ADD DALYTRAN-AMT  TO ACCT-CURR-BAL\n   548            IF DALYTRAN-AMT >= 0\n   549               ADD DALYTRAN-AMT TO ACCT-CURR-CYC-CREDIT\n   550            ELSE\n   551               ADD DALYTRAN-AMT TO ACCT-CURR-CYC-DEBIT\n\n### then[1]: If the amount is zero or positive, it is added to the cycle credit total. If it is negative, it is added as a negative value to the cycle debit total, so that total moves down.\nfields=['DALYTRAN-AMT', 'ACCT-CURR-CYC-CREDIT', 'ACCT-CURR-CYC-DEBIT'] literals=[]\nCBTRN02C.cbl:\n   544       *---------------------------------------------------------------*\n   545        2800-UPDATE-ACCOUNT-REC.\n   546       * Update the balances in account record to reflect posted trans.\n   547            ADD DALYTRAN-AMT  TO ACCT-CURR-BAL\n>> 548            IF DALYTRAN-AMT >= 0\n>> 549               ADD DALYTRAN-AMT TO ACCT-CURR-CYC-CREDIT\n>> 550            ELSE\n>> 551               ADD DALYTRAN-AMT TO ACCT-CURR-CYC-DEBIT\n>> 552            END-IF\n   553 \n   554            REWRITE FD-ACCTFILE-REC FROM  ACCOUNT-RECORD\n   555               INVALID KEY\n   556                 MOVE 109 TO WS-VALIDATION-FAIL-REASON\n\n### then[2]: The updated account record is rewritten to the account file.\nfields=['FD-ACCTFILE-REC', 'ACCOUNT-RECORD'] literals=[]\nCBTRN02C.cbl:\n   550            ELSE\n   551               ADD DALYTRAN-AMT TO ACCT-CURR-CYC-DEBIT\n   552            END-IF\n   553 \n>> 554            REWRITE FD-ACCTFILE-REC FROM  ACCOUNT-RECORD\n   555               INVALID KEY\n   556                 MOVE 109 TO WS-VALIDATION-FAIL-REASON\n   557                 MOVE 'ACCOUNT RECORD NOT FOUND'\n   558                   TO WS-VALIDATION-FAIL-REASON-DESC\n\n### then[3]: If the rewrite finds no record, reason code 109 and the text ACCOUNT RECORD NOT FOUND are set. Nothing acts on them: the transaction is still written and is not counted as rejected.\nfields=['WS-VALIDATION-FAIL-REASON', 'WS-VALIDATION-FAIL-REASON-DESC'] literals=['109', 'ACCOUNT RECORD NOT FOUND']\nCBTRN02C.cbl:\n   551               ADD DALYTRAN-AMT TO ACCT-CURR-CYC-DEBIT\n   552            END-IF\n   553 \n   554            REWRITE FD-ACCTFILE-REC FROM  ACCOUNT-RECORD\n>> 555               INVALID KEY\n>> 556                 MOVE 109 TO WS-VALIDATION-FAIL-REASON\n>> 557                 MOVE 'ACCOUNT RECORD NOT FOUND'\n>> 558                   TO WS-VALIDATION-FAIL-REASON-DESC\n   559            END-REWRITE.\n   560            EXIT.\n   561       *---------------------------------------------------------------*\n   562        2900-WRITE-TRANSACTION-FILE.\n\n### then[4]: Before the next daily transaction is validated, the reason code is reset to 0 and the reason text to spaces.\nfields=['WS-VALIDATION-FAIL-REASON', 'WS-VALIDATION-FAIL-REASON-DESC'] literals=['0']\nCBTRN02C.cbl:\n   204                    PERFORM 1000-DALYTRAN-GET-NEXT\n   205                    IF  END-OF-FILE = 'N'\n   206                      ADD 1 TO WS-TRANSACTION-COUNT\n   207       *              DISPLAY DALYTRAN-RECORD\n>> 208                      MOVE 0 TO WS-VALIDATION-FAIL-REASON\n>> 209                      MOVE SPACES TO WS-VALIDATION-FAIL-REASON-DESC\n   210                      PERFORM 1500-VALIDATE-TRAN\n   211                      IF WS-VALIDATION-FAIL-REASON = 0\n   212                        PERFORM 2000-POST-TRANSACTION\n   213                      ELSE\n\n### then[5]: The transaction record copies these fields from the daily transaction: ID, type code, category code, source, description, amount, merchant ID, merchant name, merchant city, merchant ZIP, card number and original timestamp.\nfields=['DALYTRAN-ID', 'TRAN-ID', 'DALYTRAN-TYPE-CD', 'TRAN-TYPE-CD', 'DALYTRAN-CAT-CD', 'TRAN-CAT-CD', 'DALYTRAN-SOURCE', 'TRAN-SOURCE', 'DALYTRAN-DESC', 'TRAN-DESC', 'DALYTRAN-AMT', 'TRAN-AMT', 'DALYTRAN-MERCHANT-ID', 'TRAN-MERCHANT-ID', 'DALYTRAN-MERCHANT-NAME', 'TRAN-MERCHANT-NAME', 'DALYTRAN-MERCHANT-CITY', 'TRAN-MERCHANT-CITY', 'DALYTRAN-MERCHANT-ZIP', 'TRAN-MERCHANT-ZIP', 'DALYTRAN-CARD-NUM', 'TRAN-CARD-NUM', 'DALYTRAN-ORIG-TS', 'TRAN-ORIG-TS'] literals=[]\nCBTRN02C.cbl:\n   421            END-READ\n   422            EXIT.\n   423       *---------------------------------------------------------------*\n   424        2000-POST-TRANSACTION.\n>> 425            MOVE  DALYTRAN-ID            TO    TRAN-ID\n>> 426            MOVE  DALYTRAN-TYPE-CD       TO    TRAN-TYPE-CD\n>> 427            MOVE  DALYTRAN-CAT-CD        TO    TRAN-CAT-CD\n>> 428            MOVE  DALYTRAN-SOURCE        TO    TRAN-SOURCE\n>> 429            MOVE  DALYTRAN-DESC          TO    TRAN-DESC\n>> 430            MOVE  DALYTRAN-AMT           TO    TRAN-AMT\n>> 431            MOVE  DALYTRAN-MERCHANT-ID   TO    TRAN-MERCHANT-ID\n>> 432            MOVE  DALYTRAN-MERCHANT-NAME TO    TRAN-MERCHANT-NAME\n>> 433            MOVE  DALYTRAN-MERCHANT-CITY TO    TRAN-MERCHANT-CITY\n>> 434            MOVE  DALYTRAN-MERCHANT-ZIP  TO    TRAN-MERCHANT-ZIP\n>> 435            MOVE  DALYTRAN-CARD-NUM      TO    TRAN-CARD-NUM\n>> 436            MOVE  DALYTRAN-ORIG-TS       TO    TRAN-ORIG-TS\n   437            PERFORM Z-GET-DB2-FORMAT-TIMESTAMP\n   438            MOVE  DB2-FORMAT-TS          TO    TRAN-PROC-TS\n   439 \n   440            PERFORM 2700-UPDATE-TCATBAL\n\n### then[6]: The processing timestamp is built from the current system date and time.\nfields=['DB2-FORMAT-TS', 'TRAN-PROC-TS'] literals=[]\nCBTRN02C.cbl:\n   433            MOVE  DALYTRAN-MERCHANT-CITY TO    TRAN-MERCHANT-CITY\n   434            MOVE  DALYTRAN-MERCHANT-ZIP  TO    TRAN-MERCHANT-ZIP\n   435            MOVE  DALYTRAN-CARD-NUM      TO    TRAN-CARD-NUM\n   436            MOVE  DALYTRAN-ORIG-TS       TO    TRAN-ORIG-TS\n>> 437            PERFORM Z-GET-DB2-FORMAT-TIMESTAMP\n>> 438            MOVE  DB2-FORMAT-TS          TO    TRAN-PROC-TS\n   439 \n   440            PERFORM 2700-UPDATE-TCATBAL\n   441            PERFORM 2800-UPDATE-ACCOUNT-REC\n   442            PERFORM 2900-WRITE-TRANSACTION-FILE\n\n### then[7]: The processing timestamp format is YYYY-MM-DD-HH.MM.SS.hh0000, where hh is hundredths of a second and the last four characters are always 0000.\nfields=['COBOL-TS', 'COB-YYYY', 'DB2-YYYY', 'COB-MM', 'DB2-MM', 'COB-DD', 'DB2-DD', 'COB-HH', 'DB2-HH', 'COB-MIN', 'DB2-MIN', 'COB-SS', 'DB2-SS', 'COB-MIL', 'DB2-MIL', 'DB2-REST', 'DB2-STREEP-1', 'DB2-STREEP-2', 'DB2-STREEP-3', 'DB2-DOT-1', 'DB2-DOT-2', 'DB2-DOT-3'] literals=['0000', '-', '.']\nCBTRN02C.cbl:\n   689            END-IF\n   690            EXIT.\n   691 \n   692        Z-GET-DB2-FORMAT-TIMESTAMP.\n>> 693            MOVE FUNCTION CURRENT-DATE TO COBOL-TS\n>> 694            MOVE COB-YYYY TO DB2-YYYY\n>> 695            MOVE COB-MM   TO DB2-MM\n>> 696            MOVE COB-DD   TO DB2-DD\n>> 697            MOVE COB-HH   TO DB2-HH\n>> 698            MOVE COB-MIN  TO DB2-MIN\n>> 699            MOVE COB-SS   TO DB2-SS\n>> 700            MOVE COB-MIL  TO DB2-MIL\n>> 701            MOVE '0000'   TO DB2-REST\n>> 702            MOVE '-' TO DB2-STREEP-1 DB2-STREEP-2 DB2-STREEP-3\n>> 703            MOVE '.' TO DB2-DOT-1 DB2-DOT-2 DB2-DOT-3\n   704       *    DISPLAY 'DB2-TIMESTAMP = ' DB2-FORMAT-TS\n   705            EXIT.\n   706 \n   707        9999-ABEND-PROGRAM.\n\n### then[8]: The completed transaction record is written as a new record to the transaction file, which is keyed by transaction ID.\nfields=['FD-TRANFILE-REC', 'TRAN-RECORD'] literals=[]\nCBTRN02C.cbl:\n   560            EXIT.\n   561       *---------------------------------------------------------------*\n   562        2900-WRITE-TRANSACTION-FILE.\n   563            MOVE 8 TO  APPL-RESULT.\n>> 564            WRITE FD-TRANFILE-REC FROM TRAN-RECORD\n   565 \n   566            IF  TRANFILE-STATUS = '00'\n   567                MOVE 0 TO  APPL-RESULT\n   568            ELSE"
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "medium",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "verdicts": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "clause": {
+          "type": "string",
+          "description": "clause id as given, e.g. when[0]"
+         },
+         "supported": {
+          "type": "boolean"
+         },
+         "reason": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "clause",
+         "supported",
+         "reason"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "verdicts"
+     ],
+     "additionalProperties": false
+    }
+   }
+  }
+ },
+ "response": {
+  "id": "msg_011Cgpb6MpWuM4gZVmqYehCT",
+  "container": null,
+  "content": [
+   {
+    "signature": "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",
+    "thinking": "",
+    "type": "thinking"
+   },
+   {
+    "text": "{\"verdicts\":[{\"clause\":\"given[0]\",\"supported\":true,\"reason\":\"Lines 394-395 move XREF-ACCT-ID to FD-ACCT-ID and read ACCOUNT-FILE into ACCOUNT-RECORD in the 1500-B-LOOKUP-ACCT validation paragraph.\"},{\"clause\":\"given[1]\",\"supported\":true,\"reason\":\"Line 7 defines ACCT-CURR-BAL as PIC S9(10)V99, a signed amount with 10 integer and 2 decimal digits.\"},{\"clause\":\"given[2]\",\"supported\":true,\"reason\":\"Lines 13-14 define ACCT-CURR-CYC-CREDIT and ACCT-CURR-CYC-DEBIT as PIC S9(10)V99.\"},{\"clause\":\"given[3]\",\"supported\":true,\"reason\":\"Lines 440-442 perform 2700-UPDATE-TCATBAL, then 2800-UPDATE-ACCOUNT-REC, then 2900-WRITE-TRANSACTION-FILE in that order.\"},{\"clause\":\"when[0]\",\"supported\":true,\"reason\":\"Line 548 tests IF DALYTRAN-AMT >= 0, splitting zero-or-positive amounts from negative ones in the account update.\"},{\"clause\":\"then[0]\",\"supported\":true,\"reason\":\"Line 547 unconditionally adds the signed DALYTRAN-AMT to ACCT-CURR-BAL before the IF.\"},{\"clause\":\"then[1]\",\"supported\":true,\"reason\":\"Lines 548-552 add a non-negative amount to the cycle credit and otherwise add the negative amount to the cycle debit, which lowers that total.\"},{\"clause\":\"then[2]\",\"supported\":true,\"reason\":\"Line 554 rewrites FD-ACCTFILE-REC from ACCOUNT-RECORD.\"},{\"clause\":\"then[3]\",\"supported\":false,\"reason\":\"The cited lines show only that 109 and the message are set on INVALID KEY; the claims that the transaction is still written and not counted as rejected depend on uncited lines such as 440-442 and the main loop.\"},{\"clause\":\"then[4]\",\"supported\":true,\"reason\":\"Lines 208-209 move 0 and SPACES to the reason fields in the loop, and the context shows this happens just before 1500-VALIDATE-TRAN.\"},{\"clause\":\"then[5]\",\"supported\":true,\"reason\":\"Lines 425-436 move each of the listed DALYTRAN fields to the corresponding TRAN fields.\"},{\"clause\":\"then[6]\",\"supported\":false,\"reason\":\"Lines 437-438 only perform the timestamp routine and move DB2-FORMAT-TS; that it uses the current system date and time is shown only at uncited line 693.\"},{\"clause\":\"then[7]\",\"supported\":false,\"reason\":\"The cited moves do not show how the DB2-FORMAT-TS subfields are laid out, nor that COB-MIL holds hundredths, so the exact format string cannot be established from these lines.\"},{\"clause\":\"then[8]\",\"supported\":false,\"reason\":\"Line 564 shows the WRITE of the transaction record, but nothing cited shows that the transaction file is keyed by transaction ID.\"}]}",
+    "type": "text"
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 6537,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 6537,
+     "model": null,
+     "output_tokens": 1810,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 1810,
+   "output_tokens_details": {
+    "thinking_tokens": 730
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}

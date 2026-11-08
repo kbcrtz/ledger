@@ -1,0 +1,110 @@
+{
+ "agent": "verifier",
+ "key": "ea3ddbc4d515fb765b5af92a09f4c747d6984207812473c935f12d046fbe564b",
+ "seconds": 17.6,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 32000,
+  "system": "You are the verifier judge in Ledger. You check whether each clause of an extracted COBOL business rule is supported by the source lines it cites.\n\nFor each clause you get its text and the cited lines (marked with >>), with a few surrounding lines for context only. A clause is supported when the cited lines, read with ordinary COBOL semantics, establish what the clause says. Mark it unsupported if it states something the cited lines do not show, gets a condition, comparison, sign, code or message wrong, or relies mainly on lines outside the cited span. Be strict about meaning, not about wording. Give a one-sentence reason either way.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Rule BR-CBTRN02C-005: Route each daily transaction to posting or to the reject file, and set return code 4 when any are rejected\n\n### given[0]: Records are read one at a time from the daily transaction file until end of file. Each record that is read adds 1 to the processed-transaction count.\nfields=['END-OF-FILE', 'WS-TRANSACTION-COUNT'] literals=['Y', 'N']\nCBTRN02C.cbl:\n   198            PERFORM 0300-DALYREJS-OPEN.\n   199            PERFORM 0400-ACCTFILE-OPEN.\n   200            PERFORM 0500-TCATBALF-OPEN.\n   201 \n>> 202            PERFORM UNTIL END-OF-FILE = 'Y'\n>> 203                IF  END-OF-FILE = 'N'\n>> 204                    PERFORM 1000-DALYTRAN-GET-NEXT\n>> 205                    IF  END-OF-FILE = 'N'\n>> 206                      ADD 1 TO WS-TRANSACTION-COUNT\n   207       *              DISPLAY DALYTRAN-RECORD\n   208                      MOVE 0 TO WS-VALIDATION-FAIL-REASON\n   209                      MOVE SPACES TO WS-VALIDATION-FAIL-REASON-DESC\n   210                      PERFORM 1500-VALIDATE-TRAN\n\n### given[1]: Before each transaction is validated, the failure reason code is set to 0 and the failure description is set to spaces, so nothing from the previous transaction carries over.\nfields=['WS-VALIDATION-FAIL-REASON', 'WS-VALIDATION-FAIL-REASON-DESC'] literals=['0']\nCBTRN02C.cbl:\n   204                    PERFORM 1000-DALYTRAN-GET-NEXT\n   205                    IF  END-OF-FILE = 'N'\n   206                      ADD 1 TO WS-TRANSACTION-COUNT\n   207       *              DISPLAY DALYTRAN-RECORD\n>> 208                      MOVE 0 TO WS-VALIDATION-FAIL-REASON\n>> 209                      MOVE SPACES TO WS-VALIDATION-FAIL-REASON-DESC\n>> 210                      PERFORM 1500-VALIDATE-TRAN\n   211                      IF WS-VALIDATION-FAIL-REASON = 0\n   212                        PERFORM 2000-POST-TRANSACTION\n   213                      ELSE\n   214                        ADD 1 TO WS-REJECT-COUNT\n\n### given[2]: The validation trailer is 80 bytes: a 4-digit unsigned numeric reason code followed by a 76-character description.\nfields=['WS-VALIDATION-TRAILER', 'WS-VALIDATION-FAIL-REASON', 'WS-VALIDATION-FAIL-REASON-DESC'] literals=[]\nCBTRN02C.cbl:\n   176         01 REJECT-RECORD.\n   177            05 REJECT-TRAN-DATA          PIC X(350).\n   178            05 VALIDATION-TRAILER        PIC X(80).\n   179 \n>> 180         01 WS-VALIDATION-TRAILER.\n>> 181            05 WS-VALIDATION-FAIL-REASON      PIC 9(04).\n>> 182            05 WS-VALIDATION-FAIL-REASON-DESC PIC X(76).\n   183 \n   184         01 WS-COUNTERS.\n   185            05 WS-TRANSACTION-COUNT          PIC 9(09) VALUE 0.\n   186            05 WS-REJECT-COUNT               PIC 9(09) VALUE 0.\n\n### given[3]: A reject record is 430 bytes: 350 bytes of transaction data followed by an 80-byte validation trailer.\nfields=['REJECT-RECORD', 'REJECT-TRAN-DATA', 'VALIDATION-TRAILER'] literals=[]\nCBTRN02C.cbl:\n   172            06 DB2-DOT-3                 PIC X.\n   173            06 DB2-MIL                   PIC 9(002).\n   174            06 DB2-REST                  PIC X(04).\n   175 \n>> 176         01 REJECT-RECORD.\n>> 177            05 REJECT-TRAN-DATA          PIC X(350).\n>> 178            05 VALIDATION-TRAILER        PIC X(80).\n   179 \n   180         01 WS-VALIDATION-TRAILER.\n   181            05 WS-VALIDATION-FAIL-REASON      PIC 9(04).\n   182            05 WS-VALIDATION-FAIL-REASON-DESC PIC X(76).\n\n### when[0]: After validation, the program checks whether the failure reason code is still 0.\nfields=['WS-VALIDATION-FAIL-REASON'] literals=['0']\nCBTRN02C.cbl:\n   207       *              DISPLAY DALYTRAN-RECORD\n   208                      MOVE 0 TO WS-VALIDATION-FAIL-REASON\n   209                      MOVE SPACES TO WS-VALIDATION-FAIL-REASON-DESC\n   210                      PERFORM 1500-VALIDATE-TRAN\n>> 211                      IF WS-VALIDATION-FAIL-REASON = 0\n   212                        PERFORM 2000-POST-TRANSACTION\n   213                      ELSE\n   214                        ADD 1 TO WS-REJECT-COUNT\n   215                        PERFORM 2500-WRITE-REJECT-REC\n\n### then[0]: If the reason code is 0, the transaction is posted.\nfields=['WS-VALIDATION-FAIL-REASON'] literals=['0']\nCBTRN02C.cbl:\n   207       *              DISPLAY DALYTRAN-RECORD\n   208                      MOVE 0 TO WS-VALIDATION-FAIL-REASON\n   209                      MOVE SPACES TO WS-VALIDATION-FAIL-REASON-DESC\n   210                      PERFORM 1500-VALIDATE-TRAN\n>> 211                      IF WS-VALIDATION-FAIL-REASON = 0\n>> 212                        PERFORM 2000-POST-TRANSACTION\n   213                      ELSE\n   214                        ADD 1 TO WS-REJECT-COUNT\n   215                        PERFORM 2500-WRITE-REJECT-REC\n   216                      END-IF\n\n### then[1]: If the reason code is not 0, the reject count goes up by 1 and a reject record is written. The transaction is not posted.\nfields=['WS-REJECT-COUNT'] literals=['1']\nCBTRN02C.cbl:\n   209                      MOVE SPACES TO WS-VALIDATION-FAIL-REASON-DESC\n   210                      PERFORM 1500-VALIDATE-TRAN\n   211                      IF WS-VALIDATION-FAIL-REASON = 0\n   212                        PERFORM 2000-POST-TRANSACTION\n>> 213                      ELSE\n>> 214                        ADD 1 TO WS-REJECT-COUNT\n>> 215                        PERFORM 2500-WRITE-REJECT-REC\n   216                      END-IF\n   217                    END-IF\n   218                END-IF\n   219            END-PERFORM.\n\n### then[2]: The reject record's transaction data is the complete input daily transaction record, copied unchanged.\nfields=['DALYTRAN-RECORD', 'REJECT-TRAN-DATA'] literals=[]\nCBTRN02C.cbl:\n   443 \n   444            EXIT.\n   445 \n   446        2500-WRITE-REJECT-REC.\n>> 447            MOVE DALYTRAN-RECORD TO REJECT-TRAN-DATA\n   448            MOVE WS-VALIDATION-TRAILER TO VALIDATION-TRAILER\n   449       *     DISPLAY '***' REJECT-RECORD\n   450            MOVE 8 TO APPL-RESULT\n   451            WRITE FD-REJS-RECORD FROM REJECT-RECORD\n\n### then[3]: The reject record's trailer is the current reason code and description from validation.\nfields=['WS-VALIDATION-TRAILER', 'VALIDATION-TRAILER'] literals=[]\nCBTRN02C.cbl:\n   444            EXIT.\n   445 \n   446        2500-WRITE-REJECT-REC.\n   447            MOVE DALYTRAN-RECORD TO REJECT-TRAN-DATA\n>> 448            MOVE WS-VALIDATION-TRAILER TO VALIDATION-TRAILER\n   449       *     DISPLAY '***' REJECT-RECORD\n   450            MOVE 8 TO APPL-RESULT\n   451            WRITE FD-REJS-RECORD FROM REJECT-RECORD\n   452            IF DALYREJS-STATUS = '00'\n\n### then[4]: The reject record is written as one record to the daily rejects file.\nfields=['FD-REJS-RECORD', 'REJECT-RECORD'] literals=[]\nCBTRN02C.cbl:\n   447            MOVE DALYTRAN-RECORD TO REJECT-TRAN-DATA\n   448            MOVE WS-VALIDATION-TRAILER TO VALIDATION-TRAILER\n   449       *     DISPLAY '***' REJECT-RECORD\n   450            MOVE 8 TO APPL-RESULT\n>> 451            WRITE FD-REJS-RECORD FROM REJECT-RECORD\n   452            IF DALYREJS-STATUS = '00'\n   453                MOVE 0 TO  APPL-RESULT\n   454            ELSE\n   455                MOVE 12 TO APPL-RESULT\n\n### then[5]: If the account rewrite during posting fails because the record key is not found, reason code 109 and the description ACCOUNT RECORD NOT FOUND are set.\nfields=['WS-VALIDATION-FAIL-REASON', 'WS-VALIDATION-FAIL-REASON-DESC'] literals=['109', 'ACCOUNT RECORD NOT FOUND']\nCBTRN02C.cbl:\n   550            ELSE\n   551               ADD DALYTRAN-AMT TO ACCT-CURR-CYC-DEBIT\n   552            END-IF\n   553 \n>> 554            REWRITE FD-ACCTFILE-REC FROM  ACCOUNT-RECORD\n>> 555               INVALID KEY\n>> 556                 MOVE 109 TO WS-VALIDATION-FAIL-REASON\n>> 557                 MOVE 'ACCOUNT RECORD NOT FOUND'\n>> 558                   TO WS-VALIDATION-FAIL-REASON-DESC\n>> 559            END-REWRITE.\n   560            EXIT.\n   561       *---------------------------------------------------------------*\n   562        2900-WRITE-TRANSACTION-FILE.\n   563            MOVE 8 TO  APPL-RESULT.\n\n### then[6]: Surprising behaviour: the main loop checks the reason code only before posting and never after it. A reason code set during posting (such as 109) therefore produces no reject record and does not increase the reject count.\nfields=['WS-VALIDATION-FAIL-REASON', 'WS-REJECT-COUNT'] literals=['0']\nCBTRN02C.cbl:\n   207       *              DISPLAY DALYTRAN-RECORD\n   208                      MOVE 0 TO WS-VALIDATION-FAIL-REASON\n   209                      MOVE SPACES TO WS-VALIDATION-FAIL-REASON-DESC\n   210                      PERFORM 1500-VALIDATE-TRAN\n>> 211                      IF WS-VALIDATION-FAIL-REASON = 0\n>> 212                        PERFORM 2000-POST-TRANSACTION\n>> 213                      ELSE\n>> 214                        ADD 1 TO WS-REJECT-COUNT\n>> 215                        PERFORM 2500-WRITE-REJECT-REC\n>> 216                      END-IF\n   217                    END-IF\n   218                END-IF\n   219            END-PERFORM.\n   220 \n\n### then[7]: At the end of the run, the program displays the processed-transaction count and the reject count.\nfields=['WS-TRANSACTION-COUNT', 'WS-REJECT-COUNT'] literals=['TRANSACTIONS PROCESSED :', 'TRANSACTIONS REJECTED  :']\nCBTRN02C.cbl:\n   223            PERFORM 9200-XREFFILE-CLOSE.\n   224            PERFORM 9300-DALYREJS-CLOSE.\n   225            PERFORM 9400-ACCTFILE-CLOSE.\n   226            PERFORM 9500-TCATBALF-CLOSE.\n>> 227            DISPLAY 'TRANSACTIONS PROCESSED :' WS-TRANSACTION-COUNT\n>> 228            DISPLAY 'TRANSACTIONS REJECTED  :' WS-REJECT-COUNT\n   229            IF WS-REJECT-COUNT > 0\n   230               MOVE 4 TO RETURN-CODE\n   231            END-IF\n   232            DISPLAY 'END OF EXECUTION OF PROGRAM CBTRN02C'.\n\n### then[8]: If at least one transaction was rejected, the return code is set to 4. Otherwise the program does not change the return code.\nfields=['WS-REJECT-COUNT'] literals=['4']\nCBTRN02C.cbl:\n   225            PERFORM 9400-ACCTFILE-CLOSE.\n   226            PERFORM 9500-TCATBALF-CLOSE.\n   227            DISPLAY 'TRANSACTIONS PROCESSED :' WS-TRANSACTION-COUNT\n   228            DISPLAY 'TRANSACTIONS REJECTED  :' WS-REJECT-COUNT\n>> 229            IF WS-REJECT-COUNT > 0\n>> 230               MOVE 4 TO RETURN-CODE\n>> 231            END-IF\n   232            DISPLAY 'END OF EXECUTION OF PROGRAM CBTRN02C'.\n   233 \n   234            GOBACK.\n   235       *---------------------------------------------------------------*"
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "medium",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "verdicts": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "clause": {
+          "type": "string",
+          "description": "clause id as given, e.g. when[0]"
+         },
+         "supported": {
+          "type": "boolean"
+         },
+         "reason": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "clause",
+         "supported",
+         "reason"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "verdicts"
+     ],
+     "additionalProperties": false
+    }
+   }
+  }
+ },
+ "response": {
+  "id": "msg_011Cgpb8fnJSFAeDNTE9hYrr",
+  "container": null,
+  "content": [
+   {
+    "signature": "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",
+    "thinking": "",
+    "type": "thinking"
+   },
+   {
+    "text": "{\"verdicts\":[{\"clause\":\"given[0]\",\"supported\":true,\"reason\":\"Lines 202-206 loop until END-OF-FILE = 'Y', read the next record, and add 1 to WS-TRANSACTION-COUNT only when END-OF-FILE is still 'N'.\"},{\"clause\":\"given[1]\",\"supported\":true,\"reason\":\"Lines 208-210 move 0 to the reason code and SPACES to the description immediately before PERFORM 1500-VALIDATE-TRAN.\"},{\"clause\":\"given[2]\",\"supported\":true,\"reason\":\"Lines 180-182 define the trailer as PIC 9(04) (unsigned numeric) followed by PIC X(76), which totals 80 bytes.\"},{\"clause\":\"given[3]\",\"supported\":true,\"reason\":\"Lines 176-178 define REJECT-RECORD as PIC X(350) followed by PIC X(80), which totals 430 bytes.\"},{\"clause\":\"when[0]\",\"supported\":true,\"reason\":\"Line 211 tests IF WS-VALIDATION-FAIL-REASON = 0 right after validation.\"},{\"clause\":\"then[0]\",\"supported\":true,\"reason\":\"Lines 211-212 perform 2000-POST-TRANSACTION when the reason code equals 0.\"},{\"clause\":\"then[1]\",\"supported\":true,\"reason\":\"The ELSE branch on lines 213-215 adds 1 to WS-REJECT-COUNT and performs 2500-WRITE-REJECT-REC without performing posting.\"},{\"clause\":\"then[2]\",\"supported\":false,\"reason\":\"Line 447 moves DALYTRAN-RECORD to REJECT-TRAN-DATA, but the cited lines do not show DALYTRAN-RECORD's length, so a complete, unchanged copy without truncation or padding is not established.\"},{\"clause\":\"then[3]\",\"supported\":true,\"reason\":\"Line 448 moves WS-VALIDATION-TRAILER (reason code plus description) into VALIDATION-TRAILER.\"},{\"clause\":\"then[4]\",\"supported\":true,\"reason\":\"Line 451 writes a single FD-REJS-RECORD from REJECT-RECORD to the rejects file.\"},{\"clause\":\"then[5]\",\"supported\":true,\"reason\":\"Lines 554-559 set reason code 109 and the description 'ACCOUNT RECORD NOT FOUND' on INVALID KEY of the account REWRITE.\"},{\"clause\":\"then[6]\",\"supported\":false,\"reason\":\"The cited loop shows the check happens only before posting, but the claim that a posting-time code such as 109 produces no reject depends on the contents of 2000-POST-TRANSACTION, which are not in the cited span.\"},{\"clause\":\"then[7]\",\"supported\":true,\"reason\":\"Lines 227-228 display 'TRANSACTIONS PROCESSED :' with WS-TRANSACTION-COUNT and 'TRANSACTIONS REJECTED  :' with WS-REJECT-COUNT.\"},{\"clause\":\"then[8]\",\"supported\":true,\"reason\":\"Lines 229-231 move 4 to RETURN-CODE only if WS-REJECT-COUNT > 0, and there is no else branch.\"}]}",
+    "type": "text"
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 5555,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 5555,
+     "model": null,
+     "output_tokens": 1992,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 1992,
+   "output_tokens_details": {
+    "thinking_tokens": 919
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}

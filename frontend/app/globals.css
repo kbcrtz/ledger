@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* Ledger tokens: auditor's working papers on mainframe green-bar stock. */
+@theme {
+  --color-paper: #f4f6f2;
+  --color-sheet: #fbfcfa;
+  --color-ink: #1b2420;
+  --color-ink-soft: #4c5a53;
+  --color-rule: #c9d3cc;
+  --color-bar: #e3eee4;
+  --color-marker: #ffefa0;
+  --color-marker-strong: #ffd84d;
+  --color-verified: #1f6b4a;
+  --color-traced: #3c5a85;
+  --color-flagged: #a35c00;
+  --color-rejected: #a8322d;
+  --color-approved: #2d5f3a;
+  --color-diverged: #1f5f8b;
+  --color-stale: #6e5a94;
+  --color-extracted: #6b746f;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-plex-serif), ui-serif, Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html, body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1;
+}
+:focus-visible {
+  outline: 2px solid var(--color-traced);
+  outline-offset: 2px;
+}
+/* Accounting double rule under totals */
+.double-rule {
+  border-bottom: 3px double var(--color-ink);
+}
+/* Monaco decorations */
+.ledger-bar { background: var(--color-bar); }
+.ledger-cited { background: rgba(255, 239, 160, 0.85); }
+.ledger-active { background: var(--color-marker-strong); }
+.ledger-active-gutter { background: var(--color-ink); width: 4px !important; margin-left: 3px; }
+.ledger-cited-gutter { background: #c9a227; width: 3px !important; margin-left: 4px; }
+.ledger-exec-gutter { background: var(--color-verified); width: 2px !important; margin-left: 12px; opacity: .55; }
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}

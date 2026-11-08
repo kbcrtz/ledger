@@ -1,0 +1,359 @@
+{
+ "agent": "extractor",
+ "key": "97304404ff6d1a6c6eb3db371556eb3832525dfca5c90d5e3bb643ebc7bbdc64",
+ "seconds": 2.2,
+ "request": {
+  "model": "claude-opus-5-5",
+  "max_tokens": 64000,
+  "system": "You are the extractor in Ledger, a system that documents legacy COBOL business rules so that a modern port can be written from the rules alone and checked against the running original.\n\nWrite business rules as Given/When/Then scenarios in plain English that a policy owner can read and approve. Hard requirements:\n\n- Every clause cites the exact source lines it comes from (file plus [first, last] line numbers from the numbered listing; keep spans tight, normally 1-12 lines). If a statement cannot be sourced to specific lines, leave it out.\n- Every clause lists the COBOL data names (\"fields\") and literal values (\"literals\": codes, messages, constants, without quotes) it relies on. Each listed field and literal must literally appear in the cited lines; a checker will reject the clause otherwise. Cite a declaration line (for example a PIC clause in WORKING-STORAGE) when the clause depends on a field's size or precision.\n- Describe what the code actually does, not what it was probably meant to do. If the code has surprising behaviour (a later check overwriting an earlier result, a branch that can never run, arithmetic that truncates, a check that ignores something), state that behaviour precisely in the rule.\n- Separate business logic from file plumbing. Opening/closing files, file-status checks, and abend handling are plumbing; leave them out unless they change a business outcome. Balance and record updates (for example 2700-*, 2800-*, 1050-* paragraphs) are business logic: a port that skips them would produce different output files.\n- Be precise enough that a developer who never sees the COBOL could reproduce the outputs exactly: name the output fields set, the exact codes and message texts, the order of checks, signs and arithmetic (COBOL truncates toward zero unless ROUNDED is written), and which records are created versus updated.\n- Keep each clause to one checkable fact. When a fact depends on a record layout, field size or precision, put it in its own clause that cites the declaration. Do not restate in one clause what another clause (or another part of the program) establishes.\n- Use the field names exactly as declared. Use the tools to read any other paragraph or field layout you need; do not guess line numbers.\n\nReturn only rules for the unit you are given, at most the number requested, each one a distinct behaviour with an observable effect on the program's outputs.",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Program: CBTRN02C (CBTRN02C.cbl, 732 lines). Copybooks: CVTRA06Y, CVTRA05Y, CVACT03Y, CVACT01Y, CVTRA01Y.\n\nUnit: CBTRN02C-validate. Focus: Validation of each daily transaction before posting (card cross-reference lookup, account lookup, and the checks made on the account).\nReturn at most 4 rule(s).\n\nFiles (FILE-CONTROL):\n  DALYTRAN-FILE: ASSIGN DALYTRAN, SEQUENTIAL SEQUENTIAL, key None\n  TRANSACT-FILE: ASSIGN TRANFILE, INDEXED RANDOM, key FD-TRANS-ID\n  XREF-FILE: ASSIGN XREFFILE, INDEXED RANDOM, key FD-XREF-CARD-NUM\n  DALYREJS-FILE: ASSIGN DALYREJS, SEQUENTIAL SEQUENTIAL, key None\n  ACCOUNT-FILE: ASSIGN ACCTFILE, INDEXED RANDOM, key FD-ACCT-ID\n  TCATBAL-FILE: ASSIGN TCATBALF, INDEXED RANDOM, key FD-TRAN-CAT-KEY\n\nSource for this unit (root paragraph(s) and their non-plumbing callees, with line numbers):\n\n--- CBTRN02C.cbl paragraph 1500-VALIDATE-TRAN (lines 370-378) ---\n 370        1500-VALIDATE-TRAN.\n 371            PERFORM 1500-A-LOOKUP-XREF.\n 372            IF WS-VALIDATION-FAIL-REASON = 0\n 373               PERFORM 1500-B-LOOKUP-ACCT\n 374            ELSE\n 375               CONTINUE\n 376            END-IF\n 377       * ADD MORE VALIDATIONS HERE\n 378            EXIT.\n\n--- CBTRN02C.cbl paragraph 1500-A-LOOKUP-XREF (lines 380-392) ---\n 380        1500-A-LOOKUP-XREF.\n 381       *    DISPLAY 'CARD NUMBER: ' DALYTRAN-CARD-NUM\n 382            MOVE DALYTRAN-CARD-NUM TO FD-XREF-CARD-NUM\n 383            READ XREF-FILE INTO CARD-XREF-RECORD\n 384               INVALID KEY\n 385                 MOVE 100 TO WS-VALIDATION-FAIL-REASON\n 386                 MOVE 'INVALID CARD NUMBER FOUND'\n 387                   TO WS-VALIDATION-FAIL-REASON-DESC\n 388               NOT INVALID KEY\n 389       *           DISPLAY 'ACCOUNT RECORD FOUND'\n 390                   CONTINUE\n 391            END-READ\n 392            EXIT.\n\n--- CBTRN02C.cbl paragraph 1500-B-LOOKUP-ACCT (lines 393-422) ---\n 393        1500-B-LOOKUP-ACCT.\n 394            MOVE XREF-ACCT-ID TO FD-ACCT-ID\n 395            READ ACCOUNT-FILE INTO ACCOUNT-RECORD\n 396               INVALID KEY\n 397                 MOVE 101 TO WS-VALIDATION-FAIL-REASON\n 398                 MOVE 'ACCOUNT RECORD NOT FOUND'\n 399                   TO WS-VALIDATION-FAIL-REASON-DESC\n 400               NOT INVALID KEY\n 401       *         DISPLAY 'ACCT-CREDIT-LIMIT:' ACCT-CREDIT-LIMIT\n 402       *         DISPLAY 'TRAN-AMT         :' DALYTRAN-AMT\n 403                 COMPUTE WS-TEMP-BAL = ACCT-CURR-CYC-CREDIT\n 404                                     - ACCT-CURR-CYC-DEBIT\n 405                                     + DALYTRAN-AMT\n 406 \n 407                 IF ACCT-CREDIT-LIMIT >= WS-TEMP-BAL\n 408                   CONTINUE\n 409                 ELSE\n 410                   MOVE 102 TO WS-VALIDATION-FAIL-REASON\n 411                   MOVE 'OVERLIMIT TRANSACTION'\n 412                     TO WS-VALIDATION-FAIL-REASON-DESC\n 413                 END-IF\n 414                 IF ACCT-EXPIRAION-DATE >= DALYTRAN-ORIG-TS (1:10)\n 415                   CONTINUE\n 416                 ELSE\n 417                   MOVE 103 TO WS-VALIDATION-FAIL-REASON\n 418                   MOVE 'TRANSACTION RECEIVED AFTER ACCT EXPIRATION'\n 419                     TO WS-VALIDATION-FAIL-REASON-DESC\n 420                 END-IF\n 421            END-READ\n 422            EXIT.\n\nLayouts of data names referenced above (from the deterministic parser):\nACCOUNT-RECORD                     group            record=ACCOUNT-RECORD offset=0 size=300 declared=CVACT01Y.cpy:4\nACCT-CREDIT-LIMIT                  S9(10)V9(2)      record=ACCOUNT-RECORD offset=24 size=12 declared=CVACT01Y.cpy:8\nACCT-CURR-CYC-CREDIT               S9(10)V9(2)      record=ACCOUNT-RECORD offset=78 size=12 declared=CVACT01Y.cpy:13\nACCT-CURR-CYC-DEBIT                S9(10)V9(2)      record=ACCOUNT-RECORD offset=90 size=12 declared=CVACT01Y.cpy:14\nACCT-EXPIRAION-DATE                X(10)            record=ACCOUNT-RECORD offset=58 size=10 declared=CVACT01Y.cpy:11\nCARD-XREF-RECORD                   group            record=CARD-XREF-RECORD offset=0 size=50 declared=CVACT03Y.cpy:4\nDALYTRAN-AMT                       S9(9)V9(2)       record=DALYTRAN-RECORD offset=132 size=11 declared=CVTRA06Y.cpy:10\nDALYTRAN-CARD-NUM                  X(16)            record=DALYTRAN-RECORD offset=262 size=16 declared=CVTRA06Y.cpy:15\nDALYTRAN-ORIG-TS                   X(26)            record=DALYTRAN-RECORD offset=278 size=26 declared=CVTRA06Y.cpy:16\nFD-ACCT-ID                         9(11)            record=FD-ACCTFILE-REC offset=0 size=11 declared=CBTRN02C.cbl:88\nFD-XREF-CARD-NUM                   X(16)            record=FD-XREFFILE-REC offset=0 size=16 declared=CBTRN02C.cbl:78\nTRAN-AMT                           S9(9)V9(2)       record=TRAN-RECORD offset=132 size=11 declared=CVTRA05Y.cpy:10\nWS-TEMP-BAL                        S9(9)V9(2)       record=WS-COUNTERS offset=18 size=11 declared=CBTRN02C.cbl:187\nWS-VALIDATION-FAIL-REASON          9(4)             record=WS-VALIDATION-TRAILER offset=0 size=4 declared=CBTRN02C.cbl:181\nWS-VALIDATION-FAIL-REASON-DESC     X(76)            record=WS-VALIDATION-TRAILER offset=4 size=76 declared=CBTRN02C.cbl:182\nXREF-ACCT-ID                       9(11)            record=CARD-XREF-RECORD offset=25 size=11 declared=CVACT03Y.cpy:7\n\nOther paragraphs you can read with get_paragraph: (main), 0000-DALYTRAN-OPEN, 0100-TRANFILE-OPEN, 0200-XREFFILE-OPEN, 0300-DALYREJS-OPEN, 0400-ACCTFILE-OPEN, 0500-TCATBALF-OPEN, 1000-DALYTRAN-GET-NEXT, 2000-POST-TRANSACTION, 2500-WRITE-REJECT-REC, 2700-UPDATE-TCATBAL, 2700-A-CREATE-TCATBAL-REC, 2700-B-UPDATE-TCATBAL-REC, 2800-UPDATE-ACCOUNT-REC, 2900-WRITE-TRANSACTION-FILE, 9000-DALYTRAN-CLOSE, 9100-TRANFILE-CLOSE, 9200-XREFFILE-CLOSE, 9300-DALYREJS-CLOSE, 9400-ACCTFILE-CLOSE, 9500-TCATBALF-CLOSE, Z-GET-DB2-FORMAT-TIMESTAMP, 9999-ABEND-PROGRAM, 9910-DISPLAY-IO-STATUS"
+   },
+   {
+    "role": "assistant",
+    "content": [
+     {
+      "type": "thinking",
+      "thinking": "",
+      "signature": "CAQS0wUKEAgTGAI4AUIIdGhpbmtpbmcSDAMYBUihKdBKOT3CyhoM/S2BnScxuroT6BEtIjDicFc1Qm/e+xbqcAAr2Miqf0Wu74eVhrTV8XFEizRcfdBade7z8SRe5a4AzCapqosq8ATA+vFz9nfjZ/mL1cdCK5WQIBbe46v8XDxIh979WmkHEZhStQXn99q8YINCioamAYQ+XWw6b2y1kR8xzrKmwJxIhgta0aQEElBe/58z++DXo/4GMlPOkhHjOfXjagxy0vPLaBQeHeItaZ2gZVCzAHBCY9b8hfoGugenlorYFNksivTmVTDuROc8sMdbNdOiFBwHSWBqxTCVirLLgdbAf7JmoozaxAXhfU0xfrNJzkHVxd5+tA//DsIoY/YlC6RrsL/1WaeHqrOZ1LES1u3sKbnWkL019DoCvzWAT/NVenM3aHg+xuXWkZce6LCr7eWFwf9WSE6RXXsmckKMfiE/B4RoebaPpR/d5e27gHwYtkg0qs3JE5OMjogiws0xaiDg5MY26ISpSdx2aJccdaerZO24hijbSOdYtSJJuQuY2PPy+ZwNkB+S4h5KDWUEMsCgY+gw3I39hmKZcPl9dHOchpuNqfeOyahckLwhCekohmgBJibmH1hlZV0aEoumScKwQwMUTPelHplJKSOX0eFyBvcJcjmhN18Fxoiy9jK/kXTx4tGy4Mc5rlrvpcbOjVQECujwKh8tir/jBxx8mcn/uD0q/CR1dIEx7nK3bvDhUuYNT863zD94TH+aNbt9zL4EA9uoCtvgjMl8W31LJxU3wNBzZ6wWGJK9mJWiIfjO/vRbLKVI9B0zkvN7nv1gdnbvNsQiUqz3IfE5W0QfPuL26GiLDCrCNVkz9fn4xrtYmrHCb0HRNyyZuZ649h7Ioj2nGxgDt+UcHLdM1S6bMBCTwdyJss47WQfPd6k5IMIfcCKWngVFRiylgjVMo8Yqmt/GQY0YAQ=="
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_01JzuoYK1cUGHRQQRAo5PSFH",
+      "name": "get_paragraph",
+      "input": {
+       "name": "(main)"
+      }
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_018Wa49ynksoR18DqDqpArVJ",
+      "name": "get_lines",
+      "input": {
+       "file": "CBTRN02C.cbl",
+       "first": 176,
+       "last": 190
+      }
+     }
+    ]
+   },
+   {
+    "role": "user",
+    "content": [
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_01JzuoYK1cUGHRQQRAo5PSFH",
+      "content": "error: 'no paragraph (main) in CBTRN02C'",
+      "is_error": true
+     },
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_018Wa49ynksoR18DqDqpArVJ",
+      "content": " 176         01 REJECT-RECORD.\n 177            05 REJECT-TRAN-DATA          PIC X(350).\n 178            05 VALIDATION-TRAILER        PIC X(80).\n 179 \n 180         01 WS-VALIDATION-TRAILER.\n 181            05 WS-VALIDATION-FAIL-REASON      PIC 9(04).\n 182            05 WS-VALIDATION-FAIL-REASON-DESC PIC X(76).\n 183 \n 184         01 WS-COUNTERS.\n 185            05 WS-TRANSACTION-COUNT          PIC 9(09) VALUE 0.\n 186            05 WS-REJECT-COUNT               PIC 9(09) VALUE 0.\n 187            05 WS-TEMP-BAL                   PIC S9(09)V99.\n 188 \n 189         01 WS-FLAGS.\n 190            05 WS-CREATE-TRANCAT-REC         PIC X(01) VALUE 'N'.",
+      "is_error": false
+     }
+    ]
+   }
+  ],
+  "thinking": {
+   "type": "adaptive"
+  },
+  "output_config": {
+   "effort": "high",
+   "format": {
+    "type": "json_schema",
+    "schema": {
+     "type": "object",
+     "properties": {
+      "rules": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "title": {
+          "type": "string"
+         },
+         "paragraph": {
+          "type": "string",
+          "description": "Main paragraph implementing the rule"
+         },
+         "summary": {
+          "type": "string",
+          "description": "One or two sentences for the catalog"
+         },
+         "given": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in the cited lines"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in the cited lines"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "when": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in the cited lines"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in the cited lines"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "then": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "text": {
+             "type": "string",
+             "description": "Plain-English statement a policy owner can read."
+            },
+            "file": {
+             "type": "string",
+             "description": "Source file the lines are in, e.g. CBTRN02C.cbl or CVACT01Y.cpy"
+            },
+            "lines": {
+             "type": "array",
+             "items": {
+              "type": "integer"
+             },
+             "description": "[first, last] line numbers, inclusive"
+            },
+            "fields": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "COBOL data names this clause relies on; each must appear in the cited lines"
+            },
+            "literals": {
+             "type": "array",
+             "items": {
+              "type": "string"
+             },
+             "description": "Literal values (codes, messages, constants) this clause relies on, without quotes; each must appear in the cited lines"
+            }
+           },
+           "required": [
+            "text",
+            "file",
+            "lines",
+            "fields",
+            "literals"
+           ],
+           "additionalProperties": false
+          }
+         }
+        },
+        "required": [
+         "title",
+         "paragraph",
+         "summary",
+         "given",
+         "when",
+         "then"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "rules"
+     ],
+     "additionalProperties": false
+    }
+   }
+  },
+  "tools": [
+   {
+    "name": "get_paragraph",
+    "description": "Numbered source of one paragraph of the program.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "name": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   },
+   {
+    "name": "get_lines",
+    "description": "Numbered source lines [first, last] of the program or a copybook (file e.g. 'CVACT01Y.cpy'; default the program).",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "file": {
+       "type": "string"
+      },
+      "first": {
+       "type": "integer"
+      },
+      "last": {
+       "type": "integer"
+      }
+     },
+     "required": [
+      "file",
+      "first",
+      "last"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   },
+   {
+    "name": "get_field",
+    "description": "Layout of a data item: PIC, offset, size, record, declaring file and line.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "name": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "additionalProperties": false
+    },
+    "eager_input_streaming": true
+   }
+  ]
+ },
+ "response": {
+  "id": "msg_011Cgpaw6Bf8khYvZHFNsQAf",
+  "container": null,
+  "content": [
+   {
+    "id": "toolu_012mPRNYCEKxvo7LSouVbBnt",
+    "input": {
+     "file": "CBTRN02C.cbl",
+     "first": 193,
+     "last": 240
+    },
+    "name": "get_lines",
+    "type": "tool_use",
+    "caller": {
+     "type": "direct"
+    }
+   }
+  ],
+  "diagnostics": null,
+  "model": "claude-opus-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 6854,
+   "iterations": [
+    {
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+     },
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 0,
+     "input_tokens": 6854,
+     "model": null,
+     "output_tokens": 100,
+     "type": "message"
+    }
+   ],
+   "output_tokens": 100,
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "service_tier": "standard",
+   "speed": "standard"
+  }
+ }
+}
