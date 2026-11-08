@@ -5,7 +5,7 @@ import { get, RuleSummary } from "@/lib/api";
 import { StateIcon } from "@/components/Status";
 import ProofChain, { stateOf } from "@/components/ProofChain";
 import { Bug, Database } from "@/components/Icons";
-import { FINDINGS, differ, plural } from "@/lib/labels";
+import { FINDINGS, differ } from "@/lib/labels";
 
 type Summary = {
   totals: Record<string, number>;
@@ -146,7 +146,6 @@ function RealData({ summary }: { summary: Summary }) {
   const post = summary.sample.CBTRN02C, int = summary.sample.CBACT04C;
   if (!post && !int) return null;
   const both = (post?.match ?? true) && (int?.match ?? true);
-  const neither = Object.values(summary.coverage ?? {}).reduce((a, c) => a + (c.neither ?? 0), 0);
   const parts = [
     post && `${post.files.DALYREJS?.legacy_records ?? 0} rejected transactions`,
     post && `${post.files.TRANSACT?.legacy_records ?? 0} posted`,
@@ -162,7 +161,6 @@ function RealData({ summary }: { summary: Summary }) {
           ? <>the original COBOL and the Python rebuild produce <span className="text-verified font-medium">identical results</span>: {parts}.</>
           : <>the original and the rebuild differ: {differ((post?.difference_count ?? 0) + (int?.difference_count ?? 0))}.</>}
       </span>
-      {neither > 0 && <Link href="/coverage" className="link text-[13px] whitespace-nowrap mt-[1px]">{plural(neither, "statement")} untouched by any rule or test</Link>}
     </div>
   );
 }
