@@ -96,11 +96,28 @@ JUDGE_SYSTEM = """You are the verifier judge in Ledger. You check whether each c
 For each clause you get its text and the cited lines (marked with >>), with a few surrounding lines for context only. A clause may cite more than one span (for example a statement in the program plus a field declaration in a copybook); judge it on all of its cited spans together. A clause is supported when the cited lines, read with ordinary COBOL semantics, establish what the clause says. Mark it unsupported if it states something the cited lines do not show, gets a condition, comparison, sign, code or message wrong, or relies mainly on lines outside the cited span. Be strict about meaning, not about wording. Give a one-sentence reason either way."""
 
 
-def judge_rule(program: str, rule: dict) -> dict[str, dict]:
+def clause_key(c: dict) -> str:
+    """Identity of a clause's content: unchanged text, spans, fields and literals mean
+    an earlier verdict on it still holds."""
+    return json.dumps({k: c.get(k) for k in ("text", "source", "also", "fields", "literals")}, sort_keys=True)
+
+
+def clause_items(rule: dict):
+    for part in ("given", "when", "then"):
+        for i, c in enumerate(rule["scenario"][part]):
+            yield f"{part}[{i}]", c
+
+
+def judge_rule(program: str, rule: dict, only: set[str] | None = None) -> dict[str, dict]:
+    """Judge the rule's clauses in one call. With `only`, the other clauses are shown as
+    already-verified context and the judge returns verdicts just for `only`."""
     parts = []
     for part in ("given", "when", "then"):
         for i, c in enumerate(rule["scenario"][part]):
             cid = f"{part}[{i}]"
+            if only is not None and cid not in only:
+                parts.append(f"### {cid} (already verified; context only, no verdict needed): {c['text']}")
+                continue
             blocks = []
             for src in clause_spans(c) or [{}]:
                 f = src.get("file") or f"{program}.cbl"
@@ -114,21 +131,35 @@ def judge_rule(program: str, rule: dict) -> dict[str, dict]:
                 blocks.append(f"{f}:\n" + "\n".join(ctx))
             parts.append(f"### {cid}: {c['text']}\nfields={c.get('fields')} literals={c.get('literals')}\n" + "\n".join(blocks))
     prompt = f"Rule {rule['id']}: {rule['title']}\n\n" + "\n\n".join(parts)
+    if only is not None:
+        prompt += "\n\nGive verdicts only for the clauses that are not marked already verified."
     out = run_agent("verifier", JUDGE_SYSTEM, prompt, schema=JUDGE_SCHEMA, effort="medium", max_tokens=32000)
     return {v["clause"]: v for v in out["verdicts"]}
 
 
-def verify_rule(program: str, rule: dict) -> dict:
-    """Returns {'passed': bool, 'clauses': [...], 'failures': [...]} for the rule's current scenario."""
+def verify_rule(program: str, rule: dict, prior: dict[str, dict] | None = None) -> dict:
+    """Returns {'passed': bool, 'clauses': [...], 'failures': [...]} for the rule's current scenario.
+
+    `prior` maps clause_key -> an earlier passing clause result. A clause whose content is
+    unchanged keeps that verdict instead of being re-judged, so a retry only re-checks
+    the clauses the extractor actually changed (the judge is not perfectly consistent,
+    and re-judging unchanged clauses let retries break clauses that had passed)."""
+    prior = prior or {}
     results, failures = [], []
-    det = {}
-    for part in ("given", "when", "then"):
-        for i, c in enumerate(rule["scenario"][part]):
-            det[f"{part}[{i}]"] = check_clause(program, c)
+    det, keys = {}, {}
+    for cid, c in clause_items(rule):
+        det[cid] = check_clause(program, c)
+        keys[cid] = clause_key(c)
+    reuse = {cid for cid, errs in det.items() if not errs and keys[cid] in prior}
+    todo = {cid for cid, errs in det.items() if not errs and cid not in reuse}
     # Only clauses that pass the deterministic check are worth the judge's time,
     # but we judge the whole rule in one call so it sees the full scenario.
-    judged = judge_rule(program, rule) if any(not e for e in det.values()) else {}
+    judged = (judge_rule(program, rule, only=todo if reuse else None) if todo else {})
     for cid, errs in det.items():
+        if cid in reuse:
+            res = {**prior[keys[cid]], "clause": cid, "reused": True}
+            results.append(res)
+            continue
         v = judged.get(cid)
         res = {"clause": cid, "deterministic": {"passed": not errs, "errors": errs},
                "judge": ({"supported": v["supported"], "reason": v["reason"]} if (v and not errs) else None)}

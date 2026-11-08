@@ -48,19 +48,24 @@ def cmd_parse(_):
 
 def _verify_and_retry(rule: dict) -> dict:
     from .agents.extractor import repair_rule
-    from .agents.verifier import verify_rule, log_result
+    from .agents.verifier import verify_rule, log_result, clause_items, clause_key
     unit = next(u for u in UNITS if u["id"] == rule["unit"])
     prog = unit["program"]
     res = verify_rule(prog, rule)
     rule["verification"]["attempts"].append(res)
     log_result(prog, rule, res, 1)
     if not res["passed"]:
+        # Remember clauses that already passed, so the retry re-checks only changed ones.
+        prior = {clause_key(c): r for (_, c), r in zip(clause_items(rule), res["clauses"]) if r["passed"]}
         fixed = repair_rule(unit, rule, res["failures"])
         if fixed:
             rule.update({k: fixed[k] for k in ("title", "paragraph", "summary")})
             rule["scenario"] = {k: [_clause(c) for c in fixed[k]] for k in ("given", "when", "then")}
             rule["status_history"].append({"status": "extracted", "why": "retried after verifier rejection", "by": "extractor"})
-            res = verify_rule(prog, rule)
+            res = verify_rule(prog, rule, prior=prior)
+            kept = sum(1 for c in res["clauses"] if c.get("reused"))
+            log.event(prog, "verifier", "retry-scope",
+                      f"{rule['id']}: kept {kept} unchanged passing clause(s), re-checked {len(res['clauses']) - kept}")
             rule["verification"]["attempts"].append(res)
             log_result(prog, rule, res, 2)
     if res["passed"]:
