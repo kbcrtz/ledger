@@ -3,9 +3,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { get, RuleSummary } from "@/lib/api";
 import { StateIcon } from "@/components/Status";
-import ChecksBox from "@/components/Checks";
-import { Bug, Database, FileCode } from "@/components/Icons";
-import { FINDINGS, PROGRAM_BLURB, PROGRAM_NAME, differ, fileName, outcomeText, plural } from "@/lib/labels";
+import ProofChain, { stateOf } from "@/components/ProofChain";
+import { Bug, Database } from "@/components/Icons";
+import { FINDINGS, differ, plural } from "@/lib/labels";
 
 type Summary = {
   totals: Record<string, number>;
@@ -16,12 +16,16 @@ type Summary = {
   coverage: Record<string, { statement_lines: number; executed_any: number; cited_by_rules: number; neither: number }>;
 };
 
-const PROGRAMS = ["CBTRN02C", "CBACT04C"];
+const PROGRAMS = ["CBTRN02C", "CBACT04C"] as const;
+const SHORT: Record<string, string> = { CBTRN02C: "Daily posting", CBACT04C: "Monthly interest" };
+const DOT: Record<string, string> = { CBTRN02C: "bg-accent-bright", CBACT04C: "bg-approved" };
+type Filter = "all" | (typeof PROGRAMS)[number] | "findings";
 
 export default function Home() {
   const [rules, setRules] = useState<RuleSummary[] | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>("all");
 
   useEffect(() => {
     Promise.all([get<RuleSummary[]>("/api/rules"), get<Summary>("/api/summary")])
@@ -29,7 +33,12 @@ export default function Home() {
       .catch((e) => setError(String(e)));
   }, []);
 
-  const byId = useMemo(() => Object.fromEntries((rules ?? []).map((r) => [r.id, r])), [rules]);
+  // One finding per rule today; the first one wins if a rule ever has more.
+  const finding = useMemo(() => {
+    const m: Record<string, (typeof FINDINGS)[number]> = {};
+    FINDINGS.forEach((f) => { if (!m[f.rule]) m[f.rule] = f; });
+    return m;
+  }, []);
 
   if (error) return <Empty>The review API is not reachable ({error}). Start it with <code className="font-mono">uvicorn backend.app:app --port 8000</code>.</Empty>;
   if (!rules || !summary) return <Empty>Loading rules…</Empty>;
@@ -39,166 +48,122 @@ export default function Home() {
   const sourced = rules.filter((r) => r.sourced).length;
   const rebuilt = rules.filter((r) => r.port_function).length;
   const signed = rules.filter((r) => r.signed_off).length;
-  const allTestsPass = summary.cases.total > 0 && summary.cases.passed === summary.cases.total;
-  const findings = FINDINGS.filter((f) => byId[f.rule]);
+  const withFinding = rules.filter((r) => finding[r.id]).length;
+  const shown = rules.filter((r) =>
+    filter === "all" ? true : filter === "findings" ? !!finding[r.id] : r.program === filter);
+  const filters: { key: Filter; label: string; count: number }[] = [
+    { key: "all", label: "All rules", count: n },
+    ...PROGRAMS.map((p) => ({ key: p as Filter, label: SHORT[p], count: rules.filter((r) => r.program === p).length })),
+    { key: "findings", label: "Has a finding", count: withFinding },
+  ];
 
   return (
     <>
-    <section aria-label="What Ledger does" className="dot-grid border-b border-rule">
-      <div className="mx-auto max-w-[1600px] px-6 pt-16 pb-14">
-        <h1 className="text-[48px] leading-[1.04] font-semibold tracking-[-0.035em] max-w-[18ch] sm:max-w-none">
-          <span className="block text-[#8e8784]">What the old code actually does,</span>
-          <span className="block">written down and checked against it.</span>
-        </h1>
-        <p className="mt-5 text-[16.5px] leading-relaxed text-ink-soft max-w-[64ch]">
-          Ledger read two of AWS CardDemo&apos;s COBOL batch programs and wrote their business rules in plain English.
-          Every rule then goes through four checks, in order, and the last one is a person&apos;s call.
-        </p>
-      </div>
-    </section>
-    <div className="mx-auto max-w-[1600px] px-6 pt-10 pb-16">
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_300px] gap-8 items-start">
-        <div className="grid gap-6 min-w-0">
-          <ChecksBox title={`${n} rules`} checks={[
-            { name: "Sourced", state: sourced === n ? "pass" : "pending", result: `${sourced} of ${plural(n, "rule")}`,
-              detail: "Every sentence points to the COBOL lines it came from, and a checker confirmed those lines say it." },
-            { name: "Rebuilt", state: rebuilt === n ? "pass" : "pending", result: `${rebuilt} of ${plural(n, "rule")}`,
-              detail: "A separate AI wrote a Python version from the rules alone. It never saw the COBOL." },
-            { name: "Tested", state: allTestsPass ? "pass" : summary.cases.passed < summary.cases.total ? "fail" : "pending",
-              result: `${summary.cases.passed} of ${plural(summary.cases.total, "test")} match`,
-              detail: "The original COBOL and the Python rebuild ran on the same inputs and produced the same outputs." },
-            { name: "Signed off", state: signed === n ? "approved" : "pending", result: signed ? `${signed} of ${plural(n, "rule")}` : "Not yet",
-              detail: "A person reads each rule beside its code and approves or rejects it. Open a rule below to do that." },
-          ]} />
-
-          {findings.length > 0 && (
-            <section className="box" aria-label="Findings">
-              <div className="box-header flex items-center gap-2">
-                <Bug className="text-rejected" />
-                <h2 className="font-semibold">What it found in the code</h2>
-                <span className="counter">{findings.length}</span>
-                <span className="ml-auto text-[12.5px] text-ink-soft hidden sm:inline">Behavior nobody wrote down, each backed by a verified sentence</span>
-              </div>
-              <ul>
-                {findings.map((f) => (
-                  <li key={f.rule + f.clause} className="box-row">
-                    <Link href={`/rules/${f.rule}${f.clause ? `?clause=${encodeURIComponent(f.clause)}` : ""}`}
-                      className="flex items-baseline gap-3 px-4 py-3 hover:bg-sheet group">
-                      <span className="flex-1 text-[15px] group-hover:text-accent">{f.headline}</span>
-                      <span className="text-[12px] text-ink-soft whitespace-nowrap hidden sm:inline">{PROGRAM_NAME[byId[f.rule].program]}</span>
-                      <span className="font-mono text-[12px] text-accent whitespace-nowrap">{f.rule.replace("BR-", "")}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {PROGRAMS.map((p) => {
-            const rs = rules.filter((r) => r.program === p);
-            if (!rs.length) return null;
-            return (
-              <section key={p} className="box" aria-label={PROGRAM_NAME[p]}>
-                <div className="box-header">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <FileCode className="text-ink-soft" />
-                    <h2 className="font-semibold">{PROGRAM_NAME[p]}</h2>
-                    <span className="font-mono text-[12px] text-ink-soft">{p}.cbl</span>
-                    <span className="counter">{rs.length}</span>
-                  </div>
-                  <p className="text-[13px] text-ink-soft mt-1">{PROGRAM_BLURB[p]}</p>
-                </div>
-                <ul>
-                  {rs.map((r) => {
-                    const ok = r.tests_total > 0 && r.tests_passed === r.tests_total;
-                    return (
-                      <li key={r.id} className="box-row">
-                        <Link href={`/rules/${r.id}`} className="grid grid-cols-[16px_1fr_auto] gap-x-3 px-4 py-3 hover:bg-sheet group items-start">
-                          <span className="mt-[3px]"><StateIcon state={r.signed_off ? "approved" : r.status === "verified" ? "pass" : r.status === "rejected" ? "fail" : "pending"} title={r.status} /></span>
-                          <span className="min-w-0">
-                            <span className="block text-[15px] font-semibold leading-snug group-hover:text-accent">{r.title}</span>
-                            <span className="block text-[12.5px] text-ink-soft mt-0.5">
-                              <span className="font-mono">{r.id.replace("BR-", "")}</span> from paragraph <span className="font-mono">{r.paragraph}</span>
-                            </span>
-                          </span>
-                          <span className={`text-[12.5px] whitespace-nowrap mt-[2px] ${ok ? "text-verified" : r.tests_total ? "text-rejected" : "text-ink-soft"}`}>
-                            {r.tests_total ? `${r.tests_passed}/${r.tests_total} tests` : "no tests"}
-                          </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
-            );
-          })}
+      <section aria-label="What Ledger does" className="dot-grid border-b border-rule">
+        <div className="mx-auto max-w-[1600px] px-6 pt-12 pb-10">
+          <h1 className="text-[40px] leading-[1.06] font-semibold tracking-[-0.03em]">
+            <span className="block text-[#8e8784]">What the old code actually does,</span>
+            <span className="block">written down and checked against it.</span>
+          </h1>
+          <p className="mt-4 text-[16px] leading-relaxed text-ink-soft max-w-[68ch]">
+            Ledger read two of AWS CardDemo&apos;s COBOL batch programs, wrote their business rules in plain English,
+            and checked every rule against the running original.
+          </p>
         </div>
+      </section>
 
-        <aside className="grid gap-6 text-[14px]" aria-label="About">
-          <section>
-            <h2 className="font-semibold text-[16px]">About</h2>
-            <p className="mt-2 text-ink-soft leading-relaxed">
-              The input is <a className="link" href="https://github.com/aws-samples/aws-mainframe-modernization-carddemo" target="_blank" rel="noreferrer">AWS CardDemo</a>,
-              an open-source COBOL credit-card system. The original programs run unchanged under GnuCOBOL; nothing was rewritten by hand.
-            </p>
-          </section>
+      <div className="mx-auto max-w-[1600px] px-6 pt-8 pb-16 grid gap-6">
+        <section className="box" aria-label="Status">
+          <div className="px-5 pt-5 pb-4">
+            <ProofChain compact steps={[
+              { title: "Sourced", value: `${sourced} of ${n} rules`, state: stateOf(sourced, n), detail: "Every sentence cites its COBOL lines." },
+              { title: "Rebuilt", value: `${rebuilt} of ${n} rules`, state: stateOf(rebuilt, n), detail: "Python written from the rules alone." },
+              { title: "Tested", value: `${summary.cases.passed} of ${summary.cases.total} tests match`, state: stateOf(summary.cases.passed, summary.cases.total), detail: "Original and rebuild give the same output." },
+              { title: "Signed off", value: signed ? `${signed} of ${n} rules` : "Not yet", state: stateOf(signed, n), detail: "A person approves each rule." },
+            ]} />
+          </div>
+          <RealData summary={summary} />
+        </section>
 
-          <section className="border-t border-rule pt-5">
-            <h2 className="font-semibold text-[16px] flex items-center gap-2"><Database className="text-ink-soft" />Checked on CardDemo&apos;s own data</h2>
-            <p className="mt-1 text-[13px] text-ink-soft">The tests were written from the rules. This data wasn&apos;t, so it can catch anything the rules missed.</p>
-            <ul className="mt-3 grid gap-3">
-              {PROGRAMS.filter((p) => summary.sample[p]).map((p) => {
-                const s = summary.sample[p];
-                return (
-                  <li key={p} className="grid grid-cols-[16px_1fr] gap-x-2.5">
-                    <span className="mt-[3px]"><StateIcon state={s.match ? "pass" : "fail"} /></span>
-                    <span>
-                      <span className="font-medium">{PROGRAM_NAME[p]}</span>
-                      <span className={`block text-[13px] ${s.match ? "text-verified" : "text-rejected"}`}>{s.match ? "Identical results" : differ(s.difference_count)}</span>
-                      <span className="block text-[12.5px] text-ink-soft">{Object.entries(s.files).map(([f, v]) => `${v.legacy_records} ${fileName(f)}`).join(", ")}; {outcomeText(s.outcome.legacy)}</span>
+        <section className="box" aria-label="Rules">
+          <div className="box-header flex items-center gap-2 flex-wrap !py-2">
+            <h2 className="font-semibold mr-2">Rules</h2>
+            <div role="tablist" aria-label="Filter rules" className="flex gap-1 flex-wrap">
+              {filters.map((f) => (
+                <button key={f.key} role="tab" aria-selected={filter === f.key} onClick={() => setFilter(f.key)}
+                  className={`h-8 px-3 rounded-md text-[13.5px] flex items-center gap-2 ${filter === f.key ? "bg-canvas border border-rule-strong text-ink font-medium" : "text-ink-soft hover:text-ink border border-transparent"}`}>
+                  {f.key === "findings" ? <Bug className="text-flagged" /> : f.key !== "all" ? <span className={`h-2 w-2 rounded-full ${DOT[f.key]}`} aria-hidden /> : null}
+                  {f.label}<span className="counter">{f.count}</span>
+                </button>
+              ))}
+            </div>
+            <span className="ml-auto text-[12.5px] text-ink-soft hidden md:inline">Open a rule to see its COBOL, sentences and Python side by side</span>
+          </div>
+
+          <div className="hidden md:grid grid-cols-[16px_minmax(0,1fr)_150px_96px] gap-x-4 px-4 py-2 text-[12px] text-ink-soft border-b border-rule">
+            <span aria-hidden /><span>Rule</span><span>Program</span><span className="text-right">Tests</span>
+          </div>
+
+          <ul>
+            {shown.map((r) => {
+              const f = finding[r.id];
+              const ok = r.tests_total > 0 && r.tests_passed === r.tests_total;
+              const href = `/rules/${r.id}${f?.clause ? `?clause=${encodeURIComponent(f.clause)}` : ""}`;
+              return (
+                <li key={r.id} className="box-row">
+                  <Link href={href} className="grid grid-cols-[16px_minmax(0,1fr)_auto] md:grid-cols-[16px_minmax(0,1fr)_150px_96px] gap-x-4 px-4 py-3.5 hover:bg-sheet group items-start">
+                    <span className="mt-[3px]"><StateIcon state={r.signed_off ? "approved" : r.status === "verified" ? "pass" : r.status === "rejected" ? "fail" : "pending"} title={r.status} /></span>
+                    <span className="min-w-0">
+                      <span className="block text-[15px] font-semibold leading-snug group-hover:text-accent">{r.title}</span>
+                      {f ? (
+                        <span className="mt-1 flex items-start gap-1.5 text-[13.5px]">
+                          <Bug className="mt-[2px] shrink-0 text-flagged" /><span><span className="text-flagged font-medium">Found in the code:</span> <span className="text-ink">{f.headline}</span></span>
+                        </span>
+                      ) : (
+                        <span className="mt-1 block text-[13.5px] text-ink-soft truncate">{r.summary}</span>
+                      )}
                     </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-
-          <CoverageBar cov={summary.coverage} />
-        </aside>
+                    <span className="hidden md:flex items-center gap-2 text-[13px] text-ink-soft mt-[2px]">
+                      <span className={`h-2 w-2 rounded-full ${DOT[r.program]}`} aria-hidden />{SHORT[r.program] ?? r.program}
+                    </span>
+                    <span className={`text-[13px] text-right whitespace-nowrap mt-[2px] ${ok ? "text-verified" : r.tests_total ? "text-rejected" : "text-ink-soft"}`}>
+                      {r.tests_total ? `${r.tests_passed}/${r.tests_total} pass` : "no tests"}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+            {shown.length === 0 && <li className="px-4 py-6 text-ink-soft">No rules match this filter.</li>}
+          </ul>
+        </section>
       </div>
-    </div>
     </>
   );
 }
 
-// Like GitHub's language bar: how much of the COBOL the tests ran, and what nothing touched.
-function CoverageBar({ cov }: { cov: Summary["coverage"] }) {
-  const t = Object.values(cov ?? {}).reduce((a, c) => ({ total: a.total + c.statement_lines, ran: a.ran + c.executed_any, neither: a.neither + c.neither }), { total: 0, ran: 0, neither: 0 });
-  if (!t.total) return null;
-  const citedOnly = Math.max(0, t.total - t.ran - t.neither);
+// The strongest single claim, in one line: CardDemo's own data gives identical results.
+function RealData({ summary }: { summary: Summary }) {
+  const post = summary.sample.CBTRN02C, int = summary.sample.CBACT04C;
+  if (!post && !int) return null;
+  const both = (post?.match ?? true) && (int?.match ?? true);
+  const neither = Object.values(summary.coverage ?? {}).reduce((a, c) => a + (c.neither ?? 0), 0);
   const parts = [
-    { label: "Run by a test", n: t.ran, color: "bg-verified" },
-    { label: "Cited, not run", n: citedOnly, color: "bg-accent-bright" },
-    { label: "Not cited or run", n: t.neither, color: "bg-[#42403e]" },
-  ];
+    post && `${post.files.DALYREJS?.legacy_records ?? 0} rejected transactions`,
+    post && `${post.files.TRANSACT?.legacy_records ?? 0} posted`,
+    post && `${post.files.ACCOUNT?.legacy_records ?? 0} accounts`,
+    int && `${int.files.TRANSACT?.legacy_records ?? 0} interest charges`,
+  ].filter(Boolean).join(", ");
   return (
-    <section className="border-t border-rule pt-5">
-      <h2 className="font-semibold text-[16px]">Coverage</h2>
-      <p className="mt-1 text-[13px] text-ink-soft">{t.total} COBOL statements across both programs.</p>
-      <div className="mt-3 flex h-2 rounded-full overflow-hidden" role="img" aria-label={parts.map((p) => `${p.label}: ${p.n}`).join(", ")}>
-        {parts.map((p) => <span key={p.label} className={p.color} style={{ width: `${(p.n / t.total) * 100}%` }} />)}
-      </div>
-      <ul className="mt-2.5 grid gap-1 text-[12.5px]">
-        {parts.map((p) => (
-          <li key={p.label} className="flex items-center gap-2">
-            <span className={`h-2 w-2 rounded-full ${p.color}`} aria-hidden />
-            <span>{p.label}</span>
-            <span className="text-ink-soft">{p.n}</span>
-          </li>
-        ))}
-      </ul>
-      <Link href="/coverage" className="link text-[13px] mt-2 inline-block">See which lines nothing touched</Link>
-    </section>
+    <div className="border-t border-rule bg-sheet rounded-b-lg px-5 py-3 flex items-start gap-3 flex-wrap text-[14px]">
+      <span className="mt-[3px]"><StateIcon state={both ? "pass" : "fail"} /></span>
+      <span className="flex-1 min-w-[280px]">
+        <Database className="inline text-ink-soft mr-1.5 align-[-3px]" />
+        On CardDemo&apos;s own data, {both
+          ? <>the original COBOL and the Python rebuild produce <span className="text-verified font-medium">identical results</span>: {parts}.</>
+          : <>the original and the rebuild differ: {differ((post?.difference_count ?? 0) + (int?.difference_count ?? 0))}.</>}
+      </span>
+      {neither > 0 && <Link href="/coverage" className="link text-[13px] whitespace-nowrap mt-[1px]">{plural(neither, "statement")} untouched by any rule or test</Link>}
+    </div>
   );
 }
 
