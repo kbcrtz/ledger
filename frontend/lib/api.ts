@@ -97,3 +97,17 @@ export type Rule = RuleSummary & {
   sample: null | { match: boolean; difference_count: number; differences: Diff[]; files: CaseResult["files"]; outcome: { legacy: string; port: string } };
 };
 export type LogEvent = { ts: string; program: string | null; agent: string; step: string; message: string };
+
+export type Provenance = {
+  found: boolean;
+  parsed: {
+    program_file: string; line_count: number; paragraph_count: number; field_count: number;
+    paragraph: null | { name: string; start: number; end: number; performs: { target: string; line: number }[] | string[]; performed_by: { source: string; line: number }[] };
+    fields: { name: string; pic: string | null; file: string; line: number; record: string; offset: number; size: number; usage: string }[];
+  };
+  model?: string; seconds?: number; cache_file?: string;
+  unit?: string; focus?: string; repair?: boolean;
+  source?: string; layouts?: string; verifier_failures?: string | null;
+  lookups?: { tool: string; input: Record<string, unknown> }[];
+  answer?: Record<string, unknown>;
+};

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { use, useEffect, useMemo, useState } from "react";
-import { get, post, Rule, Clause, Part, CaseResult, ClauseCheck } from "@/lib/api";
+import { get, post, Rule, Clause, Part, CaseResult, ClauseCheck, Provenance } from "@/lib/api";
 import SourceView from "@/components/SourceView";
 import { StatusMark, StateIcon, Tick } from "@/components/Status";
 import DiffTable from "@/components/DiffTable";
@@ -12,7 +12,7 @@ import { PROGRAM_NAME, differ, fileName, lineRange, outcomeText, plural } from "
 const PARTS: Part[] = ["given", "when", "then"];
 const PART_LABEL: Record<Part, string> = { given: "Given", when: "When", then: "Then" };
 const PART_HINT: Record<Part, string> = { given: "the starting situation", when: "what triggers the rule", then: "what the program does" };
-type Tab = "rule" | "tests" | "history";
+type Tab = "rule" | "tests" | "history" | "made";
 
 export default function RuleDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -29,7 +29,7 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
   // #tests / #history open a tab; ?clause=then[3] (from the home page findings) opens a sentence.
   useEffect(() => {
     const h = window.location.hash.slice(1);
-    if (h === "tests" || h === "history") setTabState(h);
+    if (h === "tests" || h === "history" || h === "made") setTabState(h);
   }, []);
   useEffect(() => {
     if (!rule) return;
@@ -94,7 +94,7 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
       </header>
 
       <nav className="mt-5 border-b border-rule flex gap-1 text-[14px]" aria-label="Rule sections">
-        {([["rule", "Rule", undefined], ["tests", "Tests", rule.cases.length], ["history", "History", timelineCount]] as const).map(([k, label, count]) => (
+        {([["rule", "Rule", undefined], ["tests", "Tests", rule.cases.length], ["history", "History", timelineCount], ["made", "How it was made", undefined]] as const).map(([k, label, count]) => (
           <button key={k} onClick={() => setTab(k)} aria-current={tab === k ? "page" : undefined}
             className={`relative flex items-center gap-2 px-3 h-11 ${tab === k ? "font-semibold text-ink" : "text-ink-soft hover:text-ink"}`}>
             {label}{count !== undefined && <span className="counter">{count}</span>}
@@ -264,6 +264,7 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
       )}
 
       {tab === "history" && <Timeline rule={rule} />}
+      {tab === "made" && <HowMade rule={rule} onShowRule={() => setTab("rule")} />}
     </div>
   );
 }
@@ -421,5 +422,156 @@ function Timeline({ rule }: { rule: Rule }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+// "How it was made": every step from COBOL to these sentences, read back from what the
+// pipeline saved (the parser's output and the exact cached AI call). Nothing is regenerated.
+function HowMade({ rule, onShowRule }: { rule: Rule; onShowRule: () => void }) {
+  const [p, setP] = useState<Provenance | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => { get<Provenance>(`/api/rules/${rule.id}/provenance`).then(setP).catch((e) => setErr(String(e))); }, [rule.id]);
+  if (err) return <p className="mt-6 text-rejected">{err}</p>;
+  if (!p) return <p className="mt-6 text-ink-soft">Loading…</p>;
+  const para = p.parsed.paragraph;
+  const look = (l: { tool: string; input: Record<string, unknown> }) =>
+    l.tool === "get_paragraph" ? <>Read paragraph <code className="font-mono text-[12.5px]">{String(l.input.name)}</code></>
+    : l.tool === "get_lines" ? <>Read <code className="font-mono text-[12.5px]">{lineRange(String(l.input.file), [Number(l.input.first), Number(l.input.last)])}</code></>
+    : l.tool === "get_field" ? <>Looked up the layout of <code className="font-mono text-[12.5px]">{String(l.input.name)}</code></>
+    : <>{l.tool} {JSON.stringify(l.input)}</>;
+  return (
+    <div className="mt-6 max-w-[1000px] min-w-0">
+      <p className="text-[14.5px] text-ink-soft max-w-[78ch]">
+        Every step from the COBOL file to the sentences on the Rule tab, in order. All of it is read back from what the pipeline
+        saved when it ran, so this is exactly what happened, not a re-run.
+      </p>
+      <ol className="mt-5 grid grid-cols-1 gap-5 min-w-0">
+        <Step n={1} title="The parser mapped the program" tag="plain code, no AI">
+          <p>It read <code className="font-mono text-[12.5px]">{p.parsed.program_file}</code> ({p.parsed.line_count} lines) and recorded its structure:
+            {" "}{p.parsed.paragraph_count} paragraphs, which paragraph calls which, and {p.parsed.field_count} data fields with their exact size and position. For this rule:</p>
+          {para && (
+            <div className="mt-3 rounded-md border border-rule bg-paper px-3.5 py-2.5 text-[13.5px]">
+              Paragraph <code className="font-mono text-[12.5px]">{para.name}</code> is lines {para.start}–{para.end}
+              {para.performed_by?.length ? <>, called from {para.performed_by.map((c, i) => <span key={i}>{i ? ", " : ""}<code className="font-mono text-[12.5px]">{c.source}</code> at line {c.line}</span>)}</> : null}.
+            </div>
+          )}
+          {p.parsed.fields.length > 0 && (
+            <div className="mt-3 overflow-x-auto rounded-md border border-rule">
+              <table className="w-full text-[12.5px]">
+                <thead className="bg-sheet text-ink-soft text-left"><tr><th className="font-medium px-3 py-1.5">Field this rule uses</th><th className="font-medium px-3">Type</th><th className="font-medium px-3">Defined at</th><th className="font-medium px-3">Record</th><th className="font-medium px-3">Position</th></tr></thead>
+                <tbody>
+                  {p.parsed.fields.map((f) => (
+                    <tr key={f.name} className="border-t border-rule">
+                      <td className="px-3 py-1.5 font-mono">{f.name}</td><td className="px-3 font-mono">{f.pic ?? "group"}</td>
+                      <td className="px-3 font-mono">{f.file}:{f.line}</td><td className="px-3 font-mono">{f.record}</td>
+                      <td className="px-3">bytes {f.offset + 1}–{f.offset + f.size}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Step>
+
+        {!p.found ? (
+          <Step n={2} title="The AI call" tag="not found">
+            <p className="text-flagged">No saved AI call matches this rule&apos;s current wording. It may have been edited after extraction.</p>
+          </Step>
+        ) : (
+          <>
+            <Step n={2} title="The AI was given this COBOL" tag={p.model ?? "AI"}>
+              <p>The program is split into six parts. This rule came from the part
+                {" "}<code className="font-mono text-[12.5px]">{p.unit}</code>, with this brief: “{p.focus}” The AI received these numbered lines, plus the
+                parser&apos;s layout for every field they mention:</p>
+              <pre className="mt-3 max-h-[420px] overflow-auto rounded-md border border-rule bg-paper p-3 font-mono text-[12px] leading-[1.55]">{p.source}</pre>
+              <details className="mt-2"><summary className="cursor-pointer link text-[13px]">Field layouts it was given</summary>
+                <pre className="mt-2 max-h-[300px] overflow-auto rounded-md border border-rule bg-paper p-3 font-mono text-[12px] leading-[1.55]">{p.layouts}</pre>
+              </details>
+            </Step>
+
+            <Step n={3} title="It looked up what else it needed" tag={plural(p.lookups?.length ?? 0, "lookup")}>
+              {p.lookups && p.lookups.length > 0 ? (
+                <ul className="list-disc ml-5 grid gap-0.5">{p.lookups.map((l, i) => <li key={i}>{look(l)}</li>)}</ul>
+              ) : <p>It needed nothing beyond the lines it was given.</p>}
+              <p className="mt-2 text-[13px] text-ink-soft">These are tools that return exact source lines and parser data, so line numbers are never guessed.</p>
+            </Step>
+
+            {p.repair && (
+              <Step n={4} title="The citation checker sent it back once" tag="retry">
+                <p>The first draft had sentences the checker rejected. The AI got the reasons below and rewrote only those sentences; the ones that had passed kept their result.</p>
+                <pre className="mt-3 max-h-[300px] overflow-auto rounded-md border border-rule bg-paper p-3 font-mono text-[12px] leading-[1.55] whitespace-pre-wrap">{p.verifier_failures}</pre>
+              </Step>
+            )}
+
+            <Step n={p.repair ? 5 : 4} title="It wrote back the rule" tag="exact answer">
+              <p>This is the AI&apos;s answer, unedited. Each sentence names the lines it came from and the fields and values it relies on.</p>
+              <pre className="mt-3 max-h-[480px] overflow-auto rounded-md border border-rule bg-paper p-3 font-mono text-[12px] leading-[1.55]">{JSON.stringify(p.answer, null, 2)}</pre>
+            </Step>
+
+            <Step n={p.repair ? 6 : 5} title="Every sentence was checked against its lines" tag="code, then AI">
+              <p>A plain-code check confirmed the cited lines contain each listed field and value, then a separate AI reviewer read only those lines.
+                {" "}<button className="link" onClick={onShowRule}>See each sentence&apos;s result on the Rule tab</button>.</p>
+            </Step>
+
+            <Step n={p.repair ? 7 : 6} title="It became this Python" tag="written without the COBOL">
+              <PythonFor rule={rule} />
+            </Step>
+          </>
+        )}
+      </ol>
+      {p.found && (
+        <p className="mt-6 text-[12.5px] text-ink-soft">
+          Model {p.model}, {p.seconds}s. Saved call: <code className="font-mono">{p.cache_file}</code>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Step({ n, title, tag, children }: { n: number; title: string; tag: string; children: React.ReactNode }) {
+  return (
+    <li className="box min-w-0 overflow-hidden">
+      <div className="box-header flex items-center gap-3">
+        <span className="h-6 w-6 rounded-full border border-rule-strong text-[12px] font-semibold flex items-center justify-center">{n}</span>
+        <h2 className="font-semibold">{title}</h2>
+        <span className="ml-auto text-[12px] text-ink-soft border border-rule rounded-full px-2 py-[1px]">{tag}</span>
+      </div>
+      <div className="px-4 py-3.5 text-[14px] leading-relaxed min-w-0">{children}</div>
+    </li>
+  );
+}
+
+// The function(s) the modernizer wrote for this rule, cut from the generated module by
+// their @rule("<id>") tag, plus the whole file on request.
+function PythonFor({ rule }: { rule: Rule }) {
+  const [src, setSrc] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => {
+    get<{ source: string }>(`/api/port/${rule.program}`).then((d) => setSrc(d.source)).catch((e) => setErr(String(e)));
+  }, [rule.program]);
+  if (err) return <p className="text-ink-soft">The Python version isn&apos;t available ({err}).</p>;
+  if (src === null) return <p className="text-ink-soft">Loading…</p>;
+  const lines = src.split("\n");
+  const blocks: string[] = [];
+  lines.forEach((ln, i) => {
+    if (ln.trim() !== `@rule("${rule.id}")`) return;
+    let j = i + 1;
+    while (j < lines.length && !(j > i + 1 && /^(@|def |class |[A-Z_]+ =)/.test(lines[j]))) j++;
+    while (j > i && lines[j - 1].trim() === "") j--;
+    blocks.push(lines.slice(i, j).join("\n"));
+  });
+  const file = `port/generated/${rule.program.toLowerCase()}.py`;
+  return (
+    <>
+      <p>A separate AI wrote the Python version of {rule.program} from the sourced rules and record layouts only; it never saw the COBOL.
+        This is the code it wrote for this rule, tagged with the rule&apos;s ID. Any <code className="font-mono text-[12.5px]"># GAP:</code> comment marks
+        something the rules didn&apos;t say, which it flagged instead of guessing.</p>
+      {blocks.length ? blocks.map((b, i) => (
+        <pre key={i} className="mt-3 max-h-[420px] overflow-auto rounded-md border border-rule bg-paper p-3 font-mono text-[12px] leading-[1.55]">{b}</pre>
+      )) : <p className="mt-2 text-flagged">No function in {file} is tagged with this rule.</p>}
+      <details className="mt-2"><summary className="cursor-pointer link text-[13px]">The whole Python file ({file}, {lines.length} lines)</summary>
+        <pre className="mt-2 max-h-[520px] overflow-auto rounded-md border border-rule bg-paper p-3 font-mono text-[12px] leading-[1.55]">{src}</pre>
+      </details>
+    </>
   );
 }

@@ -184,6 +184,16 @@ def get_rule(rule_id: str):
     return v
 
 
+@app.get("/api/rules/{rule_id}/provenance")
+def get_provenance(rule_id: str):
+    """How the rule was made: parser output plus the exact cached extractor call."""
+    from backend.provenance import provenance
+    r = next((x for x in rules() if x["id"] == rule_id), None)
+    if not r:
+        raise HTTPException(404, "no such rule")
+    return provenance(r)
+
+
 @app.get("/api/source/{name}")
 def source(name: str):
     return {"file": name, "lines": file_lines(name)}
