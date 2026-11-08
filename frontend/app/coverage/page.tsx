@@ -16,9 +16,9 @@ export default function Coverage() {
   const [program, setProgram] = useState("CBTRN02C");
   const [line, setLine] = useState<number | null>(null);
   useEffect(() => { get<Cov>("/api/coverage").then(setCov).catch(() => setCov({})); }, []);
-  if (!cov) return <div className="mx-auto max-w-[1280px] px-6 py-10 text-ink-soft">Loading coverage…</div>;
+  if (!cov) return <div className="mx-auto max-w-[1600px] px-6 py-10 text-ink-soft">Loading coverage…</div>;
   const c = cov[program];
-  if (!c) return <div className="mx-auto max-w-[1280px] px-6 py-10 text-ink-soft">No coverage yet. Run <code className="font-mono">python -m ledger.pipeline coverage</code>.</div>;
+  if (!c) return <div className="mx-auto max-w-[1600px] px-6 py-10 text-ink-soft">No coverage yet. Run <code className="font-mono">python -m ledger.pipeline coverage</code>.</div>;
   const executed = Object.entries(c.lines).filter(([, v]) => v.executed > 0).map(([k]) => Number(k));
   const byPara: Record<string, number[]> = {};
   c.uncovered_lines.forEach((u) => { (byPara[u.paragraph] ??= []).push(u.line); });
@@ -30,7 +30,7 @@ export default function Coverage() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1280px] px-6 pt-8 pb-16">
+    <div className="mx-auto max-w-[1600px] px-6 pt-8 pb-16">
       <h1 className="text-[28px] font-semibold tracking-[-0.015em]">Coverage</h1>
       <p className="text-[14.5px] text-ink-soft max-w-[80ch] mt-1">
         What might the rules have missed? These are COBOL statements that no rule cites and no test runs. Line tracking comes from

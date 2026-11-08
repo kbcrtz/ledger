@@ -52,8 +52,8 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
     history.replaceState(null, "", t === "rule" ? window.location.pathname + window.location.search : `#${t}`);
   }
 
-  if (error) return <div className="mx-auto max-w-[1280px] px-6 py-10 text-ink-soft">Could not load {id}: {error}</div>;
-  if (!rule) return <div className="mx-auto max-w-[1280px] px-6 py-10 text-ink-soft">Loading {id}…</div>;
+  if (error) return <div className="mx-auto max-w-[1600px] px-6 py-10 text-ink-soft">Could not load {id}: {error}</div>;
+  if (!rule) return <div className="mx-auto max-w-[1600px] px-6 py-10 text-ink-soft">Loading {id}…</div>;
 
   const progFile = `${rule.program}.cbl`;
   const spans = PARTS.flatMap((p) => rule.scenario[p].flatMap((c) => [c.source, ...(c.also ?? [])]));
@@ -72,7 +72,7 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
   const timelineCount = rule.status_history.length + rule.review_history.length;
 
   return (
-    <div className="mx-auto max-w-[1280px] px-6 pt-6 pb-16">
+    <div className="mx-auto max-w-[1600px] px-6 pt-6 pb-16">
       <div className="text-[13px] text-ink-soft">
         <Link href="/" className="link">Rules</Link> / {PROGRAM_NAME[rule.program] ?? rule.program}
       </div>
@@ -143,12 +143,40 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
             </aside>
           </div>
 
-          <div className="mt-8 grid xl:grid-cols-[minmax(0,42fr)_minmax(0,58fr)] gap-6">
-            <section className="box min-w-0 self-start" aria-label="Rule sentences">
-              <div className="box-header flex items-baseline gap-3 flex-wrap">
-                <h2 className="font-semibold">What the rule says</h2>
-                <span className="text-[12.5px] text-ink-soft">Click a sentence to see the COBOL it comes from.</span>
+          <section className="mt-8" aria-label="From COBOL to rule to Python">
+            <div className="hidden xl:grid grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)_minmax(0,1fr)] gap-5 mb-2.5">
+              <FlowLabel n={1} title="Original COBOL" hint="what the code says" />
+              <FlowLabel n={2} title="Business rule" hint="what it means, cited to the lines" arrow />
+              <FlowLabel n={3} title="Python rebuild" hint="written from the rule alone" arrow />
+            </div>
+            <div className="grid xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)_minmax(0,1fr)] gap-5 items-start">
+            <section className="box min-w-0 overflow-hidden" aria-label="COBOL source">
+              <div className="xl:hidden px-4 pt-3"><FlowLabel n={1} title="Original COBOL" hint="what the code says" /></div>
+              <div className="box-header !py-0 flex items-center gap-1 text-[13px] overflow-x-auto">
+                {files.map((f) => (
+                  <button key={f} onClick={() => setFile(f)}
+                    className={`relative flex items-center gap-1.5 px-2.5 h-10 font-mono text-[12.5px] whitespace-nowrap ${shownFile === f ? "text-ink font-medium" : "text-ink-soft hover:text-ink"}`}>
+                    <FileCode className={shownFile === f ? "text-ink" : "text-ink-soft"} />{f}
+                    {shownFile === f && <span aria-hidden className="absolute left-1.5 right-1.5 bottom-0 h-[2px] rounded-full bg-accent-bright" />}
+                  </button>
+                ))}
+                <span className="ml-auto pl-4 text-ink-soft whitespace-nowrap">
+                  {execCase ? <>Green marks: lines test {execCase.id} ran <button className="link ml-1" onClick={() => setExecFor(null)}>clear</button></>
+                    : <><span className="inline-block w-3 h-3 align-[-1px] bg-marker mr-1.5 border border-marker-strong rounded-[2px]" />cited by this rule</>}
+                </span>
               </div>
+              <div className="h-[68vh]">
+                <SourceView file={shownFile} spans={spans} active={activeClause?.source ?? null}
+                  executed={execCase && shownFile === progFile ? execCase.executed_lines : undefined} />
+              </div>
+            </section>
+
+            <section className="box min-w-0 overflow-hidden" aria-label="Rule sentences">
+              <div className="xl:hidden px-4 pt-3"><FlowLabel n={2} title="Business rule" hint="what it means, cited to the lines" /></div>
+              <div className="box-header h-10 !py-0 flex items-center gap-2 text-[12.5px] text-ink-soft">
+                Click a sentence to light up its COBOL lines.
+              </div>
+              <div className="h-[68vh] overflow-y-auto">
               {PARTS.map((part) => (
                 <div key={part}>
                   <h3 className="px-4 pt-3 pb-1 flex items-baseline gap-2 border-t border-rule first:border-t-0">
@@ -166,7 +194,7 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
                             className="w-full text-left grid grid-cols-[16px_1fr] gap-3 px-4 py-2.5 hover:bg-sheet/70">
                             <span className="mt-[3px]"><Tick ok={chk ? chk.passed : null} title={chk ? (chk.passed ? "Backed by the cited COBOL lines" : "Not backed by the cited lines") : "Not checked"} /></span>
                             <span>
-                              <span className="block text-[15px] leading-[1.55]">{c.text}</span>
+                              <span className="block text-[14.5px] leading-[1.55]">{c.text}</span>
                               <span className="text-[12px] text-ink-soft mt-0.5 flex flex-wrap gap-x-3 font-mono">
                                 {[c.source, ...(c.also ?? [])].map((s, k) => <span key={k}>{lineRange(s.file, s.lines)}</span>)}
                               </span>
@@ -188,28 +216,12 @@ export default function RuleDetail({ params }: { params: Promise<{ id: string }>
                 </div>
               ))}
               {attempts > 1 && <RetryNote rule={rule} />}
+              </div>
             </section>
 
-            <section className="box min-w-0 overflow-hidden self-start xl:sticky xl:top-4" aria-label="COBOL source">
-              <div className="box-header !py-0 flex items-center gap-1 text-[13px] overflow-x-auto">
-                {files.map((f) => (
-                  <button key={f} onClick={() => setFile(f)}
-                    className={`relative flex items-center gap-1.5 px-2.5 h-10 font-mono text-[12.5px] whitespace-nowrap ${shownFile === f ? "text-ink font-medium" : "text-ink-soft hover:text-ink"}`}>
-                    <FileCode className={shownFile === f ? "text-ink" : "text-ink-soft"} />{f}
-                    {shownFile === f && <span aria-hidden className="absolute left-1.5 right-1.5 bottom-0 h-[2px] rounded-full bg-accent-bright" />}
-                  </button>
-                ))}
-                <span className="ml-auto pl-4 text-ink-soft whitespace-nowrap">
-                  {execCase ? <>Green marks: lines test {execCase.id} ran <button className="link ml-1" onClick={() => setExecFor(null)}>clear</button></>
-                    : <><span className="inline-block w-3 h-3 align-[-1px] bg-marker mr-1.5 border border-marker-strong rounded-[2px]" />cited by this rule</>}
-                </span>
-              </div>
-              <div className="h-[70vh]">
-                <SourceView file={shownFile} spans={spans} active={activeClause?.source ?? null}
-                  executed={execCase && shownFile === progFile ? execCase.executed_lines : undefined} />
-              </div>
-            </section>
-          </div>
+            <PythonColumn rule={rule} />
+            </div>
+          </section>
 
           <div className="mt-8 max-w-[1000px]" id="checks">
             <ChecksBox checks={[
@@ -573,5 +585,67 @@ function PythonFor({ rule }: { rule: Rule }) {
         <pre className="mt-2 max-h-[520px] overflow-auto rounded-md border border-rule bg-paper p-3 font-mono text-[12px] leading-[1.55]">{src}</pre>
       </details>
     </>
+  );
+}
+
+
+// Fetch the generated Python module and cut out this rule's function(s) by their @rule tag.
+function usePort(rule: Rule) {
+  const [src, setSrc] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => {
+    get<{ source: string }>(`/api/port/${rule.program}`).then((d) => setSrc(d.source)).catch((e) => setErr(String(e)));
+  }, [rule.program]);
+  const blocks: { start: number; end: number; text: string }[] = [];
+  if (src) {
+    const lines = src.split("\n");
+    lines.forEach((ln, i) => {
+      if (ln.trim() !== `@rule("${rule.id}")`) return;
+      let j = i + 1;
+      while (j < lines.length && !(j > i + 1 && /^(@|def |class |[A-Z_]+ =)/.test(lines[j]))) j++;
+      while (j > i && lines[j - 1].trim() === "") j--;
+      blocks.push({ start: i + 1, end: j, text: lines.slice(i, j).join("\n") });
+    });
+  }
+  return { src, err, blocks, file: `${rule.program.toLowerCase()}.py` };
+}
+
+function PythonColumn({ rule }: { rule: Rule }) {
+  const { src, err, blocks, file } = usePort(rule);
+  const [full, setFull] = useState(false);
+  const text = full ? src ?? "" : blocks.map((b) => b.text).join("\n\n\n");
+  const spans = full ? blocks.map((b) => ({ file, lines: [b.start, b.end] })) : [];
+  return (
+    <section className="box min-w-0 overflow-hidden" aria-label="Python rebuild">
+      <div className="xl:hidden px-4 pt-3"><FlowLabel n={3} title="Python rebuild" hint="written from the rule alone" /></div>
+      <div className="box-header !py-0 h-10 flex items-center gap-2 text-[13px]">
+        <FileCode className="text-ink-soft" /><span className="font-mono text-[12.5px]">port/generated/{file}</span>
+        {src && (
+          <button onClick={() => setFull((v) => !v)} className="ml-auto link text-[12.5px] whitespace-nowrap">
+            {full ? "Show only this rule" : "Show in full file"}
+          </button>
+        )}
+      </div>
+      {err ? <p className="p-4 text-ink-soft">The Python version isn&apos;t available.</p>
+        : src === null ? <p className="p-4 text-ink-soft">Loading…</p>
+        : blocks.length === 0 ? <p className="p-4 text-flagged">No function in {file} is tagged with this rule yet.</p>
+        : (
+          <div className="h-[68vh]">
+            <SourceView key={full ? "full" : "rule"} file={file} text={text} language="python" spans={spans}
+              active={full && blocks[0] ? { file, lines: [blocks[0].start, blocks[0].end] } : null} />
+          </div>
+        )}
+    </section>
+  );
+}
+
+function FlowLabel({ n, title, hint, arrow = false }: { n: number; title: string; hint: string; arrow?: boolean }) {
+  return (
+    <div className="flex items-center gap-2.5 min-w-0">
+      {arrow && <span aria-hidden className="hidden xl:inline text-ink-faint text-[18px] -ml-1">→</span>}
+      <span className="h-6 w-6 shrink-0 rounded-full bg-accent-fill text-white text-[12px] font-semibold flex items-center justify-center">{n}</span>
+      <span className="font-semibold">{title}</span>
+      <span className="text-[12.5px] text-ink-soft truncate">{hint}</span>
+    </div>
   );
 }

@@ -111,7 +111,7 @@ export default function SourceView({
       height={height}
       language={language}
       value={src}
-      theme={language === "cobol" ? "ledger-paper" : "vs-dark"}
+      theme="ledger-paper"
       beforeMount={registerCobol}
       onMount={(ed, monaco) => { editorRef.current = ed; monacoRef.current = monaco; decorate(); }}
       options={{

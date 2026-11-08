@@ -31,7 +31,7 @@ export default function Impact({ params }: { params: Promise<{ id: string }> }) 
   }
   useEffect(() => { get<Rule>(`/api/rules/${id}`).then(load).catch((e) => setErr(String(e))); }, [id]);
 
-  if (!rule) return <div className="mx-auto max-w-[1280px] px-6 py-10 text-ink-soft">{err ?? `Loading ${id}…`}</div>;
+  if (!rule) return <div className="mx-auto max-w-[1600px] px-6 py-10 text-ink-soft">{err ?? `Loading ${id}…`}</div>;
   const edit = rule.edit;
   const rv = edit?.reverify;
   const imp = edit?.stale ?? rule.impact;
@@ -54,7 +54,7 @@ export default function Impact({ params }: { params: Promise<{ id: string }> }) 
     .sort(([a], [b]) => Number(b.startsWith("SAMPLE-")) - Number(a.startsWith("SAMPLE-"))) : [];
 
   return (
-    <div className="mx-auto max-w-[1280px] px-6 pt-6 pb-16">
+    <div className="mx-auto max-w-[1600px] px-6 pt-6 pb-16">
       <div className="text-[13px] text-ink-soft">
         <Link href="/" className="link">Rules</Link> / {PROGRAM_NAME[rule.program] ?? rule.program} / <Link href={`/rules/${id}`} className="link font-mono text-[12.5px]">{id.replace("BR-", "")}</Link> / change
       </div>

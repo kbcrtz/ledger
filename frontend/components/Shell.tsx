@@ -24,7 +24,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-night text-night-ink">
-        <div className="mx-auto max-w-[1280px] px-6 h-14 flex items-center gap-3">
+        <div className="mx-auto max-w-[1600px] px-6 h-14 flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2.5" aria-label="Ledger home">
             <Mark />
             <span className="text-[16px] font-semibold tracking-[-0.01em]">Ledger</span>
@@ -39,7 +39,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <nav className="border-b border-night-line bg-night" aria-label="Sections">
-        <div className="mx-auto max-w-[1280px] px-6 flex gap-1 text-[14px]">
+        <div className="mx-auto max-w-[1600px] px-6 flex gap-1 text-[14px]">
           {tabs.map((t) => (
             <Link key={t.href} href={t.href} aria-current={t.active ? "page" : undefined}
               className={`relative flex items-center gap-2 px-3 h-12 ${t.active ? "font-semibold text-ink" : "text-ink-soft hover:text-ink"}`}>

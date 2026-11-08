@@ -45,7 +45,7 @@ export default function Home() {
   return (
     <>
     <section aria-label="What Ledger does" className="dot-grid border-b border-rule">
-      <div className="mx-auto max-w-[1280px] px-6 pt-16 pb-14">
+      <div className="mx-auto max-w-[1600px] px-6 pt-16 pb-14">
         <h1 className="text-[48px] leading-[1.04] font-semibold tracking-[-0.035em] max-w-[18ch] sm:max-w-none">
           <span className="block text-[#8e8784]">What the old code actually does,</span>
           <span className="block">written down and checked against it.</span>
@@ -56,7 +56,7 @@ export default function Home() {
         </p>
       </div>
     </section>
-    <div className="mx-auto max-w-[1280px] px-6 pt-10 pb-16">
+    <div className="mx-auto max-w-[1600px] px-6 pt-10 pb-16">
       <div className="grid lg:grid-cols-[minmax(0,1fr)_300px] gap-8 items-start">
         <div className="grid gap-6 min-w-0">
           <ChecksBox title={`${n} rules`} checks={[
