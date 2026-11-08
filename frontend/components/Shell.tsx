@@ -1,24 +1,16 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { get } from "@/lib/api";
+import { useState } from "react";
 import LogPanel from "./LogPanel";
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const [logOpen, setLogOpen] = useState(false);
-  const [counts, setCounts] = useState<{ rules?: number; uncovered?: number }>({});
   const path = usePathname();
 
-  useEffect(() => {
-    get<{ rules: number; coverage: Record<string, { neither: number }> }>("/api/summary")
-      .then((s) => setCounts({ rules: s.rules, uncovered: Object.values(s.coverage ?? {}).reduce((a, c) => a + (c.neither ?? 0), 0) }))
-      .catch(() => {});
-  }, []);
-
   const tabs = [
-    { href: "/", label: "Rules", count: counts.rules, active: path === "/" || path.startsWith("/rules") },
-    { href: "/coverage", label: "Coverage", count: counts.uncovered, active: path.startsWith("/coverage"), countTitle: "statements no rule cites and no test runs" },
+    { href: "/", label: "Rules", active: path === "/" || path.startsWith("/rules") },
+    { href: "/coverage", label: "Coverage", active: path.startsWith("/coverage") },
   ];
 
   return (
@@ -41,7 +33,6 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <Link key={t.href} href={t.href} aria-current={t.active ? "page" : undefined}
               className={`relative flex items-center gap-2 px-3 h-12 ${t.active ? "font-semibold text-ink" : "text-ink-soft hover:text-ink"}`}>
               {t.label}
-              {t.count !== undefined && <span className="counter" title={t.countTitle}>{t.count}</span>}
               {t.active && <span aria-hidden className="absolute left-2 right-2 -bottom-px h-[2px] rounded-full bg-accent-bright" />}
             </Link>
           ))}
