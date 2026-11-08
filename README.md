@@ -86,7 +86,9 @@ No API key is needed for this. On the committed cache this makes 75 cache hits a
 
 ## Team
 
-- Kobe Cortez, GitHub: <!-- TODO: GitHub handle --> <!-- TODO: role -->
+- Kobe Cortez
+- Alex Nguyen
+- Love Oluwaleye
 
 ## Setup
 
